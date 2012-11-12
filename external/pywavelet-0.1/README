@@ -1,0 +1,84 @@
+$Id: README,v 1.1 2002-12-04 10:38:06+01 arnold Exp $
+Name:    pywavelet
+Purpose: to provide some wavelet transform capability to Python
+Date:    December 4, 2002
+Version: 0.1
+Author:  Arnold Moene (arnold.moene@wur.nl, Wageningen University, 
+         The Netherlands (extension module)
+         C. Torrence and G. P. Compo (RSI and NOAA, 
+	 see http://paos.colorado.edu/research/wavelets)
+Note:    Wavelet software was provided by C. Torrence and G. Compo,
+         and is available at URL: http://paos.colorado.edu/research/wavelets/
+Licenses: *underlying wavelet software*
+         Copyright (C) 1998, Christopher Torrence and Gilbert P. Compo
+         This software may be used, copied, or redistributed as long as it is not
+         sold and this copyright notice is reproduced on each copy made.  This
+         routine is provided as is without any express or implied warranties
+         whatsoever.
+	 *python module*
+	 GPL
+
+Building
+--------
+To build the module you need f2py (http://cens.ioc.ee/projects/f2py2e/)
+Simply type:
+  f2py -m pywavelet -c cfftpack.f chisqr.f wavelet.f pywavelet.f
+Then install the module (pywavelet.so un UNIX, pywavelet.pyd in Windows) in
+an approriate place (the site-packages of your python installation should work).
+
+
+Using
+-----
+In python simply issue:
+>> import pywavelet
+
+Then invoke as follows
+>> foo = pywavelet.pywavelet(y, dt, mother, param, s0, dj, jtot, npad)
+
+The meaning of the arguments is as in the documentation of the routines:
+   y      : the time series of length "n".
+   dt     : amount of time between each Y value, i.e. the sampling time.
+   mother : An integer giving the mother wavelet to use.
+            0='Morlet'
+            1='Paul'
+ 	    2='DOG' (derivative of Gaussian)
+            If (mother<0 or >2) then default is 'Morlet'.
+   param  : mother wavelet parameter. If <0 then default is used.
+ 	    For 'Morlet' this is k0 (wavenumber), default is 6.
+ 	    For 'Paul' this is m (order), default is 4.
+ 	    For 'DOG' this is m (m-th derivative), default is 2.
+   s0     : the smallest scale of the wavelet.  Typically = 2*dt.
+ 	    Note: for accurate reconstruction and variance computation
+ 	    set s0=dt for Morlet; s0=dt/4 for Paul
+   dj     : the spacing between discrete scales. Typically = 0.25.
+            A smaller # will give better scale resolution, but be slower.
+   jtot   : the # of scales.
+            Scales range from s0 up to s0*2^[(jtot-1)*dj],
+            Typically jtot=1+(LOG2(n dt/s0))/dj
+   npad   : the total number of points (including padding) to
+            use for the wavelet transform. Typically this is some
+	    power of 2. It must be greater or equal to "n".
+            If npad>n, then zeroes are padded onto the end
+            of the time series.
+
+The return value is a tuple with members: wave, scale, period and coi
+   wave   : a complex 2D array (n,jtot) of the real & imaginary parts
+            of the wavelet transform, versus time & scale.
+            CABS(wave) gives the WAVELET amplitude,
+            ATAN2(AIMAG(wave),DBLE(wave)) gives WAVELET phase.
+            The WAVELET power spectrum is CABS(wave)**2.
+   scale  : the wavelet scales that were used (length jtot)
+   period : the "Fourier" periods (in time units) corresponding to "scale" (length jtot)
+   coi    : the e-folding factor used for the cone of influence (length n)
+
+For more info see the source code of wavelet.f and the documentation on
+the website of the authors of the wavelet routines.
+
+Bugs/missing/todo
+------------
+- a very rough way of doing things
+- more types of mother wavelets
+- don't know yet how to combine f2py with distutils
+- other routines should perhaps also be exposed to python, with appropriate
+  interface and docs
+

@@ -1,0 +1,81 @@
+LICENSE TERMS
+
+Unless additional restrictions apply (see below), the following
+statement applies to this software.
+
+This software is provided "as is," with no support or maintenance
+implied.
+
+This software can be redistributed and modified, provided that these
+terms, the full source code, and the original reference are included,
+subject to additional restrictions described below.
+
+This software should be referenced in conjunction with the Master's degree
+thesis of Nat Wilson, Simon Fraser University (expected 2012).
+
+
+
+WAVELET TRANSFORMS
+
+Wavelet transforms use code provided by C. Torrence and G. P. Compo. The
+following license terms apply.
+
+    Copyright (C) 1998, Christopher Torrence and Gilbert P. Compo This
+    software may be used, copied, or redistributed as long as it is not
+    sold and this copyright notice is reproduced on each copy made.
+    This routine is provided as is without any express or implied
+    warranties
+
+See Torrence and Compo, A practical guide to wavelet analysis, Bulletin
+of the American Meteorological Society (1998)
+http://paos.colorado.edu/research/wavelets/
+
+The f2py wrapper that allows the wavelet code to be called from Python is
+released by Arnold Moene under the Gnu Public License (GPL).
+http://www.gnu.org/licenses/gpl.html
+
+
+
+STOLT MIGRATION
+
+Stolt migration code has been translated from a MATLAB algorithm distributed by
+the CREWES project at U. Calgary. No CREWES code is included, and the code
+distributed here is a clean implementation of the original algorithm.
+Nevertheless, the following terms may still apply.
+
+    CREWES license terms
+   
+    This SOFTWARE is maintained by the CREWES Project at the Department
+    of Geology and Geophysics of the University of Calgary, Calgary,
+    Alberta, Canada.  The copyright and ownership is jointly held by 
+    its author (identified above) and the CREWES Project.  The CREWES 
+    project may be contacted via email at:  crewesinfo@crewes.org
+    
+    The term 'SOFTWARE' refers to the Matlab source code, translations to
+    any other computer language, or object code
+   
+    Terms of use of this SOFTWARE
+   
+    1) Use of this SOFTWARE by any for-profit commercial organization is
+       expressly forbidden unless said organization is a CREWES Project
+       Sponsor.
+   
+    2) A CREWES Project sponsor may use this SOFTWARE under the terms of the 
+       CREWES Project Sponsorship agreement.
+   
+    3) A student or employee of a non-profit educational institution may 
+       use this SOFTWARE subject to the following terms and conditions:
+       - this SOFTWARE is for teaching or research purposes only.
+       - this SOFTWARE may be distributed to other students or researchers 
+         provided that these license terms are included.
+       - reselling the SOFTWARE, or including it or any portion of it, in any
+         software that will be resold is expressly forbidden.
+       - transfering the SOFTWARE in any form to a commercial firm or any 
+         other for-profit organization is expressly forbidden.
+
+    End CREWES license terms
+
+Should this be troublesome, Stolt migration can be removed by deleting
+or renaming the file "irlib/mig_fk.py". The rest of irlib will function
+normally.
+
