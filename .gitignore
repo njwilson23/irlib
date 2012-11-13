@@ -1,0 +1,5 @@
+# Temporary files to ignore
+*.pyc
+*.swp
+*.ird
+*.so
