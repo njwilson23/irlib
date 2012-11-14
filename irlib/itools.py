@@ -2,6 +2,7 @@
 
 import os
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import scipy.io
@@ -13,7 +14,7 @@ from recordlist import RecordList
 #font = FontProperties(fname='Verdana.ttf', weight='normal', size=12)
 font = FontProperties(family='sans-serif', weight='normal', size=11)
 
-def plotax(ax, L, gain=5, annotate=True):
+def plotax(ax, L, gain=5, annotate=True, font=None):
     """ Make a radargram plot.
 
     plotax(ax, L, gain=5, annotate=True)
@@ -26,6 +27,9 @@ def plotax(ax, L, gain=5, annotate=True):
     rate = L.rate
     lbnd = max([-L.data.min() / gain, L.data.max() / gain])
 
+    if font is None:
+        font = matplotlib.font_manager.FontProperties()
+
     try:
         data = L.GetTopoCorrectedData()
     except LineGatherError:
@@ -35,11 +39,12 @@ def plotax(ax, L, gain=5, annotate=True):
 
     if annotate:
         ax2 = ax.twinx()
-        ax.set_ylabel('Time (ns)')
-        ax2.set_ylabel('Sample number', rotation=270)
-        ax.set_xlabel('Trace number')
-        ax.set_xticklabels([int(a) for a in ax.get_xticks()])
-        ax.set_yticklabels(ax.get_yticks() * L.rate * 1e9, fontproperties=font)
+        ax.set_ylabel('Time (ns)', fontproperties=font)
+        ax2.set_ylabel('Sample number', rotation=270, fontproperties=font)
+        ax.set_xlabel('Trace number', fontproperties=font)
+        ax.set_xticklabels([int(a) for a in ax.get_xticks()], fontproperties=font)
+        timevec = ax.get_yticks() * L.rate * 1e9
+        ax.set_yticklabels(timevec.astype(int), fontproperties=font)
         locs2 = ax2.get_yticks()
         labels2 = [int(round(i)) for i in locs2*L.data.shape[0]]
         labels2.reverse()
