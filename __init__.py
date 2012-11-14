@@ -13,20 +13,16 @@
        pywavelet           Wavelet transform function
 """
 
-import survey
-from survey import *
-import gather
-from gather import *
-import recordlist
-from recordlist import *
-import filehandler
-from filehandler import *
 import irlib
-from irlib import *
+from irlib.survey import Survey
+from irlib.gather import Gather, CommonOffsetGather, CommonMidpointGather
+from irlib.gather import LineGather
+from irlib.recordlist import RecordList
+from irlib.filehandler import FileHandler
 
-from filter_defs import ApplyFilter
+from irlib.filter_defs import ApplyFilter
 
 try:
-	import itools
+	import irlib.itools as itools
 except:
 	print "Warning: itools not imported"
