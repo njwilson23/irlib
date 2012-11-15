@@ -1459,7 +1459,7 @@ class CommonOffsetGather(Gather):
             proj_data_part = self.Interpolate(Pgrid, P, arr=data_part)
             try:
                 proj_topo_part = np.interp(Pgrid, P, topo_part)
-            except AttributeError:      # No topography
+            except UnboundLocalError:      # No topography
                 pass
 
             proj_x_part = np.interp(Pgrid, P, X)
