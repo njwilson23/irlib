@@ -23,6 +23,7 @@ from irlib.filehandler import FileHandler
 from irlib.filter_defs import ApplyFilter
 
 try:
+	import irlib.itools
 	import irlib.itools as itools
 except:
 	print "Warning: itools not imported"

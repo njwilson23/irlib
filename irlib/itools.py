@@ -14,12 +14,16 @@ from recordlist import RecordList
 #font = FontProperties(fname='Verdana.ttf', weight='normal', size=12)
 font = FontProperties(family='sans-serif', weight='normal', size=11)
 
-def plotax(ax, L, gain=5, annotate=True, font=None):
+def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None):
     """ Make a radargram plot.
 
     plotax(ax, L, gain=5, annotate=True)
-    where *ax* is a matplotlib.Axes, *L( is an irlib.Gather, *gain* specifies
+    where *ax* is a matplotlib.Axes, *L* is an irlib.Gather, *gain* specifies
     the contrast, and *annotate* turns on axes labels.
+
+    *font*          : annotation FontProperties
+
+    *mask_topo*     : if not None, then must be a value to replace nans with
 
     Replaces plotl() and plotlt() functions.
     """
@@ -32,6 +36,8 @@ def plotax(ax, L, gain=5, annotate=True, font=None):
 
     try:
         data = L.GetTopoCorrectedData()
+        if nan_fill is not None:
+            data[np.isnan(data)] = nan_fill
     except LineGatherError:
         data = L.data
 
