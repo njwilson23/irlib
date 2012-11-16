@@ -56,26 +56,12 @@ Command-line tools:
     :irtrace:             Plot a radar trace acquired at a single location
     :irline:              Plot a radar section along a line of locations
 
-Scripts (not a complete list):
-------------------------------
-
-    :batch_line_plot.py:  Plot a range of lines from a single survey
-    :picks2xyz.py:      Load the coordinates for data picked by icepick and
-                        write and XYZ tab-delimited file
-    :join_radar.py:     Combine picking and rating files and calculate ice
-                        thicknesses
-    :join_*.sh:         Miscellaneous shell scripts that automate the
-                        post-picking data processing
-    :regen_caches.sh:   Call generate_cache.py for multiple surveys
-
 Python modules:
 ---------------
 
     :irlib:             contains several functions and classes used by the
                         above programs, and serves as a programming API for
                         developing new tools and scripts
-    :geo_tools:         contains classes and functions for manipulating
-                        geographical data in Python
 
 Dependencies:
 =============
