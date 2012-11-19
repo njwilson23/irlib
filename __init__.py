@@ -22,6 +22,8 @@ from irlib.filehandler import FileHandler
 
 from irlib.filter_defs import ApplyFilter
 
+import irlib.misc as misc
+
 try:
 	import irlib.itools
 	import irlib.itools as itools
