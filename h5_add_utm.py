@@ -3,8 +3,27 @@
 #   Add UTM coordinates to HDF5 radar data
 #
 
-import sys, shutil
+import sys
+import shutil
 import traceback
+
+def calculate_centroid(X, Y):
+    """ Return the planar centroid of a matched pair of X and Y coordinates.
+    """
+    count_good = lambda L: sum((1 for a in L if a is not None))
+    Xc = (a for a in X if a is not None)
+    Yc = (a for a in Y if a is not None)
+    xm = sum(Xc) / float(count_good(X))
+    ym = sum(Yc) / float(count_good(Y))
+    return (xm, ym)
+
+def calculate_utm_zone(xll, yll):
+    """ Determine the UTM zone that a lon-lat point falls in. Returns and
+    integer and a string, either ('N') or ('S'). """
+    if yll >= 0: hemi = 'N'
+    else: hemi = 'S'
+    zone = int((180 + xll) // 6)
+    return (zone, hemi)
 
 if len(sys.argv) < 3:
     print """
@@ -51,12 +70,21 @@ gps_message_ok = metadata.gps_message_ok
 # Project these to UTM using USGS proj.4
 eastings = []
 northings = []
-projector = pyproj.Proj(proj='utm', zone=7, north=True)
+
+xlm, ylm = calculate_centroid(lons, lats)
+zone, hemi = calculate_utm_zone(-xlm, ylm)
+if hemi == 'N': north = True
+else: north = False
+#projector = pyproj.Proj(proj='utm', zone=7, north=True)    # St Elias Range
+#projector = pyproj.Proj(proj='utm', zone=16, north=True)   # Milne Ice Shelf
+projector = pyproj.Proj(proj='utm', zone=zone, north=north) # Auto-determined
+print "Projecting to UTM zone {0}{1}".format(zone, hemi)
+
 for i, (lon, lat) in enumerate(zip(lons, lats)):
     if lon is not None and lat is not None:
         x, y = projector(-lon, lat)
-        if (x < 600000) or (x > 700000) or (y < 6000000) or (y > 7000000):
-            print "Warning:",i,'\t',-lon,'\t',lat,'\t',x,'\t',y
+        #if (x < 600000) or (x > 700000) or (y < 6000000) or (y > 7000000):
+        #    print "Warning:",i,'\t',-lon,'\t',lat,'\t',x,'\t',y
     else:
         x = 'NaN'
         y = 'NaN'
@@ -132,6 +160,6 @@ for i, dataset in enumerate(datasets):
         fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'] = utm_string
     except:
         # Something else went wrong
-        sys.stderr.write('problem getting attributes from {0}\n'.format(f[dataset].name))
+        sys.stderr.write('problem creating {0}\n'.format(fout[dataset].name))
         traceback.print_exc()
 fout.close()
