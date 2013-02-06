@@ -12,16 +12,17 @@ def print_syntax():
     print """
     SYNTAX: gen_cache HDF_SURVEY [OPTIONS]
 
-        d [DIR] cache directory (default: ./cache/)
-        g       fix static GPS issues
-        s       smoothen coordinates
-        b       remove blank traces (trigger failure)
-        r       remove stationary traces
-        f       force regeneration of existing caches
-        q       silence standard output
+        -d [DIR]    cache directory (default: ./cache/)
+        -g          fix static GPS issues
+        -s          smoothen coordinates
+        -b          remove blank traces (trigger failure)
+        -r          remove stationary traces
+        -f          force regeneration of existing caches
+        -q          silence standard output
+        --dc=[#]    specify datacapture (default: 0)
     """
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfq')
+optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfq', ['dc='])
 optdict = dict(optlist)
 
 
@@ -61,6 +62,12 @@ else:
     be_quiet = False
 
 try:
+    dc = int(optdict.get('--dc', 0))
+except ValueError:
+    print "key for --dc must be an integer"
+    sys.exit()
+
+try:
     survey_fnm = sys.argv[1]
 except IndexError:
     print_syntax()
@@ -68,18 +75,22 @@ except IndexError:
 
 S = irlib.Survey(survey_fnm)
 
+if not be_quiet:
+    print "Working on {0}".format(survey_fnm)
+
 lines = S.GetLines()
 
 for line in lines:
     line_no = line.split('_')[1]
-    cache_fnm = S.GetLineCacheName(line_no, cache_dir=cache_dir)
+    cache_fnm = S.GetLineCacheName(line_no, dc=dc, cache_dir=cache_dir)
     if os.path.isfile(cache_fnm) and not force_cache:
         pass
     else:
         if not be_quiet:
-            print "Generating data for " + str(line) + " in " + cache_dir + "..."
+            print ("Generating data for line {0}, datacapture {1} "
+                   "in {2}...".format(str(line), str(dc), cache_dir))
         try:
-            L = S.ExtractLine(line_no)
+            L = S.ExtractLine(line_no, datacapture=dc)
             L.RemoveBadLocations()
             if fix_gps:
                 L.FixStaticGPS()
