@@ -33,7 +33,7 @@ def ApplyFilter(GatherInstance, cmd):
         args = [i for i in cmd[1:]]
         cmd = cmd[0]
     else:
-        args = None
+        args = []
 
     try:
         if cmd == 'mult':
@@ -45,10 +45,13 @@ def ApplyFilter(GatherInstance, cmd):
 
         # Gain control
         elif cmd == 'gc':
-            GatherInstance.DoTimeGainControl(ncoef=2.e6, npow=1.)
+            GatherInstance.DoTimeGainControl(npow=1.)
+            GatherInstance.Dewow()
+        elif cmd == 'gchalve':
+            GatherInstance.DoTimeGainControl(npow=0.5)
             GatherInstance.Dewow()
         elif cmd == 'gc2':
-            GatherInstance.DoTimeGainControl(ncoef=2.e6, npow=2.)
+            GatherInstance.DoTimeGainControl(npow=2.)
             GatherInstance.Dewow()
         elif cmd == 'agc':
             #GatherInstance.DoAutoGainControl(25e-8)
@@ -115,6 +118,17 @@ def ApplyFilter(GatherInstance, cmd):
             GatherInstance.DoWindowedSinc(cutoff=55e6, bandwidth=25e6, mode='lowpass')
             GatherInstance.data = np.abs(GatherInstance.data)
 
+        elif cmd == 'eng50':
+            # Plot with high gain
+            GatherInstance.Dewow()
+            GatherInstance.DoRecursiveFilter(80e6, 60e6)
+            GatherInstance.data = abs(GatherInstance.data)
+
+        elif cmd == 'eng_high':
+            GatherInstance.DoTimeGainControl(npow=0.8)
+            GatherInstance.DoRecursiveFilter(50e6, 30e6)
+            GatherInstance.data = abs(GatherInstance.data)
+
         elif cmd == 'engd':
             # Difference based englacial scatter filter. Unimpressive on its own.
             A = GatherInstance.data.copy()
@@ -169,12 +183,18 @@ def ApplyFilter(GatherInstance, cmd):
             GatherInstance.history.append(('absolute_value'))
             GatherInstance.DoMoveAvg(7, kind='blackman', mode='lowpass')
 
+        elif cmd == 'eng10_jgr':
+            GatherInstance.RemoveHorizontal()
+            GatherInstance.DoRecursiveFilter(25e6, 10e6)
+            GatherInstance.data = abs(GatherInstance.data)
+
         elif cmd == 'eng10':
             # Englacial scatter enhancer that works well for 10 MHz data
             # Removed reset and dewow commands - they're not always wanted
-            GatherInstance.DoTimeGainControl(ncoef=2.e6, npow=1.)
+            GatherInstance.DoTimeGainControl(npow=1.)
             GatherInstance.DoWindowedSinc(40.e6, bandwidth=4.e6, mode='highpass')
-            D_masked = np.ma.masked_where(GatherInstance.data==0, np.abs(GatherInstance.data))
+            D_masked = np.ma.masked_where(GatherInstance.data==0,
+                                          np.abs(GatherInstance.data))
             D_transformed = np.abs(D_masked**0.33) * np.sign(D_masked)
             D_transformed.mask = np.ma.nomask
             GatherInstance.data = D_transformed
