@@ -13,3 +13,7 @@ from filehandler import FileHandler
 import misc
 import itools
 
+from filter_defs import ApplyFilter
+
+__all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'itools']
+
