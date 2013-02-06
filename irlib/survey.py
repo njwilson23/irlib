@@ -151,19 +151,17 @@ class Survey:
         if fromcache:
             fnm = self.GetLineCacheName(line, dc=datacapture, cache_dir=cache_dir)
             if print_fnm:
-                # Print attempted cache name for debugging
                 print fnm
             if os.path.isfile(fnm):
                 try:
                     with open(fnm, 'r') as f:
                         unpickler = cPickle.Unpickler(f)
-                        gather = unpickler.load()
+                        gatherdata = unpickler.load()
                 except:
                     traceback.print_exc()
-                    gather = None
-                return gather
+                    gatherdata = None
+                return gatherdata
             else:
-                #raise IOError("Cached file not available; loading from HDF")
                 print "Cached file not available; loading from HDF"
 
         path = 'line_{lin}'.format(lin=line)
@@ -186,7 +184,6 @@ class Survey:
                     names)))
         if len(datasets) == 0:
             sys.stderr.write("no datasets match the specified channel(s)\n")
-
 
         # Sort the datasets by location number
         try:
