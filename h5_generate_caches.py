@@ -5,17 +5,17 @@
 #
 
 
-import irlib
+from irlib import Survey
 import os, sys, getopt
 
 def print_syntax():
     print """
     SYNTAX: gen_cache HDF_SURVEY [OPTIONS]
 
-        -d [DIR]    cache directory (default: ./cache/)
+        -d [DIR]    cache directory (default: cache/)
         -g          fix static GPS issues
         -s          smoothen coordinates
-        -b          remove blank traces (trigger failure)
+        -b          remove blank traces caused by triggering failure
         -r          remove stationary traces
         -f          force regeneration of existing caches
         -q          silence standard output
@@ -25,42 +25,13 @@ def print_syntax():
 optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfq', ['dc='])
 optdict = dict(optlist)
 
-
-if '-d' in optdict.keys():
-    cache_dir = optdict['-d']
-else:
-    cache_dir = "cache"
-
-if '-g' in optdict.keys():
-    fix_gps = True
-else:
-    fix_gps = False
-
-if '-s' in optdict.keys():
-    smoothen_gps = True
-else:
-    smoothen_gps = False
-
-if '-r' in optdict.keys():
-    remove_stationary = True
-else:
-    remove_stationary = False
-
-if '-b' in optdict.keys():
-    remove_blanks = True
-else:
-    remove_blanks = False
-
-if '-f' in optdict.keys():
-    force_cache = True
-else:
-    force_cache = False
-
-if '-q' in optdict.keys():
-    be_quiet = True
-else:
-    be_quiet = False
-
+# Parse input switches
+cache_dir = optdict.get('-d', 'cache')
+fix_gps = True if '-g' in optdict.keys() else False
+remove_stationary = True if '-r' in optdict.keys() else False
+remove_blanks = True if '-b' in optdict.keys() else False
+force_cache = True if '-f' in optdict.keys() else False
+be_quiet = True if '-q' in optdict.keys() else False
 try:
     dc = int(optdict.get('--dc', 0))
 except ValueError:
@@ -73,7 +44,7 @@ except IndexError:
     print_syntax()
     sys.exit()
 
-S = irlib.Survey(survey_fnm)
+S = Survey(survey_fnm)
 
 if not be_quiet:
     print "Working on {0}".format(survey_fnm)
@@ -87,8 +58,8 @@ for line in lines:
         pass
     else:
         if not be_quiet:
-            print ("Generating data for line {0}, datacapture {1} "
-                   "in {2}...".format(str(line), str(dc), cache_dir))
+            print "\tCaching line {0}, datacapture {1}...".format(str(line),
+                                                                  str(dc))
         try:
             L = S.ExtractLine(line_no, datacapture=dc)
             L.RemoveBadLocations()
@@ -106,3 +77,4 @@ for line in lines:
             print "\tfailed"
         except KeyboardInterrupt:
             sys.exit(0)
+
