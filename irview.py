@@ -15,32 +15,6 @@ import traceback, pdb
 
 np.seterr(invalid='ignore')
 
-def get_infile():
-    """ Return an input file path. """
-    #infile = '../field/radar_200805/glacier1_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier1/Glacier1_May09_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_30April2011_and_02May2011_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_a_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_b_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_06May2011_utm.h5'
-    #infile = '../field/radar_201105/GL1/gl1_201105_utm.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_utm.h5'
-    infile = '../field/radar_201107/gl1_201107_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl1_201107_50mhz_utm.h5'
-
-    #infile = '../field/radar_200805/glacier2_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier2/Glacier2_May09_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_09May2011_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_10may2011_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_50mhz_utm.h5'
-
-    #infile = '../field/radar_201107/gl1_20110713_10mhz_cmp.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_cmp.h5'
-
-    #infile = '../field/radar_201107/gl1_20110710.h5'
-    return infile
-
 class ImageWindow:
     def __init__(self, L, fh5=None, rate=1.e-8):
         try:

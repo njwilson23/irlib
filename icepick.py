@@ -13,33 +13,6 @@ import traceback, pdb
 
 np.seterr(invalid='ignore')
 
-def get_infile():
-    """ Return an input file path. """
-    #infile = '../field/radar_200805/glacier1_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier1/Glacier1_May09_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_30April2011_and_02May2011_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_a_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_b_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_06May2011_utm.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_utm.h5'
-    #infile = '../field/radar_201107/gl1_201107_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl1_201107_50mhz_utm.h5'
-
-    #infile = '../field/radar_200805/glacier2_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier2/Glacier2_May09_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_09May2011_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_10may2011_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_50mhz_utm.h5'
-
-    infile = '../field/radar_201107/gl1_20110713_10mhz_cmp.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_cmp.h5'
-
-    #infile = '../field/radar_201105/GL1/gl1_201105_utm.h5'
-    #infile = '../field/radar_201107/gl1_20110710_10mhz_magellan_utm.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_utm.h5'
-    return infile
-
 class PickWindow:
     def __init__(self, arr=None, rate=1.e-8, bias=.02):
         self.rate = rate
@@ -358,7 +331,7 @@ def OpenLine(P, infile, line, init_filters=False, fromcache=True, tocache=True):
         loaded = False
         cnm = S.GetLineCacheName(line)
         if fromcache:
-            loaded, L = irlib.TryCache(cnm)
+            loaded, L = irlib.misc.TryCache(cnm)
         if loaded == False:
             L = S.ExtractLine(line)
             try:
@@ -600,10 +573,28 @@ def HandleCommand(s, infile, line, S, L, P):
 
 # Cold start interface
 def main():
-    optlist, args = getopt.gnu_getopt(sys.argv[1:], 'L:', ['filter'])
+    optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:', ['filter'])
     optdict = dict(optlist)
 
-    infile = get_infile()
+    def print_syntax():
+        print "\t icepick -f file_name [-L line_number]"
+        return
+
+    try:
+        optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:')
+    except getopt.GetoptError:
+        print "Error collecting arguments - check syntax."
+        print_syntax()
+        sys.exit(1)
+    optdict = dict(optlist)
+
+    try:
+        infile = optdict['-f']
+    except KeyError:
+        print "A survey filename must be supplied:"
+        print_syntax()
+        sys.exit(0)
+
 
     try:
         line = int(sys.argv[1])
