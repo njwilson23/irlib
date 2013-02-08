@@ -30,6 +30,7 @@ cache_dir = optdict.get('-d', 'cache')
 fix_gps = True if '-g' in optdict.keys() else False
 remove_stationary = True if '-r' in optdict.keys() else False
 remove_blanks = True if '-b' in optdict.keys() else False
+smoothen_gps = True if '-s' in optdict.keys() else False
 force_cache = True if '-f' in optdict.keys() else False
 be_quiet = True if '-q' in optdict.keys() else False
 try:
@@ -39,7 +40,7 @@ except ValueError:
     sys.exit()
 
 try:
-    survey_fnm = sys.argv[1]
+    survey_fnm = fins[0]
 except IndexError:
     print_syntax()
     sys.exit()
