@@ -363,9 +363,9 @@ def HandleCommand(s, S, IW, L):
             print 'channel: ' + str(L.datacapture)
         except AttributeError:
             pass
-        print 'nx: ' + str(IW.arr.shape[1])
-        print 'nz: ' + str(IW.arr.shape[0])
-        print 'rate: ' + str(IW.rate) + ' s'
+        print '# traces: ' + str(IW.arr.shape[1])
+        print '# samples: ' + str(IW.arr.shape[0])
+        print 'sample interval: ' + str(IW.rate) + ' s'
         print 'depth resolution: ' + str(IW.rate * 1.68e8 / 2.0) + ' m'
         print 'vertical range: ' + str(1.68e8*IW.arr.shape[0]*IW.rate / 2.0) + ' m'
         print 'available channels: ' + str(S.GetChannelsInLine(int(L.line)))

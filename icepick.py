@@ -341,7 +341,7 @@ def OpenLine(P, infile, line, init_filters=False, fromcache=True, tocache=True):
                 pass
             if tocache:
                 L.Dump(cnm)
-        L.Dewow()
+        #L.Dewow()
         P.Clear()
         P.Open(L.data)
     except SystemExit:
@@ -384,9 +384,13 @@ def HandleCommand(s, infile, line, S, L, P):
     elif args[0] == 'info':                 # INFO
         print infile
         print 'line: ' + str(line)
-        print 'nx: ' + str(P.arr.shape[1])
-        print 'nz: ' + str(P.arr.shape[0])
-        print 'rate: ' + str(P.rate) + ' s'
+        try:
+            print 'channel: ' + str(P.datacapture)
+        except AttributeError:
+            pass
+        print '# traces: ' + str(P.arr.shape[1])
+        print '# samples: ' + str(P.arr.shape[0])
+        print 'sample interval: ' + str(P.rate) + ' s'
         print 'depth resolution: ' + str(P.rate * 1.68e8 / 2.0) + ' m'
         print 'vertical range: ' + str(1.68e8*P.arr.shape[0]*P.rate / 2.0) + ' m'
         print 'pick-mode: ' + P.mode
@@ -465,11 +469,16 @@ def HandleCommand(s, infile, line, S, L, P):
                 rbound = int(args[4])
             except IndexError:
                 pass
-        except IndexError:
-            #tstart = 60
-            #tend = 250
+        except Exception as err:
+            if isinstance(err, ValueError):
+                print "autobed arguments not understood", args[1:]
+            elif isinstance(err, IndexError):
+                pass
+            else:
+                print type(err), err.message
             tstart = 150
             tend = 511
+
         L.PickBed(sbracket=(tstart,tend), bounds=(lbound,rbound), phase=1)
         mode = P.mode
         P.bed_points = L.bed_picks  # The mode gets overridden
@@ -482,15 +491,16 @@ def HandleCommand(s, infile, line, S, L, P):
         try:
             tstart = int(args[1])
             tend = int(args[2])
-            #tstart = int(tstart * 1e-9 * 1e8)   # For NI digitizer
-            #tend = int(tend * 1e-9 * 1e8)
-            #tstart = int(tstart * 1e-9 * 2.5e8)     # For Pico digitizer
-            #tend = int(tend * 1e-9 * 2.5e8)
-        except IndexError:
-            #tstart = 20            # For NI digitizer
-            #tend = 60
-            tstart = 100            # For Pico digitizer
-            tend = 400
+        except Exception as err:
+            if isinstance(err, ValueError):
+                print "autodc arguments not understood", args[1:]
+            elif isinstance(err, IndexError):
+                pass
+            else:
+                print type(err), err.message
+            tstart = 50
+            tend = 150
+
         L.PickDC(sbracket=(tstart,tend))
         mode = P.mode
         P.dc_points = L.dc_picks    # The mode gets overridden
