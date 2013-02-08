@@ -22,7 +22,7 @@ def calculate_utm_zone(xll, yll):
     integer and a string, either ('N') or ('S'). """
     if yll >= 0: hemi = 'N'
     else: hemi = 'S'
-    zone = int((180 + xll) // 6)
+    zone = int((180 + xll) // 6) + 1
     return (zone, hemi)
 
 if len(sys.argv) < 3:
