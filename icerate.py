@@ -15,31 +15,6 @@ from copy import copy
 
 np.seterr(invalid='ignore')
 
-def get_infile():
-    """ Return an input file path. """
-    #infile = '../field/radar_200805/glacier1_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier1/Glacier1_May09_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_30April2011_and_02May2011_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_a_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_05May2011_b_utm.h5'
-    #infile = '../field/radar_201105/GL1/GL1_06May2011_utm.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_utm.h5'
-    infile = '../field/radar_201107/gl1_201107_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl1_201107_50mhz_utm.h5'
-
-    #infile = '../field/radar_200805/glacier2_08_utm.h5'
-    #infile = '../field/radar_200905/Glacier2/Glacier2_May09_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_09May2011_utm.h5'
-    #infile = '../field/radar_201105/GL2/GL2_10may2011_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_35mhz_utm.h5'
-    #infile = '../field/radar_201107/gl2_20110801_50mhz_utm.h5'
-
-    #infile = '../field/radar_201107/gl1_20110713_10mhz_cmp.h5'
-    #infile = '../field/radar_201107/gl1_20110725_10mhz_cmp.h5'
-
-    #infile = '../field/radar_201107/gl1_20110710.h5'
-    return infile
-
 class RatingWindow:
     def __init__(self, L, picks, ratings=None, rate=1.e-8, bias=.02):
         self.bias = bias
@@ -442,10 +417,25 @@ def HandleCommand(s, infile, R, L, S):
 
 # Cold start interface
 def main():
-    optlist, args = getopt.gnu_getopt(sys.argv[1:], 'L:', ['filter'])
+
+    def print_syntax():
+        print "\t icerate -f file_name [-L line_number]"
+        return
+
+    try:
+        optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:')
+    except getopt.GetoptError:
+        print "Error collecting arguments - check syntax."
+        print_syntax()
+        sys.exit(1)
     optdict = dict(optlist)
 
-    infile = get_infile()
+    try:
+        infile = optdict['-f']
+    except KeyError:
+        print "A survey filename must be supplied:"
+        print_syntax()
+        sys.exit(0)
 
     try:
         line = int(sys.argv[1])
@@ -458,8 +448,9 @@ def main():
     R,L,S = OpenLine(infile, line, pickfile)
 
     # Begin main loop
-    print "IceRate 20110223"
-    while 1:
+    print "IceRate"
+
+    while True:
         s = raw_input('>> ')
         R, L = HandleCommand(s, infile, R, L, S)
 

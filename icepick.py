@@ -583,8 +583,6 @@ def HandleCommand(s, infile, line, S, L, P):
 
 # Cold start interface
 def main():
-    optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:', ['filter'])
-    optdict = dict(optlist)
 
     def print_syntax():
         print "\t icepick -f file_name [-L line_number]"
@@ -605,7 +603,6 @@ def main():
         print_syntax()
         sys.exit(0)
 
-
     try:
         line = int(sys.argv[1])
     except:
@@ -617,7 +614,8 @@ def main():
 
     # Begin main loop
     print "IcePick"
-    while 1:
+
+    while True:
         s = raw_input('>> ')
         infile,line,S,L,P = HandleCommand(s, infile, line, S, L, P)
 
