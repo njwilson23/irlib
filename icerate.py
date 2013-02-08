@@ -437,10 +437,7 @@ def main():
         print_syntax()
         sys.exit(0)
 
-    try:
-        line = int(sys.argv[1])
-    except:
-        line = 0
+    line = int(optdict.get('-L', 0))
 
     pickfile = 'picking/' + \
         os.path.basename(infile).split('.')[0] + \

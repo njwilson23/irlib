@@ -603,10 +603,7 @@ def main():
         print_syntax()
         sys.exit(0)
 
-    try:
-        line = int(sys.argv[1])
-    except:
-        line = 0
+    line = int(optdict.get('-L', 0))
 
     # Initialize a PickWindow instance and load it with data
     P = PickWindow(rate=4e-9)

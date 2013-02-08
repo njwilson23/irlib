@@ -543,12 +543,7 @@ def main():
         print_syntax()
         sys.exit(0)
 
-    #infile = get_infile()
-
-    try:
-        line = optdict['-L']
-    except KeyError:
-        line = 0
+    line = int(optdict.get('-L', 0))
 
     S = irlib.Survey(infile)
     fh5 = S.f
