@@ -38,10 +38,8 @@ except ImportError:
 
 
 class Gather:
-    """ Base class for common offset and common midpoint lines.
+    """ Base class for common offset and common midpoint lines. """
 
-
-    """
     def __init__(self, arr, infile=None, line=None, metadata=None, retain=None,
         dc=0):
         """
@@ -284,8 +282,10 @@ class Gather:
         try:
             eastings0 = np.array(self.metadata.eastings)
             northings0 = np.array(self.metadata.northings)
-            # Swap NaNs with interpolated values, unless the entire array is NaN
-            if (len(np.nonzero(np.isnan(eastings0)==False)[0]) > 0) and (len(np.nonzero(np.isnan(northings0)==False)[0]) > 0):
+            # iInterpolate over NaNs, unless the entire array is NaN
+            n_valid_eastings = len(np.nonzero(np.isnan(eastings0)==False)[0])
+            n_valid_northings = len(np.nonzero(np.isnan(northings0)==False)[0])
+            if (n_valid_eastings > 0) and (n_valid_northings > 0):
                 eastings0 = interpolate_nans(eastings0)
                 northings0 = interpolate_nans(northings0)
             # Pad and then convolve with boxcar
@@ -470,7 +470,7 @@ class Gather:
                             agctrace[j] = trace[j] / math.sqrt(blocksum / (nt-j+iwagc))
                         except ValueError:
                             # Sometimes there's a domain error here - should look into it
-                            pass
+                            traceback.print_exc()
 
                     # Scale to preserve average amplitude
                     agctrace[np.isnan(agctrace)] = 0.
@@ -604,84 +604,36 @@ class Gather:
         else:
             iend = int(bounds[1]) + 1
 
-        # Only works well when dewow has been applied
-        # Find the most negative point, and then find the first positive dV/dt
-        def first_break_bed(A, prewin=30, dmax=5e-3):
+        def first_break_bed(A, prewin=30)
+            """ Find the most negative point, and then find the first positive
+            dV/dt before, within a buffer **prewin**. May require dewow for
+            good performance. """
             try:
                 # Most negative V
                 ineg = (A == A[prewin:].min()).nonzero()[0][0]
                 # Most positive dV/dt prior
                 dA = np.diff(A[ineg-prewin:ineg])
-                ipos1 = (dA[10:] == dA[10:].max()).nonzero()[0][0] + ineg - prewin + 10
+                ipos1 = np.argmax(dA[10:]) + ineg - prewin + 10
                 # Closest point with V ~ 0 prior
                 prewin = min((ipos1, prewin))
+                abs_win = np.abs(A[ipos1-prewin:ipos1])
                 try:
-                    izero = (np.abs(A[ipos1-prewin:ipos1]) < 1e-3).nonzero()[0][-1] + ipos1 - prewin
+                    izero = (abs_win < 1e-3).nonzero()[0][-1] + ipos1 - prewin
                 except IndexError:
-                    izero = (np.abs(A[ipos1-prewin:ipos1]) == np.abs(A[ipos1-prewin:ipos1]).min()).nonzero()[0][0] + ipos1 - prewin
-                #dA_abs = np.abs(np.diff(A[ipos1-prewin:ipos1]))
-                #izero = (dA_abs == dA_abs.min()).nonzero()[0][-1] + ipos1 - prewin
-                return izero
+                    izero = np.argmin(abs_win) + ipos1 - prewin
             except:
-                return 999
+                # Except what?
+                izero = np.nan
+            return izero
 
         # Apply function over all traces
         try:
             picks = map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)
-            self.bed_picks[istart:iend] = picks
-            self.bed_picks[istart:iend] += sbracket[0]
+            picks = np.where(np.isnan(picks), 999, picks)
+            self.bed_picks[istart:iend] = picks + sbracket[0]
             self.bed_phase[istart:iend] = 1
         except:
             traceback.print_exc()
-
-        ## Find the most negative point, then find the most positive
-        ## point before it within about half a wavelength
-        #try:
-            #wavelength = math.floor(1. / (8.e6 * rate))
-
-            #for i in range(istart, iend):
-                #vec = self.data[sbracket[0]:sbracket[1],i]
-                #if phase >= 0:
-                    #_pt = np.nonzero(vec==vec.min())[0][0]
-                    #if _pt == 0:
-                        #self.bed_picks[i] = 999
-                        #self.bed_phase[i] = 999
-                    #else:
-                        #subvec = vec[_pt-min(_pt,wavelength):_pt]
-                        #self.bed_picks[i] = np.nonzero(subvec==subvec.max())[0][0]
-                        #self.bed_phase[i] = 1
-                #elif phase < 0:
-                    #_pt = np.nonzero(vec==vec.max())[0][0]
-                    #if _pt == 0:
-                        #self.bed_picks[i] = 999
-                        #self.bed_phase[i] = 999
-                    #else:
-                        #subvec = vec[_pt-min(_pt,wavelength):_pt]
-                        #self.bed_picks[i] = np.nonzero(subvec==subvec.min())[0][0]
-                        #self.bed_phase[i] = 1
-
-                #self.bed_picks[i] += (_pt-wavelength)
-
-            #for i in range(istart, iend):
-                #vec = self.data[sbracket[0]:sbracket[1],i]
-                #if phase > 0:
-                    #self.bed_picks[i] = np.nonzero(vec==vec.max())[0][0]
-                    #self.bed_phase[i] = 1
-                #elif phase < 0:
-                    #self.bed_picks[i] = np.nonzero(vec==vec.min())[0][0]
-                    #self.bed_phase[i] = -1
-                #elif phase > 0 or abs(vec.max()) >= abs(vec.min()):
-                    #self.bed_picks[i] = np.nonzero(vec==vec.max())[0][0]
-                    #self.bed_phase[i] = 1
-                #else:
-                    #self.bed_picks[i] = np.nonzero(vec==vec.min())[0][0]
-                    #self.bed_phase[i] = -1
-
-        #except:
-            #traceback.print_exc()
-
-        #finally:
-            #self.bed_picks += sbracket[0]
 
         self.history.append(('pick_bed',sbracket,bounds))
         return self.bed_picks, self.bed_phase
@@ -719,7 +671,6 @@ class Gather:
                 return le_bool.nonzero()[0][-1] + ihalfpwr - prewin
             except:
                 return 999
-
 
         # Apply function over all traces
         try:
@@ -850,9 +801,6 @@ class Gather:
             self.topography = self.topography_copy.copy()
         except AttributeError:
             pass
-        #gen_fid = lambda i: (str(self.line).rjust(4,'0')
-                            #+ str(i).rjust(4,'0') + 8*'0')
-        #self.fids = [gen_fid(i) for i in range(self.data.shape[1])]
         self.fids = copy.copy(self.fids_copy)
         self.bed_picks = 999 * np.ones(self.data.shape[1])
         self.bed_phase = 999 * np.ones(self.data.shape[1])
@@ -917,7 +865,8 @@ class Gather:
         the CutRegion() and CutSingle() methods. """
         kill_list.sort()
         kill_list.reverse()
-        keep_list = list(set(range(len(self.metadata.locations))).difference(set(kill_list)))
+        all_locs = range(len(self.metadata.locations))
+        keep_list = list(set(all_locs).difference(set(kill_list)))
 
         try:
             self.fids = [self.fids[i] for i in keep_list]
@@ -1560,7 +1509,8 @@ class CommonOffsetGather(Gather):
         lum_bound = max((abs(self.data.max()), abs(self.data.min())))
 
         # Draw it
-        img = plt.imshow(self.data, aspect='auto', cmap=cmap, vmin=-lum_bound, vmax=lum_bound)
+        img = plt.imshow(self.data, aspect='auto', cmap=cmap,
+                         vmin=-lum_bound, vmax=lum_bound)
         plt.title(title)
         plt.xlabel("Location Number")
         plt.ylabel("Time (ns)")
@@ -1615,7 +1565,8 @@ class CommonMidpointGather(Gather):
             for pair in key:
                 avg_picks.append(avg(picks[pair[0]:pair[1]+1]))
         except IndexError:
-            sys.stderr.write("key and pick arguments to CalcAveragePicks() are inconsistent\n")
+            sys.stderr.write("key and pick arguments to CalcAveragePicks() are"
+                             " inconsistent\n")
             avg_picks = None
         return np.array(avg_picks)
 
