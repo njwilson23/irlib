@@ -245,13 +245,9 @@ def Autosave(L, R):
 
 def SaveRatings(outfile, R, L):
     """ Save ratings to file, with FID and rating. """
-    traces = range(0, R.arr.shape[1])
-    traces.sort()
-    ratings = list(R.ratings)
-    data = zip(traces, ratings)
     with open(outfile, 'w') as f:
-        for loc,r in data:
-            f.write(L.GetFID(loc) + "\t" + str(int(r)) + "\n")
+        for fid, rating in zip(L.metadata.fids, list(R.ratings)):
+            f.write(fid + "\t" + str(int(rating)) + "\n")
     return
 
 
