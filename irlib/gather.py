@@ -193,6 +193,20 @@ class Gather:
 
         self.history.append(('convolution_A', width, kind, 'highpass'))
 
+    def _svd(self):
+        """ Perform SVD on trace data. Results are:
+            U: horizontal space domain eigenvectors
+            S: singular values
+            V: vertical time domain eigenvectors
+        """
+        U, S, V = np.linalg.svd(self.data)
+        return U, S, V
+
+    def _svd_reconstruct(self, U, S, V, i):
+        """ Return an eigenimage given the SVD products. """
+        return S[i] * np.dot(np.atleast_2d(U[:,i]).T, np.atleast_2d(V[i,:]))
+
+
     def GetFID(self, loc):
         """ Given a location (array index), return the location's
         FID. This solves the problem of knowing the FID of an array
@@ -575,6 +589,26 @@ class Gather:
         for i in range(self.data.shape[1]):
             self.data[:,i] = sig.wiener(self.data[:,i], mysize=window)
         self.history.append(('wiener_filter', window))
+        return
+
+    def ConstructEigenimage(self, i):
+        """ Return the i-th eigenimage of data. """
+        assert i < min((self.nx, self.ny))
+        U, S, V = self._svd()
+        return self._svd_reconstruct(U, S, V, i)
+
+    def RetainEigenimageRange(self, rng):
+        """ Replace data with a slice of its eigenimages. Takes a slice object
+        `rng` as an argument. """
+        U, S, V = self._svd()
+        E = np.dstack([self._svd_reconstruct(U, S, V, i) for i in range(len(S))])
+        self.data = np.sum(E[:,:,rng], axis=2)
+        return
+
+    def RemoveRinging(self, n=2):
+        """ Attempt to filter out ringing clutter by substracting the first `n`
+        eigenimages. """
+        self.RetainEigenimageRange(slice(5, None))
         return
 
     def RemoveHorizontal(self):
