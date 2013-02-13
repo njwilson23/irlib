@@ -605,7 +605,7 @@ class Gather:
         else:
             iend = int(bounds[1]) + 1
 
-        def first_break_bed(A, prewin=30)
+        def first_break_bed(A, prewin=30):
             """ Find the most negative point, and then find the first positive
             dV/dt before, within a buffer **prewin**. May require dewow for
             good performance. """
