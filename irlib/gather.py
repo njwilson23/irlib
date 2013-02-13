@@ -730,25 +730,6 @@ class Gather:
         except:
             traceback.print_exc()
 
-        #try:
-            #for i in range(istart, iend):
-                #vec = self.data[sbracket[0]:sbracket[1],i]
-                ## Bracket using the min and max values within the airwave
-                #t1 = np.nonzero(vec==vec.max())[0][0] + sbracket[0]
-                #t2 = np.nonzero(vec==vec.min())[0][0] + sbracket[0]
-                #if t1 > t2:
-                    #sys.stderr.write("Warning: airwave polarity reversed: line {0}\n".format(i+istart))
-                    #_t = t1
-                    #t1 = t2
-                    #t2 = _t
-                    #self.dc_phase[i] = -1
-                #else:
-                    #self.dc_phase[i] = 1
-                ## Grab the point where amplitude is maximized
-                #self.dc_picks[i] = t1
-        #except:
-            #traceback.print_exc()
-
         self.history.append(('pick_dc',sbracket,bounds))
         return self.dc_picks, self.dc_phase
 
