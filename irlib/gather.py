@@ -489,9 +489,44 @@ class Gather:
         better performance characteristics than a Chebyschev filter, at
         the expense of execution speed.
 
-            cutoff: e-folding cutoff frequency (in Hz)
-            bandwidth: transition bandwidth (narrow means sharper response)
-            rate: sampling rate
+            cutoff: cutoff frequency in Hz
+            bandwidth: transition bandwidth in Hz
+            mode: 'lowpass' or 'highpass'
+        """
+        if self.rate is not None:
+            r = 1.0 / self.rate
+        else:
+            r = 1e8
+
+        fc = cutoff / r
+        bw = bandwidth / r
+        if max((fc, bw)) > 0.5:
+            raise LineGatherError("cutoff or bandwidth exceed Nyquist "
+                                  "frequency")
+        M = int(4 // bw)
+        if M % 2 == 1:
+            M += 1
+
+        X = np.arange(M+1) - M / 2
+        kernel = sig.blackman(M+1) * np.sinc(2*fc*X)
+        kernel /= np.sum(kernel)
+        if mode == 'highpass':
+            kernel = -kernel
+            kernel[M/2] += 1.0
+
+        for i in range(self.data.shape[1]):
+            self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
+
+        self.history.append(('windowed_sinc', cutoff, bandwidth, mode))
+        return
+
+    def DoWindowedSinc_old(self, cutoff, bandwidth=2.e6, mode='lowpass'):
+        """ Implement a windowed sinc frequency-domain filter. This has
+        better performance characteristics than a Chebyschev filter, at
+        the expense of execution speed.
+
+            cutoff: cutoff frequency in Hz
+            bandwidth: transition bandwidth in Hz
         """
         if self.rate is not None:
             rate = self.rate
@@ -507,7 +542,7 @@ class Gather:
         N = int(round(4./bw))
         if N % 2 == 0:
             N += 1
-        kernel = sig.firwin(N, 0.3, window='blackman')
+        kernel = sig.firwin(N, 2*fc, window='blackman')
         if mode == 'highpass':
             kernel = -kernel
             kernel[(N-1)/2] += 1.0
