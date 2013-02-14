@@ -29,68 +29,17 @@ construction, and interfacing *radar_tools* capabilities with external Python
 scripts.
 
 
-irview
-======
 
-*irview* is a graphical utility intended for viewing radar lines. Filters can
-be applied or removed on the fly, and features within the radargram can be
-manually digitized using a mouse.
-
-[incomplete]
+.. irview
+.. include:: doc_irview.rst
 
 
-icepick and icerate
-===================
-
-*icepick* is a tool for precisely picking radar reflections (e.g. for bed
-sounding). *icerate* is a similar program for rating the quality of picks
-before surface interpolation. Both have an interface that is similar to that of
-*irview*.
-
-[incomplete]
+.. icepick and icerate
+.. include:: doc_icepick.rst
 
 
-irlib API
-=========
-
-The following sections describe the classes of the ``irlib`` API. These can
-then be used directly from a Python script or terminal to view and manipulate
-radar data.
-
-Surveys
--------
-
-.. automodule:: irlib.survey
-    :members:
-
-Gathers
--------
-
-.. automodule:: irlib.gather
-    :members:
-
-Metadata
---------
-
-.. automodule:: irlib.recordlist
-    :members:
-
-
-Management of picking and rating files
---------------------------------------
-
-.. automodule:: irlib.filehandler
-    :members:
-
-
-itools
-------
-
-.. automodule:: irlib.itools
-    :members:
-
-
-
+.. irlib API
+.. include:: doc_irlib.rst
 
 
 Indices and tables
