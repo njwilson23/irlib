@@ -581,14 +581,15 @@ class Gather:
             sys.stderr.write('failed to create IIR filter - bad parameters\n')
         return
 
-    def DoWienerFilter(self, window=5):
+    def DoWienerFilter(self, window=5, noise=None):
         """ Noise removal using a Wiener statistical filter. *window* must be
         an odd positive integer. """
         assert window > 0
         assert window % 2 == 1
         for i in range(self.data.shape[1]):
-            self.data[:,i] = sig.wiener(self.data[:,i], mysize=window)
-        self.history.append(('wiener_filter', window))
+            self.data[:,i] = sig.wiener(self.data[:,i], mysize=window,
+                                        noise=Noise)
+        self.history.append(('wiener_filter', window, noise))
         return
 
     def ConstructEigenimage(self, i):
@@ -603,6 +604,7 @@ class Gather:
         U, S, V = self._svd()
         E = np.dstack([self._svd_reconstruct(U, S, V, i) for i in range(len(S))])
         self.data = np.sum(E[:,:,rng], axis=2)
+        self.history.append(('eigenimage_range', rng.start, rng.stop, rng.step))
         return
 
     def RemoveRinging(self, n=2):
