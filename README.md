@@ -86,7 +86,13 @@ Documentation:
 
 In addition to the basic information here, documentation can be found in `doc`.
 In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
-installed. If LaTeX is available, the documentation can be compiled into a PDF.
+installed. Type
+
+    make html
+
+If LaTeX is available, the documentation can be compiled into a PDF. Type
+
+    make latexpdf
 
 License:
 --------
