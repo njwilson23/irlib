@@ -588,7 +588,7 @@ class Gather:
         assert window % 2 == 1
         for i in range(self.data.shape[1]):
             self.data[:,i] = sig.wiener(self.data[:,i], mysize=window,
-                                        noise=Noise)
+                                        noise=noise)
         self.history.append(('wiener_filter', window, noise))
         return
 
