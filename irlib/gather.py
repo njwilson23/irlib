@@ -79,8 +79,8 @@ class Gather:
         self.bed_phase = 999 * np.ones(self.nx)
         self.dc_picks = 999 * np.ones(self.nx)
         self.dc_phase = 999 * np.ones(self.nx)
-
         self.history = [('init')]
+        return
 
     def __repr__(self):
         return ("Gather instance for {fnm} at line {line}, "
@@ -90,27 +90,26 @@ class Gather:
     def _path2fid(self, path, linloc_only = False):
         """ Based on a path, return a unique FID for database
         relations. """
+        path = path.lstrip('/').lstrip('\\')
         try:
-            # Index from [1:] to cut out any '/' that might be present
             # Line number
-            lin = int(path[1:].split('/',1)[0].split('_',1)[1])
+            lin = int(path.split('/',1)[0].split('_',1)[1])
             # Location number
-            loc = int(path[1:].split('/',2)[1].split('_',1)[1])
+            loc = int(path.split('/',2)[1].split('_',1)[1])
             if not linloc_only:
                 # Datacapture number
-                dc = int(path[1:].split('/',3)[2].split('_',1)[1])
+                dc = int(path.split('/',3)[2].split('_',1)[1])
                 # Echogram number
-                eg = int(path[1:].split('/',3)[2].split('_',1)[1])
+                eg = int(path.split('/',3)[2].split('_',1)[1])
             else:
                 dc = 0
                 eg = 0
             fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
                 + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-            return fid
         except:
             traceback.print_exc()
-            sys.stderr.write('LineGather: failed at path2fid\n')
-            return None
+            fid = None
+        return fid
 
     def _getkernel(self, width, kind):
         """ Generate a lowpass convolution kernel. """
@@ -130,12 +129,14 @@ class Gather:
             kernel /= kernel.sum()
 
         elif kind == 'blackman':
+
             def integrate_blackman(w, a0, a1, a2):
                 # Compute the integral of a blackman window
                 val = a0*w \
                     - a1*(w-1)/(2*math.pi)*math.sin(2*math.pi*w/(w-2)) \
                     + a2*(w-1)/(2*math.pi)*math.sin(4*math.pi*w/(w-1))
                 return val
+
             alpha = 0.16
             a0 = (1-alpha)/2.
             a1 = 1./2.
@@ -169,6 +170,7 @@ class Gather:
             self.data[:,i] = _trace.copy()
 
         self.history.append(('convolution_A', width, kind, 'lowpass'))
+        return
 
     def _highpassma(self, width, kind='boxcar'):
         """ Internal high-pass convolution filter implementation.
@@ -192,6 +194,7 @@ class Gather:
             self.data[:,i] = _trace.copy()
 
         self.history.append(('convolution_A', width, kind, 'highpass'))
+        return
 
     def _svd(self):
         """ Perform SVD on trace data. Results are:
@@ -251,10 +254,10 @@ class Gather:
                         self.metadata.eastings, self.metadata.northings))
             except:
                 pdb.set_trace()
-            self.history.append(('load_topo', topofnm))
             if smooth:
                 self.SmoothenTopography()
             self.topography_copy = self.topography.copy()
+            self.history.append(('load_topo', topofnm))
         else:
             print "{0} is not a file".format(topofnm)
         return
@@ -563,7 +566,6 @@ class Gather:
         # Convolve every trace
         for i in range(self.data.shape[1]):
             self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
-        # Record
         self.history.append(('windowed_sinc', cutoff, bandwidth, mode))
         return
 
@@ -849,6 +851,7 @@ class Gather:
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
         self.fids_copy = copy.copy(self.fids)
+
         self.history.append(('remove_blank', nsmp, threshold))
         return
 
@@ -870,6 +873,7 @@ class Gather:
         self.bed_phase = 999 * np.ones(self.data.shape[1])
         self.dc_picks = 999 * np.ones(self.data.shape[1])
         self.dc_phase = 999 * np.ones(self.data.shape[1])
+
         self.history = [('init')]
         return
 
@@ -1380,7 +1384,6 @@ class CommonOffsetGather(Gather):
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
         self.fids_copy = copy.copy(self.fids)
-
         self.history.append(('remove_stationary', threshold))
         return
 
@@ -1492,6 +1495,7 @@ class CommonOffsetGather(Gather):
             self.topography = proj_topo
         except AttributeError:
             pass
+
         self.history.append(('projection_as_segments', bounds, dx))
         return (sections, Xdbg, Ydbg, Pdbg, Pgriddbg)
 
@@ -1560,6 +1564,7 @@ class CommonOffsetGather(Gather):
             self.data = np.roll(full_Dmig, t0_adjust, axis=0)
         else:
             self.data = full_Dmig
+
         self.history.append(('fk_migration', bounds, dx))
         return migsections
 
