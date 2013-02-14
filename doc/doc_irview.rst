@@ -89,6 +89,39 @@ migration, and instrument ringing removal. Defining custom filters requires
 modification of the file ``irlib/filter_defs.py``, and can be done using the
 *irlib* API (discussed elsewhere).
 
+**Non-comprehensive list of filters**
+
+=============== ==============================================================
+Command         Description
+=============== ==============================================================
+*Gain Control*
+``gc``          Applies a linear gain enhancement
+``gc2``         Applies a quadratic gain enhancement
+``agc``         Applies an automatic (nonlinear) gain enhancement
+*Covolutions*
+``dewow``       "Dewowing" filter to remove instrument drift
+``lowpass``     Performs a frequency-domain lowpass filter with a cutoff
+                frequency of 25 MHz
+``highpass``    Performs a frequency-domain lowpass filter with a cutoff
+                frequency of 25 MHz
+``lowpass_ma``  Performs a time-domain lowpass filter (moving average)
+``highpass_ma`` Performs a time-domain highpass filter (inverted moving
+                average)
+*Recursive*
+``iir30low``    Chebyschev lowpass filter with cutoff at 30 MHz
+``iir25high``   Chebyschev highpass filter with cutoff at 25 MHz
+*Migration*
+``fkmig``       Stolt (F-K) migration
+*Misc*
+``abs``         Displays the absolute value of the data
+``wiener``      Wiener statistical noise filter
+``ringing``     Horizontal ringing filter based on singular value decomposition
+``project``     Project radar line to straight segments with equal trace
+                spacing
+=============== ==============================================================
+
+For a comprehensive list, see ``irlib/filter_defs.py:ApplyFilter()``
+
 
 Digitizing
 ----------
@@ -113,9 +146,21 @@ feature.*
 
 Once all desired features have been digitized, typing::
 
-    dexport
+    dsave
 
-saves the vertices to a text file. Presently, there is no way to load
+saves the vertices to a text file. The saved file is Tab-delimited with blank
+lines between features.
+
+=========== ===================================
+Column      Description
+=========== ===================================
+1           Trace at vertex location
+2           Longtitude
+3           Latitude
+4           Time (ns) from the top of the trace
+=========== ===================================
+
+Presently, comments are not saved in the file, and there is no way to load
 previously-created features across sessions.
 
 Additional commands:
