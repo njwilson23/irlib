@@ -339,6 +339,39 @@ def OpenLine(S, line, fh5, fromcache=True, tocache=True, datacapture=0):
     return IW, L
 
 
+def StrFilterHistory(L):
+    """ Return a printable string summarizing the filter history. """
+    s_out = ""
+    for operation in L.history:
+        if hasattr(operation, "__iter__"):
+            s_out += "\t" + operation[0] + " [ "
+            for option in operation[1:]:
+                s_out += str(option) + ", "
+            s_out += " ] \n"
+        else:
+            s_out += "\t" + operation + " [ ] \n"
+    return s_out
+
+def WriteFeatures(IW, outfnm):
+    """ Write digitized features from `IW` to `outfnm`, creating folder if
+    necessary. """
+    dict_list = IW.Export()
+
+    if not os.path.isdir(os.path.dirname(outfnm)):
+        os.makedirs(os.path.dirname(outfnm))
+
+    with open(outfnm, 'w') as fout:
+        for fdict in dict_list:
+            keys = fdict.keys()
+            keys.sort()
+            for key in keys:
+                vals = fdict[key]
+                if isinstance(vals, __builtins__.tuple):
+                    fout.write('{0}\t{1}\t{2}\t{3}\n'.format(
+                        key, vals[0], vals[1], vals[2]))
+            fout.write('\n')
+    return
+
 def HandleCommand(s, S, IW, L):
 
     # List args. Handle empty input.
@@ -408,7 +441,7 @@ def HandleCommand(s, S, IW, L):
             IW.arr = L.data
             IW.ShowRadargram(repaint=True)
         except IndexError:
-            print L.history
+            print StrFilterHistory(L)
 
     elif args[0] in ('nofilter', 'nf'):     # NOFILTER
         L.Reset()
@@ -441,21 +474,12 @@ def HandleCommand(s, S, IW, L):
         for key in IW.features.keys():
             print "{0}: {1} vertices".format(key, len(IW.features[key][1]))
 
-    elif args[0] == 'dexport':              # DEXPORT
+    elif args[0] == 'dsave':                # DSAVE
         try:
             dict_list = IW.Export()
             outfnm = IW.GetDigitizerFilename()
-            with open(outfnm, 'w') as fout:
-                for fdict in dict_list:
-                    keys = fdict.keys()
-                    keys.sort()
-                    for key in keys:
-                        vals = fdict[key]
-                        if isinstance(vals, __builtins__.tuple):
-                            fout.write('{0}\t{1}\t{2}\t{3}\n'.format(
-                                key, vals[0], vals[1], vals[2]))
-                    fout.write('\n')
-
+            WriteFeatures(IW, outfnm)
+            print "Features saved to " + outfnm
         except:
             traceback.print_exc()
 
@@ -507,7 +531,7 @@ def HandleCommand(s, S, IW, L):
         dnew                start digitizing new feature
         drm [#]             remove a feature
         dls                 list features
-        dexport             export features to text
+        dsave               export features to text
 
         imsave [file]       save the radargram as an image
         hist                show a brightness histogram
