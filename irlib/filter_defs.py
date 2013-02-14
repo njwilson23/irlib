@@ -90,6 +90,9 @@ def ApplyFilter(GatherInstance, cmd):
         elif cmd == 'dewow':
             GatherInstance.Dewow()
 
+        elif cmd == 'ringing':
+            GatherInstance.RemoveRinging()
+
         elif cmd == 'bed10':
             GatherInstance.DoWindowedSinc(cutoff=8.e6, bandwidth=5.e6, mode='highpass')
             GatherInstance.DoWindowedSinc(cutoff=25.e6, bandwidth=10.e6, mode='lowpass')
