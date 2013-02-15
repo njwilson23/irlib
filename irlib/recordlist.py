@@ -197,12 +197,9 @@ class RecordList:
             self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W')))
             self.fix_qual.append(self._xmlGetValI(xml, 'Fix_Quality'))
             self.num_sat.append(self._xmlGetValI(xml, 'Num _Sat'))
-            #self.dilution.append(self._xmlGetValF(xml, 'Dilution'))
-            self.dilution.append(None)
-            #self.alt_asl.append(self._xmlGetValF(xml, 'Alt_asl_m'))
-            self.alt_asl.append(None)       # GPS alt_asl is very inaccurate
-            #self.geoid_height.append(self._xmlGetValF(xml, 'Geoid_Heigh_m'))
-            self.geoid_height.append(None)
+            self.dilution.append(self._xmlGetValF(xml, 'Dilution'))
+            self.alt_asl.append(self._xmlGetValF(xml, 'Alt_asl_m'))
+            self.geoid_height.append(self._xmlGetValF(xml, 'Geoid_Heigh_m'))
             self.gps_fix_valid.append(self._xmlGetValI(xml, 'GPS Fix valid'))
             self.gps_message_ok.append(self._xmlGetValI(xml, 'GPS Message ok'))
         except:
@@ -234,8 +231,7 @@ class RecordList:
                 self.datums.append(self._xmlGetValS(xml, 'Datum'))
                 self.eastings.append(self._xmlGetValF(xml, 'Easting_m'))
                 self.northings.append(self._xmlGetValF(xml, 'Northing_m'))
-                #self.elevations.append(self._xmlGetValF(xml, 'Elevation'))
-                self.elevations.append(None)
+                self.elevations.append(self._xmlGetValF(xml, 'Elevation'))
                 self.zones.append(self._xmlGetValI(xml, 'Zone'))
             except:
                 sys.stderr.write("\tCould not save GPS UTM metadata\n")
