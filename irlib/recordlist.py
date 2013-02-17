@@ -49,6 +49,8 @@ class RecordList:
         self.vrange = []
         self.sample_rate = []
 
+        self.comments = []
+
         self.hasUTM = False
 
     def _xmlGetValF(self, xml, name):
@@ -139,7 +141,8 @@ class RecordList:
         """ Add metadata from a new dataset to the RecordList instance. Updates
         the RecordList internal lists with data parsed from the radar xml.
 
-                dataset is an actual h5py dataset (fh5[path])
+        *dataset* is an actual h5py dataset, and is designed to be called at
+        the 'echogram' level (fh5[line][location][datacapture][echogram])
 
         Does not read pick data, and returns None if attempted.
         """
@@ -207,9 +210,7 @@ class RecordList:
             sys.stderr.write("\tirlib: Could not save GPS metadata\n")
             sys.stderr.write('\t' + dataset.name + '\n')
             sys.stderr.write(xml)
-            sys.exit(1)
             error += 1
-            return error
 
         # Parse digitizer cluster
         try:
@@ -217,11 +218,10 @@ class RecordList:
             self.vrange.append(self._xmlGetValF(xml, 'vertical range'))
             self.sample_rate.append(self._xmlGetValF(xml, ' sample rate'))
         except:
+            traceback.print_exc()
             sys.stderr.write("\tirlib: Could not save digitizer metadata\n")
             sys.stderr.write('\t' + dataset.name + '\n')
             error += 1
-            return error
-
 
         # Parse UTM cluster if available (2009 and later?)
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
@@ -234,10 +234,19 @@ class RecordList:
                 self.elevations.append(self._xmlGetValF(xml, 'Elevation'))
                 self.zones.append(self._xmlGetValI(xml, 'Zone'))
             except:
+                traceback.print_exc()
                 sys.stderr.write("\tCould not save GPS UTM metadata\n")
                 sys.stderr.write('\t' + dataset.name + '\n')
                 error += 1
-                return error
+
+        # Parse comment
+        try:
+            self.comments.append(dataset.parent.id.get_comment('.'))
+        except:
+            traceback.print_exc()
+            sys.stderr.write("\tFailure to read Group COMMENT\n")
+            error += 1
+
         return error
 
     def Write(self, f, flip_lon=True):
