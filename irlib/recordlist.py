@@ -25,33 +25,18 @@ class RecordList:
     """
     def __init__(self, filename=None):
         self.filename = filename
-        self.fids = []
-        self.filenames = []
-        self.lines = []
-        self.locations = []
-        self.datacaptures = []
-        self.echograms = []
-        self.timestamps = []
-        self.lats = []
-        self.lons = []
-        self.fix_qual = []
-        self.num_sat = []
-        self.dilution = []
-        self.alt_asl = []
-        self.geoid_height = []
-        self.gps_fix_valid = []
-        self.gps_message_ok = []
-        self.datums = []
-        self.eastings = []
-        self.northings = []
-        self.elevations = []
-        self.zones = []
-        self.vrange = []
-        self.sample_rate = []
 
-        self.comments = []
+        self.attrs = ['fids', 'filenames', 'lines', 'locations',
+                      'datacaptures', 'echograms', 'timestamps', 'lats',
+                      'lons', 'fix_qual', 'num_sat', 'dilution', 'alt_asl',
+                      'geoid_height', 'gps_fix_valid', 'gps_message_ok',
+                      'datums', 'eastings', 'northings', 'elecations', 'zones',
+                      'vrange', 'sample_rate', 'comments']
 
+        for attr in self.attrs:
+            self.__setattr__(attr, [])
         self.hasUTM = False
+        return
 
     def _xmlGetValF(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
@@ -133,9 +118,9 @@ class RecordList:
                          float(a[-2:])/60. + float("." + b)/60.,6)
         except ValueError:
             return
-        except AttributeError:
-            # *dmstr* is not a string or string-like
-            return
+        #except AttributeError:
+        #    # *dmstr* is not a string or string-like
+        #    return
 
     def AddDataset(self, dataset, fid='9'*16):
         """ Add metadata from a new dataset to the RecordList instance. Updates
@@ -326,52 +311,15 @@ class RecordList:
 
     def Reverse(self):
         """ Reverse data in place. """
-        self.fids.reverse()
-        self.filenames.reverse()
-        self.lines.reverse()
-        self.locations.reverse()
-        self.datacaptures.reverse()
-        self.echograms.reverse()
-        self.timestamps.reverse()
-        self.lats.reverse()
-        self.lons.reverse()
-        self.fix_qual.reverse()
-        self.num_sat.reverse()
-        self.dilution.reverse()
-        self.alt_asl.reverse()
-        self.geoid_height.reverse()
-        self.gps_fix_valid.reverse()
-        self.gps_message_ok.reverse()
-        self.vrange.reverse()
-        self.sample_rate.reverse()
-        self.datums.reverse()
-        self.eastings.reverse()
-        self.northings.reverse()
-        self.elevations.reverse()
+        for attr in self.attrs:
+            data = self.__getattr__(attr)
+            data.reverse()
         return
 
     def Cut(self, start, end):
         """ Drop section out of all attribute lists in place. """
-        del self.fids[start:end]
-        del self.filenames[start:end]
-        del self.lines[start:end]
-        del self.locations[start:end]
-        del self.datacaptures[start:end]
-        del self.echograms[start:end]
-        del self.timestamps[start:end]
-        del self.lats[start:end]
-        del self.lons[start:end]
-        del self.fix_qual[start:end]
-        del self.num_sat[start:end]
-        del self.dilution[start:end]
-        del self.alt_asl[start:end]
-        del self.geoid_height[start:end]
-        del self.gps_fix_valid[start:end]
-        del self.gps_message_ok[start:end]
-        del self.vrange[start:end]
-        del self.sample_rate[start:end]
-        del self.datums[start:end]
-        del self.eastings[start:end]
-        del self.northings[start:end]
-        del self.elevations[start:end]
+        for attr in self.attrs:
+            data = self.__getattr__(attr)
+            del data[start:end]
         return
+
