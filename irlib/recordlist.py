@@ -18,10 +18,6 @@ class RecordList:
         but should be the HDF filename)
 
         add datasets by passing h5 dataset objects to self.AddDataset()
-
-        cut out parts of lines with self.Cut()
-
-        export to CSV with self.Write()
     """
     def __init__(self, filename=None):
         self.filename = filename
@@ -131,50 +127,35 @@ class RecordList:
 
         Does not read pick data, and returns None if attempted.
         """
+        # Is this really a good way? Seems inelegant... -njw
         if 'picked' in dataset.name:
             sys.stderr.write('RecordList: did not attempt to parse {0}\n'
                             .format(dataset.name))
-            return 1
+            return
 
-        error = 0
         self.filenames.append(self.filename)
         self.fids.append(fid)
 
-        try:
-            splitname = dataset.name.split('/')
-            self.lines.append(int(splitname[1].split('_')[1]))
-            self.locations.append(int(splitname[2].split('_')[1]))
-            self.datacaptures.append(int(splitname[3].split('_')[1]))
-            self.echograms.append(int(splitname[4].split('_')[1]))
-        except:
-            traceback.print_exc()
-            sys.stderr.write("\tirlib: Could not properly parse dataset name\n")
-            sys.stderr.write('\t' + dataset.name + '\n')
-            error += 1
-            # Make sure that all list lengths are still equal
-            n_items = min(len(self.lines), len(self.locations),
-                        len(self.datacaptures), len(self.echograms))
-            for lst in [self.lines, self.locations, self.datacaptures, self.echograms]:
-                while len(lst) > n_items:
-                    lst.pop()
 
-        try:
-            # Different attribute labels have been used over time
-            if 'Save timestamp' in dataset.attrs:
-                # 2008
-                self.timestamps.append(dataset.attrs['Save timestamp'])
-            elif 'PCSavetimestamp' in dataset.attrs:
-                # 2009 and later
-                self.timestamps.append(dataset.attrs['PCSavetimestamp'])
-            else:
-                error += 1
-                sys.stderr.write("\t{d}: timestamp could not be found\n".format(d=dataset.name))
-        except:
-            traceback.print_exc()
-            sys.stderr.write("\tirlib: Could not save timestamp field\n")
-            sys.stderr.write('\t' + dataset.name + '\n')
-            self.timestamps.append(None)
-            error += 1
+        # Parse dataset name
+        splitname = dataset.name.split('/')
+        self.lines.append(int(splitname[1].split('_')[1]))
+        self.locations.append(int(splitname[2].split('_')[1]))
+        self.datacaptures.append(int(splitname[3].split('_')[1]))
+        self.echograms.append(int(splitname[4].split('_')[1]))
+
+
+        # Timestamps
+        if 'Save timestamp' in dataset.attrs:
+            # 2008
+            self.timestamps.append(dataset.attrs['Save timestamp'])
+        elif 'PCSavetimestamp' in dataset.attrs:
+            # 2009 and later
+            self.timestamps.append(dataset.attrs['PCSavetimestamp'])
+        else:
+            raise ParseError('Timestamp read failure', dataset.name)
+
+
 
         # XML parsing code (unused categories set to None for speed)
 
@@ -191,11 +172,10 @@ class RecordList:
             self.gps_fix_valid.append(self._xmlGetValI(xml, 'GPS Fix valid'))
             self.gps_message_ok.append(self._xmlGetValI(xml, 'GPS Message ok'))
         except:
-            traceback.print_exc()
-            sys.stderr.write("\tirlib: Could not save GPS metadata\n")
-            sys.stderr.write('\t' + dataset.name + '\n')
-            sys.stderr.write(xml)
-            error += 1
+            with open('error.log', 'w') as f:
+                traceback.print_exc(file=f)
+            raise ParseError('GPS cluster read failure', dataset.name)
+
 
         # Parse digitizer cluster
         try:
@@ -203,10 +183,9 @@ class RecordList:
             self.vrange.append(self._xmlGetValF(xml, 'vertical range'))
             self.sample_rate.append(self._xmlGetValF(xml, ' sample rate'))
         except:
-            traceback.print_exc()
-            sys.stderr.write("\tirlib: Could not save digitizer metadata\n")
-            sys.stderr.write('\t' + dataset.name + '\n')
-            error += 1
+            with open('error.log', 'w') as f:
+                traceback.print_exc(file=f)
+            raise ParseError('Digitizer cluster read failure', dataset.name)
 
         # Parse UTM cluster if available (2009 and later?)
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
@@ -219,20 +198,20 @@ class RecordList:
                 self.elevations.append(self._xmlGetValF(xml, 'Elevation'))
                 self.zones.append(self._xmlGetValI(xml, 'Zone'))
             except:
-                traceback.print_exc()
-                sys.stderr.write("\tCould not save GPS UTM metadata\n")
-                sys.stderr.write('\t' + dataset.name + '\n')
-                error += 1
+                with open('error.log', 'w') as f:
+                    traceback.print_exc(file=f)
+                raise ParseError('Digitizer cluster read failure', dataset.name)
+
 
         # Parse comment
         try:
             self.comments.append(dataset.parent.id.get_comment('.'))
         except:
-            traceback.print_exc()
-            sys.stderr.write("\tFailure to read Group COMMENT\n")
-            error += 1
+            with open('error.log', 'w') as f:
+                traceback.print_exc(file=f)
+            raise ParseError('HDF Group comment read failure')
 
-        return error
+        return
 
     def Write(self, f, flip_lon=True):
         """ Write out the data stored internally in CSV format to a file
@@ -322,4 +301,11 @@ class RecordList:
             data = self.__getattr__(attr)
             del data[start:end]
         return
+
+class ParseError(Exception):
+    def __init__(self, message='', fnm):
+        self.message = message
+    def __str__(self):
+        return self.message + ": {0}".format(fnm)
+
 
