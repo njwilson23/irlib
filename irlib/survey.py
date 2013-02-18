@@ -135,7 +135,8 @@ class Survey:
         return vec
 
     def ExtractLine(self, line, bounds=(None,None), datacapture=0,
-                    fromcache=False, cache_dir="cache", print_fnm=False):
+                    fromcache=False, cache_dir="cache", print_fnm=False,
+                    verbose=False):
         """ Extract every trace on a line. If bounds are supplied
         (min, max), limit extraction to only the range specified.
         Return a LineGather instance.
@@ -205,7 +206,12 @@ class Survey:
         metadata = RecordList(self.datafile)
         for trace in datasets:
             full_path = path + '/' + trace
-            metadata.AddDataset(self.f[path][trace], fid=self._path2fid(full_path))
+            try:
+                metadata.AddDataset(self.f[path][trace], fid=self._path2fid(full_path))
+            except ParseError as e:
+                if verbose:
+                    sys.stderr.write(e.message + '\n')
+                metadata.CropRecords()
 
         # Pull out all the data, concatenate into a single array
         try:
