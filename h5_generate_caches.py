@@ -7,6 +7,7 @@
 
 from irlib import Survey
 import os, sys, getopt
+import traceback
 
 def print_syntax():
     print """
@@ -19,6 +20,7 @@ def print_syntax():
         -r          remove stationary traces
         -f          force regeneration of existing caches
         -q          silence standard output
+        -e          print failed datacaptures
         --dc=[#]    specify datacapture (default: 0)
     """
 
@@ -33,6 +35,8 @@ remove_blanks = True if '-b' in optdict.keys() else False
 smoothen_gps = True if '-s' in optdict.keys() else False
 force_cache = True if '-f' in optdict.keys() else False
 be_quiet = True if '-q' in optdict.keys() else False
+verbose = True if '-e' in optdict.keys() else False
+
 try:
     dc = int(optdict.get('--dc', 0))
 except ValueError:
@@ -62,20 +66,26 @@ for line in lines:
             print "\tCaching line {0}, datacapture {1}...".format(str(line),
                                                                   str(dc))
         try:
-            L = S.ExtractLine(line_no, datacapture=dc)
-            L.RemoveBadLocations()
-            if fix_gps:
-                L.FixStaticGPS()
-            if smoothen_gps:
-                L.SmoothenGPS()
-            if remove_blanks:
-                L.RemoveBlankTraces()
-            if remove_stationary:
-                L.RemoveStationary(3.0)
-            L.Dump(cache_fnm)
-            del L
-        except AttributeError:
-            print "\tfailed"
+            L = S.ExtractLine(line_no, datacapture=dc, verbose=verbose)
+        except (AttributeError, IndexError):
+            print "\t\tData invalid"
+            L = None
         except KeyboardInterrupt:
             sys.exit(0)
+
+        if L is not None:
+            try:
+                L.RemoveBadLocations()
+                if fix_gps:
+                    L.FixStaticGPS()
+                if smoothen_gps:
+                    L.SmoothenGPS()
+                if remove_blanks:
+                    L.RemoveBlankTraces()
+                if remove_stationary:
+                    L.RemoveStationary(3.0)
+                L.Dump(cache_fnm)
+                del L
+            except:
+                traceback.print_exc()
 

@@ -26,11 +26,11 @@ class RecordList:
                       'datacaptures', 'echograms', 'timestamps', 'lats',
                       'lons', 'fix_qual', 'num_sat', 'dilution', 'alt_asl',
                       'geoid_height', 'gps_fix_valid', 'gps_message_ok',
-                      'datums', 'eastings', 'northings', 'elecations', 'zones',
+                      'datums', 'eastings', 'northings', 'elevations', 'zones',
                       'vrange', 'sample_rate', 'comments']
 
         for attr in self.attrs:
-            self.__setattr__(attr, [])
+            setattr(self, attr, [])
         self.hasUTM = False
         return
 
@@ -288,24 +288,33 @@ class RecordList:
                 error += 1
         return error
 
+    def CropRecords(self):
+        """ Ensure that all records are the same length. This should be called
+        if adding a dataset fails, potentially leaving dangling records. """
+        nrecs = min([len(getattr(self, attr)) for attr in self.attrs])
+        for attr in self.attrs:
+            data = getattr(self, attr)
+            while len(data) > nrecs:
+                data.pop(-1)
+        return
+
     def Reverse(self):
         """ Reverse data in place. """
         for attr in self.attrs:
-            data = self.__getattr__(attr)
+            data = getattr(self, attr)
             data.reverse()
         return
 
     def Cut(self, start, end):
         """ Drop section out of all attribute lists in place. """
         for attr in self.attrs:
-            data = self.__getattr__(attr)
+            data = getattr(self, attr)
             del data[start:end]
         return
 
 class ParseError(Exception):
-    def __init__(self, message='', fnm):
-        self.message = message
+    def __init__(self, message='', fnm=''):
+        self.message = message + ": {0}".format(fnm)
     def __str__(self):
-        return self.message + ": {0}".format(fnm)
-
+        return self.message
 
