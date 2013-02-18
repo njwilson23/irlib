@@ -6,8 +6,11 @@
 Documentation for radar_tools
 =============================
 
-.. contents::
-    :depth: 3
+.. toctree::
+    :depth: 2
+
+.. .. contents::
+..     :depth: 3
 
 Introduction
 ============
@@ -42,10 +45,10 @@ scripts.
 .. include:: doc_irlib.rst
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
