@@ -1269,14 +1269,23 @@ class CommonOffsetGather(Gather):
                 xf = self.metadata.eastings[region[1]]
                 y0 = self.metadata.northings[region[0]]
                 yf = self.metadata.northings[region[1]]
+                z0 = self.metadata.elevations[region[0]]
+                zf = self.metadata.elevations[region[1]]
                 di = region[1] - region[0] - 1
                 dx = (xf-x0) / float(di)
                 dy = (yf-y0) / float(di)
+                if None not in (z0, zf):
+                    dz = (zf-z0) / float(di)
+                else:
+                    dz = None
                 for i in range(1, di+1):
                     new_x = x0 + dx*float(i)
                     new_y = y0 + dy*float(i)
                     self.metadata.eastings[i+region[0]] = new_x
                     self.metadata.northings[i+region[0]] = new_y
+                    if dz is not None:
+                        new_z = z0 + dz*float(i)
+                        self.metadata.elevations[i+region[0]] = new_z
 
         self.raw_data = self.data.copy()        # I hope I don't regret this
         self.metadata_copy = copy.deepcopy(self.metadata)
