@@ -5,7 +5,9 @@ icepick and icerate
 sounding). *icerate* is a similar program for rating the quality of picks
 before surface interpolation. Both have an interface that is similar to that of
 *irview*, so this will assume that the previous chapter has been read and focus
-on the differences from *irview*.
+on the differences from *irview*. All GUI programs require *matplotlib* (see
+Dependencies_).
+
 
 icepick
 -------

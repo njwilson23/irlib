@@ -20,3 +20,5 @@
 
 .. _IPython: http://ipython.org/
 
+.. _gstat: http://www.gstat.org/
+

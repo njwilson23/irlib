@@ -3,7 +3,8 @@ irview
 
 *irview* is a graphical utility intended for viewing radar lines. Filters can
 be applied or removed on the fly, and features within the radargram can be
-manually digitized using a mouse.
+manually digitized using a mouse. All GUI programs require *matplotlib* (see
+Dependencies_).
 
 Usage
 -----
