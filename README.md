@@ -86,7 +86,11 @@ Documentation:
 
 In addition to the basic information here, documentation can be found in `doc`.
 In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
-installed. Type
+installed, with the ``numpydoc`` extension. The extensions can be installed by
+
+    easy_install numpydoc
+
+Then, type
 
     make html
 
