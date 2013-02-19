@@ -7,7 +7,7 @@ Documentation for radar_tools
 =============================
 
 .. toctree::
-    :depth: 2
+    :depth: 3
 
 .. .. contents::
 ..     :depth: 3
@@ -31,6 +31,8 @@ the API directly is useful for experimental data exploration, filter
 construction, and interfacing *radar_tools* capabilities with external Python
 scripts.
 
+
+.. include:: doc_utilities.rst
 
 
 .. irview
