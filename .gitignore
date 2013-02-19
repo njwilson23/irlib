@@ -3,4 +3,5 @@
 *.swp
 *.ird
 *.so
+*.c
 doc/_build/*
