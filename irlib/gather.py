@@ -1,12 +1,10 @@
-"""
- Defines various kinds of Gather() classes, which are perhaps the most
- important classes in the irlib library. These contain the data from
- individual radar lines, and make it easy to apply various processing steps to
- the data. The Gather() class is a parent class for the CommonOffsetGather()
- and CommonMidpointGather() subclasses. The LineGather() object is deprecated
- and is now just an alias for the CommonOffsetGather(), kept for backwards
- compatibility.
-"""
+""" Defines various kinds of `Gather` classes, which are perhaps the most
+important classes in the `irlib` library. These contain the data from
+individual radar lines, and make it easy to apply various processing steps to
+the data. The `Gather` class is a base class for the `CommonOffsetGather` and
+`CommonMidpointGather` daughter classes. The `LineGather` object is deprecated
+and is now just an alias for the `CommonOffsetGather`, kept for backwards
+compatibility. """
 
 import scipy.signal as sig
 import scipy.spatial as spatial
@@ -243,8 +241,8 @@ class Gather:
         """ Load topography along line gather, reading from an ASC file.
         Obviously, this requires the Gather to have a valid metadata attribute.
 
-        If smooth=True, then apply a boxcar filter to soften the effects of the
-        DEM discretization.
+        If `smooth`=True, then apply a boxcar filter to soften the effects of
+        the DEM discretization.
         """
         G = aai.Grid()
         if os.path.isfile(topofnm):
@@ -266,8 +264,8 @@ class Gather:
         """ Load topography along line gather, reading from an ASC file.
         Obviously, this requires the Gather to have a valid metadata attribute.
 
-        If smooth=True, then apply a boxcar filter to soften the effects of the
-        DEM discretization.
+        If `smooth`=True, then apply a boxcar filter to soften the effects of
+        the DEM discretization.
         """
         def interpolate_nans(V):
             Vreal = np.nonzero(np.isnan(V) == False)[0]
@@ -371,9 +369,9 @@ class Gather:
         frequency signals. This is a step up from using a simple
         demean operation.
 
-            cutoff: cutoff minimum frequency, in Hz
-
-        This is just an interface to _highpassma.
+        Parameters
+        ----------
+        cutoff : cutoff minimum frequency, in Hz
         """
         # Compute filter width as a function of the cutoff frequency
         width = 41      # SEEMS TO WORK
@@ -389,16 +387,16 @@ class Gather:
     def DoTimeGainControl(self, ncoef=1., npow=1., nexp=0., gamma=1., bias=0.):
         """ Apply a gain enhancement as a function of time.
 
-            Transform F: f(t) -> F(f(t))
+        Transform :math:`F`: 
 
-            F: (f(t) * t^npow * exp(nexp*t)) ^ gamma + bias
+        .. math:: f(t) \\to F(f(t)) \\
+            F = (f(t) * t^\\text{npow} * \\exp(\\text{nexp}*t))^\\text{gamma} \\
+                + \\text{bias}
 
-            Note: ncoef functionality has been removed and average
-            power is preserved instead.
+        Note: `ncoef` functionality has been removed and average
+        power is preserved instead.
 
-            Claerbout (1985) suggests:
-                npow = 2.
-                gamma = 0.5
+        Claerbout (1985) suggests `npow` = 2 and `gamma` = 0.5.
         """
         if self.rate is not None:
             dt = self.rate
@@ -424,7 +422,9 @@ class Gather:
         """ Apply a time-power gain enhancement up to a time limit,
         after which gain is constant (e.g. Murray et al, 1997).
 
-            tswitch is in samples
+        Parameters
+        ----------
+        tswitch : sample number at which to switch to constant gain
         """
         t = np.arange(1, self.data.shape[0]+1)
         tf = min((tswitch, self.data.shape[0]))
@@ -439,16 +439,17 @@ class Gather:
     def DoAutoGainControl(self, timewin=20e-8):
         """ Apply the RMS-based AGC algorithm from Seismic Unix*.
 
-            timewin: time half-window in seconds
-            dt: sample interval in seconds
-
         Try to use a fast Cython-accellerated version. If that fails, fall
         back to the Numpy version.
 
         *Cohen, J.K. and Stockwell, J.W. CWP/SU: Seismic Unix Release
         42. Colorado School of Mines, Center for Wave Phenomena. (1996)
-        """
 
+        Parameters
+        ----------
+        timewin : time half-window in seconds
+        dt : sample interval in seconds
+        """
         if self.rate is not None:
             dt = self.rate
         else:
@@ -506,9 +507,11 @@ class Gather:
         better performance characteristics than a Chebyschev filter, at
         the expense of execution speed.
 
-            cutoff: cutoff frequency in Hz
-            bandwidth: transition bandwidth in Hz
-            mode: 'lowpass' or 'highpass'
+        Parameters
+        ----------
+        cutoff : cutoff frequency in Hz
+        bandwidth : transition bandwidth in Hz
+        mode : 'lowpass' or 'highpass'
         """
         if self.rate is not None:
             r = 1.0 / self.rate
@@ -623,14 +626,18 @@ class Gather:
 
     def WaveletTransform(self, trno, m=0):
         """ Perform a wavelet transform of a single trace.
-        Arguments:
-            trno:       trace number to transform (< self.data.shape[1])
-            mother:     mother wavelet (0==Morlet (default), 1==Paul, 2==DOG)
+
+        Parameters
+        ----------
+        trno : trace number to transform (< self.data.shape[1])
+        mother : mother wavelet (0==Morlet (default), 1==Paul, 2==DOG)
+
         Returns
-            wva:        complex 2-D array, where amplitude is np.abs(wva)
-            scales:     scales used
-            period:     fourier periods of the scales used
-            coi:        e-folding factor used for cone-of-influence
+        -------
+        wva : complex 2-D array, where amplitude is np.abs(wva)
+        scales : scales used
+        period : fourier periods of the scales used
+        coi : e-folding factor used for cone-of-influence
         """
         y = self.data[:,trno].copy()
         dt = self.rate
@@ -658,10 +665,11 @@ class Gather:
         """ Attempt to pick bed reflections along the line. Return pick
         data and estimated polarity in vectors (also stored internally).
 
-            sbracket: tuple defining minimum and maximum times (by
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
                 sample number) during which the event can be picked
-
-            bounds: location number limits for picking
+        bounds : location number limits for picking
         """
         if self.rate is not None:
             rate = self.rate
@@ -716,10 +724,11 @@ class Gather:
         """ Attempt to pick direct coupling waves along the line.
         Return pick data in a vector (also stored internally).
 
-            sbracket: tuple defining minimum and maximum times (by
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
                 sample number) during which the event can be picked
-
-            bounds: location number limits for picking
+        bounds : location number limits for picking
         """
         if bounds[0] == None:
             istart = 0
@@ -1134,14 +1143,14 @@ class CommonOffsetGather(Gather):
             breaks = None
         return breaks
 
-    def ProjNearestNeighbour(self, dx):
-        """ Determine an equally-spaced best fit straight line, and
-        place the nearest trace onto each node.
-        Spacing in meters is given by dx.
-        DEPRECATED - SEE self.LineProject_Nearest()
-        """
-        Xmesh, Ymesh, proj_arr, sum_dist = self.LineProject_Nearest(dp=dx)
-        return proj_arr
+    #def ProjNearestNeighbour(self, dx):
+    #    """ Determine an equally-spaced best fit straight line, and
+    #    place the nearest trace onto each node.
+    #    Spacing in meters is given by dx.
+    #    DEPRECATED - SEE self.LineProject_Nearest()
+    #    """
+    #    Xmesh, Ymesh, proj_arr, sum_dist = self.LineProject_Nearest(dp=dx)
+    #    return proj_arr
 
     def LineProjectXY(self, bounds=None, eastings=None, northings=None, sane=True):
         """ Project coordinates onto a best-fit line. Return the
@@ -1298,7 +1307,9 @@ class CommonOffsetGather(Gather):
         """ Remove traces where the location is None or outside of an
         optional bounding box.
 
-            bbox    [east, west, south, north] bounding box (optional)
+        Parameters
+        ----------
+        bbox : [east, west, south, north] bounding box (optional)
         """
         kill_list = []
         for i, (x, y) in enumerate(zip(self.metadata.eastings,
@@ -1408,22 +1419,25 @@ class CommonOffsetGather(Gather):
         return D_int
 
     def LineProjectMultiSegment(self, dx=4.0, threshold=0.35, verbose=False):
-        """ Projects data to a sequence of approximating line
-        segments with even specing.
+        """ Projects data to a sequence of approximating line segments with
+        even spacing.
 
-            dx          :   point spacing in meters
-            threshold   :   threshold for segment bending
-            verbose     :   print out status message
+        THIS MAY BREAK THINGS because picks and metadata aside from coordinates
+        aren't handled. Use with caution.
 
-        Returns a tuple containing:
-            segments
-            Xdbg
-            Ydbg
-            Pdbg
-            Pgriddbg
+        Parameters
+        ----------
+        dx          :   point spacing in meters
+        threshold   :   threshold for segment bending
+        verbose     :   print out status message
 
-        THIS MAY BREAK THINGS because picks and metadata aside from
-        coordinates aren't handled. Use with caution.
+        Returns
+        -------
+        segments
+        Xdbg
+        Ydbg
+        Pdbg
+        Pgriddbg
         """
         # Find places where line direction changed
         breaks = self.FindLineBreaks(threshold=threshold)
@@ -1511,11 +1525,12 @@ class CommonOffsetGather(Gather):
     def MigrateFK(self, dx=4.0, t0_adjust=0):
         """ Perform Stolt migration over multiple sections.
 
-            dx          :   gridding interval
-
-            t0_adjust   :   zero-time offset from top of self.data, in samples
-                            e.g. if the radargram contains data from before t0,
-                            this corrects for that.
+        Parameters
+        ----------
+        dx          :   gridding interval
+        t0_adjust   :   zero-time offset from top of self.data, in samples
+                        e.g. if the radargram contains data from before t0,
+                        this corrects for that.
 
         Returns a dictionary of statistics about the transformation.
         """
@@ -1661,17 +1676,7 @@ class CommonMidpointGather(Gather):
         return
 
 
-class LineGather(CommonOffsetGather):
-    """ Class for handling individual survey lines.
-
-        arr         data held within a numpy array
-        infile      the original HDF5 dataset
-        line        the line enumeration
-        metadata    RecordList instance containing metadata
-
-        DEPRECATED
-    """
-    pass
+LineGather = CommonOffsetGather
 
 
 class LineGatherError(Exception):

@@ -1,8 +1,6 @@
-"""
- Contains the RecordList() class, which in addition to being useful for
- functions that try to directly read XML metadata from HDF datasets, is also
- used as the metadata container for Gather() objects.
-"""
+""" Contains the `RecordList` class, which in addition to being useful for
+functions that try to directly read XML metadata from HDF datasets, is also
+used as the metadata container for `Gather` objects. """
 
 import sys
 import os
@@ -14,10 +12,11 @@ class RecordList:
     datasets.
 
     Usage:
-        initialize a RecordList instance with a filename (arbitrary,
-        but should be the HDF filename)
 
-        add datasets by passing h5 dataset objects to self.AddDataset()
+    - initialize a RecordList instance with a filename (arbitrary, but should
+      be the HDF filename)
+
+    - add datasets by passing h5 dataset objects to `self.AddDataset()`
     """
     def __init__(self, filename=None):
         self.filename = filename
@@ -122,10 +121,15 @@ class RecordList:
         """ Add metadata from a new dataset to the RecordList instance. Updates
         the RecordList internal lists with data parsed from the radar xml.
 
-        *dataset* is an actual h5py dataset, and is designed to be called at
-        the 'echogram' level (fh5[line][location][datacapture][echogram])
+        Does not read pick data.
 
-        Does not read pick data, and returns None if attempted.
+        Parameters
+        ----------
+        dataset : a h5py dataset at the `echogram` level
+                  (fh5[line][location][datacapture][echogram])
+        fid : pre-defined FID for the dataset
+
+        Returns None
         """
         # Is this really a good way? Seems inelegant... -njw
         if 'picked' in dataset.name:

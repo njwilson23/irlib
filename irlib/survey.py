@@ -1,9 +1,9 @@
-"""
- Contains the Survey() class, which is the overarching irlib structure. Each
- HDF dataset can be opened as a Survey(), which stores file references and
- collects metadata in the form of a FileHandler. Radar lines can be spawned
- from a Survey() using the ExtractLine() method, which spawns a Gather().
-"""
+""" Contains the `Survey` class, which is the overarching `irlib` structure.
+`Survey` classes handle interaction with the raw HDF datasets, and spawn off
+`Gather` classes for analysis. Each HDF dataset can be opened as a `Survey`,
+which stores file references and collects metadata in the form of a
+`FileHandler`. Radar lines can be created from a `Survey` using the
+`ExtractLine` method, which returns a `Gather`. """
 
 
 import h5py
@@ -141,12 +141,14 @@ class Survey:
         (min, max), limit extraction to only the range specified.
         Return a LineGather instance.
 
-            line        :   line number to extract (int)
-            bounds      :   return a specific data slice (iter x2)
-            datacapture :   datacapture subset to load (int or iter<ints)
-            fromcache   :   attempt to load from a cached file (bool)
-            cache_dir   :   specify a cache directory (str)
-            print_fnm   :   print the cache search path (bool)
+        Parameters
+        ----------
+        line : line number to extract (int)
+        bounds : return a specific data slice (iter x2)
+        datacapture : datacapture subset to load (int or iter<ints)
+        fromcache : attempt to load from a cached file (bool)
+        cache_dir : specify a cache directory (str)
+        print_fnm : print the cache search path (bool)
         """
 
         if fromcache:
@@ -248,22 +250,27 @@ class Survey:
         """ Attempt to identify wavelet polarities. Return a dictionary
         with trace IDs as keys and a tuple with polarity tag and
         estimates of certainty for the air and basal waves.
-            Polarity tag:
-                1   air and basal reflection wave has same polarity
-                -1  air and basal reflection wave have opposite
-                    polarity
-                0   uncertain
 
-            Certainty estimate:
-                difference between instantaneous power and windowed power
+        Parameters
+        ----------
 
-            line: line to be queried; if None, will do all lines
-            aw_threshold: factor of power increase required for a
-                positive identification of air wave
-            bw_threshold: factor of power increase required for a
-                positive identification of reflected wave
-            window: window for determining local background power;
-                must be odd
+        line : line to be queried; if None, will do all lines
+        aw_threshold : factor of power increase required for a
+                       positive identification of air wave
+        bw_threshold : factor of power increase required for a
+                       positive identification of reflected wave
+        window : window for determining local background power;
+                 must be odd
+
+        Returns
+        -------
+
+        Polarity tag : `1` if air and basal reflection wave has same polarity,
+            `-1` if air and basal reflection wave have opposite polarity, and
+            `0` if uncertain
+
+        Certainty estimate : difference between instantaneous power and
+                             windowed power
         """
         makeplot = True
         aw_val = 0

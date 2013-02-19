@@ -1,7 +1,5 @@
-"""
- Contains the FileHandler() class, which abstracts the process of reading
- picking files.
-"""
+""" Contains the `FileHandler` class, which abstracts the process of reading
+and writing picking files. """
 
 import os
 import numpy as np
