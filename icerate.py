@@ -440,6 +440,9 @@ def main():
         "_line" + str(line) + ".csv"
     R,L,S = OpenLine(infile, line, pickfile)
 
+    if not os.path.isdir('rating'):
+        os.mkdir('rating')
+
     # Begin main loop
     print "IceRate"
 

@@ -609,6 +609,9 @@ def main():
     P = PickWindow(rate=4e-9)
     S,L,P = OpenLine(P, infile, line, init_filters=False)
 
+    if not os.path.isdir('picking'):
+        os.mkdir('picking')
+
     # Begin main loop
     print "IcePick"
 
