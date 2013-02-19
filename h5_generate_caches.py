@@ -11,7 +11,7 @@ import traceback
 
 def print_syntax():
     print """
-    SYNTAX: gen_cache HDF_SURVEY [OPTIONS]
+    SYNTAX: h5_generate_caches HDF_SURVEY [OPTIONS]
 
         -d [DIR]    cache directory (default: cache/)
         -g          fix static GPS issues
