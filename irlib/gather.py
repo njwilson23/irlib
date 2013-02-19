@@ -9,7 +9,6 @@ compatibility. """
 import scipy.signal as sig
 import scipy.spatial as spatial
 import numpy as np
-import matplotlib.pyplot as plt
 import math, copy, cPickle
 import os, sys
 import traceback, pdb
