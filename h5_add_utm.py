@@ -30,8 +30,8 @@ if len(sys.argv) < 3:
     SYNTAX: h5_add_utm INFILE OUTFILE
 
         Replaces geographical coordinates in INFILE with UTM coordinates
-        in OUTFILE. Does not perform any datum shift. Projection assumed
-        to be UTM zone 7N.
+        in OUTFILE. Does not perform any datum shift. Projection is calculated
+        assuming that the data from neither from western Norway nor Svalbard.
     """
     sys.exit(0)
 else:
