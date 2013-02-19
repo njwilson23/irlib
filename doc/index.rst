@@ -42,7 +42,7 @@ been updating the source code fairly frequently, and changes nearly always make
 it better. I recommend pulling the latest version from Github_. The ideal way
 to do this is to use git_. This way, new changes can be fetched with a single
 command rather than re-downloading and unpacking a compressed archive, and
-fixes that you happen to make can be easily shared upstream. Alternatively
+fixes that you happen to make can be easily shared upstream. Alternatively, a
 one-off zipped snapshot can be downloaded and installed.
 
 Dependencies

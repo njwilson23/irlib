@@ -1,7 +1,7 @@
-Commandline Utilities
-=====================
+Command-line Utilities
+======================
 
-The commandline utilities in *radar_tools* are useful for performing data
+The command-line utilities in *radar_tools* are useful for performing data
 management and pre-processing tasks on HDF radar datasets, as well as for
 performing basic data exploration and conversion tasks.
 
@@ -24,12 +24,12 @@ larger).
 h5_replace_gps
 ~~~~~~~~~~~~~~
 
-If GPS data collected from the onboard receiver are missing or of poor quality,
-they can be replaced by data from a handheld GPS receiver. The data from the
-handheld receiver must be exported as or converted to GPX format, which is a
-standard open format. Calling ``h5_replace_gps`` creates a copy of the original
-dataset with the new coordinates inserted. Commandline flags can be used to
-specify matching tolerances and which lines to work on.
+If GPS data collected from the on-board receiver are missing or of poor
+quality, they can be replaced by data from a hand-held GPS receiver. The data
+from the hand-held receiver must be exported as or converted to GPX format,
+which is a standard open format. Calling ``h5_replace_gps`` creates a copy of
+the original dataset with the new coordinates inserted. Command-line flags can
+be used to specify matching tolerances and which lines to work on.
 
 h5_add_utm
 ~~~~~~~~~~

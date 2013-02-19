@@ -102,7 +102,7 @@ Command         Description
 ``gc``          Applies a linear gain enhancement
 ``gc2``         Applies a quadratic gain enhancement
 ``agc``         Applies an automatic (nonlinear) gain enhancement
-*Covolutions*
+*Convolutions*
 ``dewow``       "Dewowing" filter to remove instrument drift
 ``lowpass``     Performs a frequency-domain lowpass filter with a cutoff
                 frequency of 25 MHz
@@ -159,7 +159,7 @@ lines between features.
 Column      Description
 =========== ===================================
 1           Trace at vertex location
-2           Longtitude
+2           Longitude
 3           Latitude
 4           Time (ns) from the top of the trace
 =========== ===================================
