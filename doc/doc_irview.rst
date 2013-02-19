@@ -63,8 +63,11 @@ Caching
 
 The performance of *irview* (and any other program in *radar_tools* that loads
 radar lines) can be enhanced substantially by pre-caching of the radar lines.
-
-[**incomplete - should probably be a separate chapter**]
+This can be done using the API (``Gather.Dump()``), or by running the
+commandline utility ``h5_generate_caches`` (discussed previously). Caches
+are Python "pickles" (serialized data), and contain a snapshot of the radar
+data, as well as a reference to ``irlib``. Substantial changes to ``irlib``
+sometimes require re-caching.
 
 
 Filters
