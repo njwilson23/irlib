@@ -7,10 +7,8 @@ import irlib
 from irlib.misc import TryCache
 import numpy as np
 import matplotlib.pyplot as plt
-from h5py import Dataset
 import sys, os
 import getopt
-import readline
 import traceback, pdb
 
 np.seterr(invalid='ignore')
@@ -54,7 +52,8 @@ class ImageWindow:
         for i in self.fig1.canvas.callbacks.callbacks:
             try:
                 if i == 'key_press_event':
-                    self.fig1.canvas.mpl_disconnect(self.fig1.canvas.callbacks.callbacks[i].keys()[0])
+                    self.fig1.canvas.mpl_disconnect(
+                            self.fig1.canvas.callbacks.callbacks[i].keys()[0])
             except IndexError:
                 # Already disconnected
                 pass
@@ -112,7 +111,7 @@ class ImageWindow:
             self.AddFeature('')
 
         elif event.key == 'E':
-            sys.EndFeature()
+            self.EndFeature()
 
     def _linloc2fid(self, loc):
         """ Based on a line and location, return a unique FID for
@@ -431,7 +430,8 @@ def HandleCommand(s, S, IW, L):
                     del L
                 IW, L = OpenLine(S, line, S.f, datacapture=datacapture)
             else:
-                print "Line {0} channel {1} does not exist".format(line, datacapture)
+                print ("Line {0} channel {1} does "
+                       "not exist".format(line, datacapture))
         except:
             traceback.print_exc()
 

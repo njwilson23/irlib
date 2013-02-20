@@ -386,7 +386,7 @@ class Gather:
     def DoTimeGainControl(self, ncoef=1., npow=1., nexp=0., gamma=1., bias=0.):
         """ Apply a gain enhancement as a function of time.
 
-        Transform :math:`F`: 
+        Transform :math:`F`:
 
         .. math:: f(t) \\to F(f(t)) \\
             F = (f(t) * t^\\text{npow} * \\exp(\\text{nexp}*t))^\\text{gamma} \\
@@ -808,7 +808,7 @@ class Gather:
         """
         features = {}
         i = 0
-        fidlist = self.fids.tolist()
+        fidlist = list(self.fids)
 
         with open(infile, 'r') as f:
             while True:
@@ -1591,30 +1591,6 @@ class CommonOffsetGather(Gather):
         self.history.append(('fk_migration', bounds, dx))
         return migsections
 
-    def Plot(self, outfile=None, cmap='gray', title='Radar Line',
-        rate=1e-8, c=1.68e8):
-        """ Plot an array containing radar data along a line. """
-        n = self.data.shape[0]
-        T = np.arange(0, n*rate, rate)      # time axis
-
-        # Find the luminescence range so that plot intensity is symmetric
-        lum_bound = max((abs(self.data.max()), abs(self.data.min())))
-
-        # Draw it
-        img = plt.imshow(self.data, aspect='auto', cmap=cmap,
-                         vmin=-lum_bound, vmax=lum_bound)
-        plt.title(title)
-        plt.xlabel("Location Number")
-        plt.ylabel("Time (ns)")
-        locs, labels = plt.yticks()
-        plt.yticks(locs, locs*1.e9*rate)
-
-        if outfile == None:
-            plt.show()
-        else:
-            plt.savefig(outfile)
-        return img
-
 
 class CommonMidpointGather(Gather):
     """ Subclass defining common-midpoint specific data and operations. """
@@ -1661,18 +1637,6 @@ class CommonMidpointGather(Gather):
                              " inconsistent\n")
             avg_picks = None
         return np.array(avg_picks)
-
-    def Plot(offsets, events, curve=None):
-        """ Plot picked events. If a set of points defining a reference NMO
-        hyperbola is provided, plot that too. """
-        plt.ion()
-        plt.plot(offsets, -events, 'xk')
-        if analytical is not None:
-            try:
-                plt.plot(offsets, -curve, '-r')
-            except:
-                pass
-        return
 
 
 LineGather = CommonOffsetGather
