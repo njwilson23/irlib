@@ -12,7 +12,7 @@ efficient and simple way to apply established methodologies for analysing radar
 data. Pre-written filters and processing routines are called by typing
 keywords.
 
-![](https://github.com/njwilson23/radar_tools/blob/c6cb324c8b049efe19d414ff3887697edd0f0582/images/repo_image.png)
+![](http://njwilson23.github.com/radar_tools/images/repo_image.png)
 
 The second way is to use the ``irlib`` API directly. This makes it possible to
 programmatically analyze radar data from the Python programming language. New
