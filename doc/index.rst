@@ -12,6 +12,9 @@ Documentation for radar_tools
 Introduction
 ============
 
+.. image:: front_image.png
+
+
 *radar_tools* is a Python package and set of applications that I wrote in order
 to view and analyze radar data. I have made the package open-source
 (https://github.com/njwilson23/radar_tools), and written this documentation to
