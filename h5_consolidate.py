@@ -10,6 +10,8 @@ import sys, getopt
 def print_syntax():
     print """
     SYNTAX: h5_consolidate INFILE1 INFILE2 [...] -o OUTFILE
+
+    Combines multiple datasets (>1) into a single concatenated dataset.
     """
 
 optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'o:')
