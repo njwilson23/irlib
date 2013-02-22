@@ -9,11 +9,7 @@ import traceback
 
 def print_syntax():
     print """
-    irgram - viewing tool for survey lines
-
-    Syntax:
-
-    irgram infile Nline [options]
+    STNTAX: plotline infile Nline [options]
 
     Options:
         -G[file]    save segment to a file
