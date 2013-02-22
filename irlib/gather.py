@@ -273,9 +273,9 @@ class Gather:
         """
         G = aai.AAIGrid()
         if os.path.isfile(topofnm):
-            G.FromFile(topofnm)
+            G.fromfile(topofnm)
             try:
-                self.topography = np.array(map(lambda x,y: G.Sample(x,y)[0],
+                self.topography = np.array(map(lambda x,y: G.sample(x,y)[0],
                         self.metadata.eastings, self.metadata.northings))
             except:
                 pdb.set_trace()
@@ -1648,7 +1648,7 @@ class CommonOffsetGather(Gather):
 class CommonMidpointGather(Gather):
     """ Subclass defining common-midpoint specific data and operations. """
 
-    def ReadIndex(index):
+    def ReadIndex(self, index):
         """ Read CMP index file and return the offsets as a 1-d array and
         location key as a 2-d array. """
         with open(index, 'r') as f:
@@ -1675,7 +1675,7 @@ class CommonMidpointGather(Gather):
         OFFSETS = np.abs(XR - XT)
         return OFFSETS, KEY
 
-    def CalcAveragePicks(key, picks):
+    def CalcAveragePicks(self, key, picks):
         """ Average picks by location, based on a key. The key is a list of
         paired iterables, containing first and last locations for every shot
         gather.
