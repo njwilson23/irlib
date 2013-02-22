@@ -96,8 +96,8 @@ Path
 ~~~~
 
 For convenience, programs that make up *radar\_tools* should be on the
-execution ``PATH``. On Linux and Mac OS X, one can add the following line to my
-``.bashrc``:
+execution ``PATH``. On Linux and Mac OS X, one can add the following line to
+the ``.bashrc``:
 
 ::
 

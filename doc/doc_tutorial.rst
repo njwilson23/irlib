@@ -301,7 +301,7 @@ radargram), then we can give this as a hint by typing
 is in each trace, subject to the vertical constraints.
 
 -  There is a minimum vertical range for the algorithm to work. I forget what
-   it is, but it's something around 20. If **``autodc``** doesn't work, try
+   it is, but it's something around 20. If ``autodc`` doesn't work, try
    increasing the range arguments.
 
 Automatically picking the airwave usually works pretty well. Automatically
