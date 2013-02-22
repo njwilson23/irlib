@@ -13,11 +13,11 @@ from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
 
-#font = FontProperties(fname='Verdana.ttf', weight='normal', size=12)
 font = FontProperties(family='sans-serif', weight='normal', size=11)
+defaultcm = matplotlib.cm.gray
 
 def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
-    cmap=matplotlib.cm.gray):
+           cmap=defaultcm):
     """ Make a radargram plot. Replaces `plotl()` and `plotlt()` functions.
 
     Parameters
@@ -28,8 +28,11 @@ def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
     annotate : turns on axes labels
     font : annotation FontProperties
     mask_topo : if not None, then must be a value to replace nans with
-    """
 
+    Returns
+    -------
+    ax : same Axes instance as passed in
+    """
     rate = L.rate
     lbnd = max([-L.data.min() / gain, L.data.max() / gain])
 
@@ -61,90 +64,8 @@ def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
     return ax
 
 
-#def plotl(D, gain=5, fnm=None, for_pub=False):
-#    """ Make a radargram plot.
-#        plotl(Gather, gain=1.25)
-#        DEPRECATED - use *plotax* instead
-#    """
-#    if for_pub:
-#        fig = plt.figure(figsize=[7,2])
-#        ax1 = fig.add_axes([0.15,0.22,0.83,0.7])
-#    else:
-#        fig = plt.figure(figsize=[9,9])
-#        ax1 = fig.add_axes([0.1,0.1,0.85,0.8])
-#        ax2 = ax1.twinx()
-#
-#    if isinstance(D, np.ndarray):
-#        data = D
-#        rate = 4e-9
-#    elif isinstance(D, Gather):
-#        data = D.data
-#        rate = D.rate
-#
-#    lbnd = max([-data.min() / gain, data.max() / gain])
-#
-#    ax1.imshow(data, aspect='auto', cmap='gray', vmin=-lbnd, vmax=lbnd)
-#    ax1.set_ylabel('Time (ns)')
-#    ax1.set_xticklabels([int(a) for a in ax1.get_xticks()])
-#    ax1.set_xlabel('Trace number')
-#
-#    locs1 = ax1.get_yticks()
-#    ax1.set_yticklabels([locs1[i] * rate * 1e9 for i in range(len(locs1))], fontproperties=font)
-#    if not for_pub:
-#        ax2.set_ylabel('Sample number')
-#        locs2 = ax2.get_yticks()
-#        labels2 = [int(round(i)) for i in locs2*data.shape[0]]
-#        labels2.reverse()
-#        ax2.set_yticklabels(labels2, fontproperties=font)
-#
-#    if fnm is not None:
-#        fig.savefig(fnm)
-#    return fig
-#
-#def plotlt(L, gain=5, fnm=None, for_pub=False, small=False):
-#    """ Make a radargram plot. Use topography.
-#        plotlt(Gather, gain=1.25)
-#        DEPRECATED - use *plotax* instead
-#    """
-#    if for_pub:
-#        figsize=[6,2]
-#        fig = plt.figure(figsize=figsize)
-#        ax1 = fig.add_axes([0.02,0.05,0.96,0.9])
-#    else:
-#        figsize=[8,3]
-#        fig = plt.figure(figsize=figsize)
-#        ax1 = fig.add_axes([0.05,0.05,0.95,0.92])
-#
-#    ax2 = ax1.twinx()
-#
-#    lbnd = max([-L.data.min() / gain, L.data.max() / gain])
-#    data = L.GetTopoCorrectedData()
-#    ax1.imshow(data, aspect='auto', cmap='gray', vmin=-lbnd, vmax=lbnd)
-#
-#    if small:
-#        ax1.set_xticks([])
-#        ax1.set_yticks([])
-#        ax2.set_yticks([])
-#
-#    else:
-#        ax1.set_ylabel('Time (ns)')
-#        ax2.set_ylabel('Sample number')
-#        ax1.set_xlabel('Trace number')
-#        ax1.set_xticklabels([int(a) for a in ax1.get_xticks()])
-#        locs1 = ax1.get_yticks()
-#        ax1.set_yticklabels([locs1[i] * L.rate * 1e9 for i in range(len(locs1))], fontproperties=font)
-#        locs2 = ax2.get_yticks()
-#        labels2 = [int(round(i)) for i in locs2*L.data.shape[0]]
-#        labels2.reverse()
-#        ax2.set_yticklabels(labels2, fontproperties=font)
-#
-#    if fnm is not None:
-#        fig.savefig(fnm)
-#    return fig
-
 def plotwv(wva, scales, vlim=None, fnm=None, for_pub=False):
     """ Plot a wavelet transform. """
-
     # Calculate fourier wavelength and frequency from scales
     # Use w0=6 (Torrence and Compo, 1998)
     radicand = np.sqrt(2+6**2)
@@ -164,7 +85,7 @@ def plotwv(wva, scales, vlim=None, fnm=None, for_pub=False):
         fig = plt.figure(figsize=[6,3])
     ax = fig.add_axes([0.13, 0.1, 0.86, 0.89])
     ax.contour(logwva[::-1,:], vmax=vmax, colors="black", linestyles="solid")
-    ax.contourf(logwva[::-1,:], vmax=vmax, cmap=plt.cm.gray)
+    ax.contourf(logwva[::-1,:], vmax=vmax, cmap=defaultcm)
 
     locs = np.linspace(10, len(freq)-11, 6).astype(int)
 
@@ -224,7 +145,7 @@ def get_n_indices(n, lst):
     for i in range(n):
         j=-1
         while j in ns:
-            j = random.randint(0, nmax-1)
+            j = np.random.randint(0, nmax-1)
         ns.append(j)
     ns.pop(0)
     return ns
