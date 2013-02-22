@@ -806,18 +806,6 @@ class Gather:
         del FH
         return
 
-    def _loadpicks(self, infile):
-        """ Load picks from a text file.
-        Future: this should probably be done with a FileHandler() instead.
-        """
-        with open(infile, 'r') as f:
-            loadvec = 999 * np.ones(self.bed_picks.shape)
-            _ = f.readline()
-            for i in range(len(loadvec)):
-                fline = f.readline()
-                loadvec[i] = int(float(fline.split(',')[1]))
-        return loadvec
-
     def LoadPicks(self, infile):
         """ Load bed picks from a text file. Employs a FileHandler. """
         try:
