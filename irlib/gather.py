@@ -34,15 +34,31 @@ except ImportError:
 
 
 class Gather:
-    """ Base class for common offset and common midpoint lines. """
+    """ Gathers (radar lines) are collections of radar traces (soundings). This
+    is the base class for CommonOffsetGather and CommonMidpointGather classes,
+    which should be chosen instead when directly creating an object.
+
+    A new `Gather` (or one of it's subclasses) is typically created by calling
+    the `ExtractLine` method of a `Survey` instance. Alternatively, a `Gather`
+    (or it's subclasses) can be created by passing a Numpy array as a first
+    argument, e.g.::
+
+        G = CommonOffsetGather(mydata)
+
+    where `mydata` is a data array. Some gather functionality will require that
+    metadata be provided in the form of a `RecordList` instance.
+    """
 
     def __init__(self, arr, infile=None, line=None, metadata=None, retain=None,
         dc=0):
-        """
-        arr         data held within a numpy array
-        infile      the original HDF5 dataset
-        line        the line enumeration
-        metadata    RecordList instance
+        """ Instantiate a new Gather.
+
+        Parameters
+        ----------
+        arr : two-dimensional sounding data [numpy.ndarray]
+        infile : (optional) the original HDF5 dataset file path [string]
+        line : (optional) the line number [integer]
+        metadata : (optional) [RecordList]
         """
         self.raw_data = arr.copy()
         self.data = self.raw_data.copy()
@@ -208,15 +224,22 @@ class Gather:
 
 
     def GetFID(self, loc):
-        """ Given a location (array index), return the location's
-        FID. This solves the problem of knowing the FID of an array
-        that has been sliced.
+        """ Return a FID. This solves the problem of knowing the FID of an
+        array that has been sliced.
+
+        Parameters
+        ----------
+        location : location index [integer]
         """
         return self.fids[loc]
 
     def FindFID(self, fid):
-        """ Given a FID, find the index within the data array. Takes
-        either a single FID, or a list. """
+        """ Find the index if a FID within the data array.
+
+        Parameters
+        ----------
+        fid : FID(s) to find [either string or list(strings)]
+        """
         if hasattr(fid, "__iter__"):
             return [self.fids.index(i) for i in fid]
         else:
@@ -231,17 +254,22 @@ class Gather:
         return cnm
 
     def GetDigitizerFilename(self):
-        """ Returns the likely name of a file containing digitized line data. """
+        """ Returns the likely name of a file containing digitized line data.
+        """
         fnm = 'englacial/' + os.path.basename(self.infile).split('.')[0] + \
             "_line" + str(self.line) + ".txt"
         return fnm
 
     def LoadTopography(self, topofnm, smooth=True):
-        """ Load topography along line gather, reading from an ASC file.
-        Obviously, this requires the Gather to have a valid metadata attribute.
+        """ Load topography along the Gather's transect. The `metadata`
+        attribute must be valid and must contain valid `northings` and
+        `eastings`.
 
-        If `smooth`=True, then apply a boxcar filter to soften the effects of
-        the DEM discretization.
+        Parameters
+        ----------
+        topofnm : ESRI ASCII grid file
+        smooth : (default `True`) apply a boxcare filter to soften the effects
+                 of the DEM's discretization [boolean]
         """
         G = aai.Grid()
         if os.path.isfile(topofnm):
@@ -1056,8 +1084,8 @@ class Gather:
 
 
 class CommonOffsetGather(Gather):
-    """ Subclass defining common-offset specific data and
-    operations. """
+    """ This is a subclass  of `Gather` that defines a common-offset radar
+    line. """
 
     def Reverse(self):
         """ Flip gather data. """
@@ -1152,10 +1180,22 @@ class CommonOffsetGather(Gather):
     #    return proj_arr
 
     def LineProjectXY(self, bounds=None, eastings=None, northings=None, sane=True):
-        """ Project coordinates onto a best-fit line. Return the
-        projected eastings and northings and the line fit information.
+        """ Project coordinates onto a best-fit line.
 
-        If sane is False, sanity checks on coordinates will be skipped
+        Parameters
+        ----------
+        bounds : (optional) side limits on projection [tuple x2]
+        eastings : (optional) coordinate eastings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        northings: (optional) coordinate northings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        sane : (default `True`) perform sanity checks on coordinate [boolean]
+
+        Returns
+        -------
+        X : projected eastings
+        Y : projected northings
+        p : a list of polynomial fitting information
         """
         # Fit a line, using metadata if no coordinates are provided
         if (eastings is None) or (northings is None):
@@ -1211,10 +1251,23 @@ class CommonOffsetGather(Gather):
 
     def LineProject_Nearest(self, bounds=None, eastings=None, northings=None, dp=4.0):
         """ Populate a best-fit line with traces nearest to equally-spaced
-        points. Return the selected traces in a 2D array, as well as the
-        coordinates of the projection.
+        points.
 
-        argument dp is point spacing in meters
+        Parameters
+        ----------
+        bounds : (optional) side limits on projection [tuple x2]
+        eastings : (optional) coordinate eastings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        northings: (optional) coordinate northings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        dp : (default `4.0`) point spacing in meters [float]
+
+        Returns
+        -------
+        Xmesh : projected eastings
+        Ymesh : projected northings
+        proj_arr : projected data
+        sum_dist : best-fit line length in meters
         """
         # Get the best-fit line p and the projections of all traces onto p
         X, Y, p = self.LineProjectXY(bounds=bounds, eastings=eastings,
@@ -1308,7 +1361,7 @@ class CommonOffsetGather(Gather):
 
         Parameters
         ----------
-        bbox : [east, west, south, north] bounding box (optional)
+        bbox : (optional) [east, west, south, north] bounding box [tuple]
         """
         kill_list = []
         for i, (x, y) in enumerate(zip(self.metadata.eastings,
@@ -1329,10 +1382,13 @@ class CommonOffsetGather(Gather):
     def RemoveStationary(self, threshold=3.0, debug=False):
         """ Remove consecutive points with very similar GPS locations. Do this
         by finding points within a minimum distance of each other, and averaging
-        them.
-        Beware incorrect GPS readings, which need to be rectified first.
+        them. Beware incorrect GPS readings, which need to be fixed first.
 
-            threshold is the minimum distance to be considered to be moving
+        Parameters
+        ----------
+        threshold : (default `3.0`) minimum offset in meters to recognize that
+                    a position has moved [float]
+        debug : (default `False`) print debugging messages [boolean]
         """
         if self.metadata.hasUTM is False:
             raise LineGatherError('RemoveStationary: no UTM coordinates available')
@@ -1407,9 +1463,16 @@ class CommonOffsetGather(Gather):
         return
 
     def Interpolate(self, X_int, X, arr=None):
-        """ Returns array of data interpolated over space.
-                X_int       locations to interpolate to
-                X           current x locations
+        """ Interpolate data over space.
+
+        Parameters
+        ----------
+        X_int : location to interpolate at
+        X : data locations
+
+        Returns
+        -------
+        D_int : linearly interpolated data
         """
         if arr is None: arr = self.data
         D_int = np.zeros([self.data.shape[0], X_int.shape[0]])
@@ -1421,8 +1484,8 @@ class CommonOffsetGather(Gather):
         """ Projects data to a sequence of approximating line segments with
         even spacing.
 
-        THIS MAY BREAK THINGS because picks and metadata aside from coordinates
-        aren't handled. Use with caution.
+        **THIS MAY BREAK THINGS** because picks and metadata aside from
+        coordinates aren't handled. Use with caution.
 
         Parameters
         ----------
@@ -1531,7 +1594,9 @@ class CommonOffsetGather(Gather):
                         e.g. if the radargram contains data from before t0,
                         this corrects for that.
 
-        Returns a dictionary of statistics about the transformation.
+        Returns
+        -------
+        migsections : list of quasilinear migration sections
         """
         full_Dmig = np.zeros(self.data.shape)
 
