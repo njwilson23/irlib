@@ -1,6 +1,6 @@
 .. target-notes::
 
-.. _Github: https://njwilson23.github.com/radar_tools
+.. _Github: http://njwilson23.github.com/radar_tools
 
 .. _git: http://git-scm.com/
 
