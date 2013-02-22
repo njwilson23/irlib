@@ -13,7 +13,7 @@ import math, copy, cPickle
 import os, sys
 import traceback, pdb
 
-import aaigrid_driver as aai
+import aaigrid as aai
 from filehandler import *
 from autovivification import AutoVivification
 
@@ -271,7 +271,7 @@ class Gather:
         smooth : (default `True`) apply a boxcare filter to soften the effects
                  of the DEM's discretization [boolean]
         """
-        G = aai.Grid()
+        G = aai.AAIGrid()
         if os.path.isfile(topofnm):
             G.FromFile(topofnm)
             try:
