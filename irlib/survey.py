@@ -6,17 +6,16 @@ which stores file references and collects metadata in the form of a
 `ExtractLine` method, which returns a `Gather`. """
 
 
+import os
+import sys
+import cPickle
 import h5py
 import numpy as np
-import os
-import cPickle
 import traceback
 
-from gather import *
-from filehandler import *
-from recordlist import *
-
-from autovivification import AutoVivification
+from irlib.gather import CommonOffsetGather
+from irlib.recordlist import RecordList, ParseError
+from irlib.autovivification import AutoVivification
 
 class Survey:
     """ Surveys can be broken down into **Gathers** and *traces*. To create a
@@ -85,7 +84,7 @@ class Survey:
         self.f[path].visit(names.append)
         datasets = []
         for name in names:
-            if (type(f[name]) == h5py.Dataset) and \
+            if (type(self.f[name]) == h5py.Dataset) and \
               ('picked' not in self.f[path][name].name):
                 datasets.append(path+name)
         return datasets
@@ -159,7 +158,7 @@ class Survey:
                     verbose=False):
         """ Extract every trace on a line. If bounds are supplied
         (min, max), limit extraction to only the range specified.
-        Return a LineGather instance.
+        Return a CommonOffsetGather instance.
 
         Parameters
         ----------
@@ -185,7 +184,8 @@ class Survey:
                     gatherdata = None
                 return gatherdata
             else:
-                print "Cached file not available; loading from HDF"
+                sys.stderr.write("Cached file {0} not available; loading from "
+                                 "HDF\n".format(fnm))
 
         path = 'line_{lin}'.format(lin=line)
 
@@ -253,7 +253,7 @@ class Survey:
                 arr = np.vstack((arr, np.zeros((newrow.shape[0]-arr.shape[0], arr.shape[1]))))
             arr = np.concatenate((arr, newrow), axis=1)
 
-        return LineGather(arr, infile=self.datafile, line=line,
+        return CommonOffsetGather(arr, infile=self.datafile, line=line,
                 metadata=metadata, retain=self.retain['line_{0}'.format(line)],
                 dc=datacapture)
 
@@ -296,7 +296,6 @@ class Survey:
         Certainty estimate : difference between instantaneous power and
                              windowed power
         """
-        makeplot = True
         aw_val = 0
         bw_val = 0
 
@@ -316,10 +315,6 @@ class Survey:
                     # Airwave found
                     dc_phase = int(vec[val] / abs(vec[val]))
                     aw_cert = abs(vec[val] - math.sqrt(square_sum/window))
-                    ### DEBUG ###
-                    if makeplot:
-                        aw_val = val
-                    #############
                     break
                 else:
                     # Go to the next val after updating square_sum
@@ -344,11 +339,6 @@ class Survey:
                         # the second cycle of a Ricker wavelet
                         bw_polarity = -int(vec[val] / abs(vec[val]))
                         bw_cert = abs(vec[val] - math.sqrt(square_sum/window))
-                        ### DEBUG ###
-                        if makeplot:
-                            bw_val = val
-                            print path,'\t',bw_val,'\t',bw_polarity
-                        #############
                         break
                     else:
                         # Go to the next val after updating square_sum
@@ -366,13 +356,6 @@ class Survey:
                 polbool = 1
             else:
                 polbool = -1
-
-            if makeplot:
-                plt.plot(vec, '-k')
-                plt.plot([aw_val,aw_val],[-.05,.05],'-b')
-                plt.plot([bw_val,bw_val],[-.05,.05],'-r')
-                plt.savefig('pick_plots/'+self._path2fid(path, linloc_only=True))
-                plt.clf()
 
             # Make a note
             outdict[self._path2fid(path, linloc_only=True)] = \
@@ -406,21 +389,22 @@ class Survey:
             print 'already exists'
             return
 
-        fout = h5py.File(fnm, 'w')
-        print "working"
+        with h5py.File(fnm, 'w') as fout:
 
-        for line in self.f:
-            if isinstance(self.f[line], h5py.Group):
-                try:
-                    fout.create_group(line)
-                except ValueError:
-                    print "somehow, {0} already existed in Survey.WriteHDF5()". format(line)
-                    print "this might be a problem, and you should look into it."
-                print "\t{0}".format(line)
-                for location in list(self.f[line]):
-                    if self.retain[line][location]:
-                        self.f.copy('{0}/{1}'.format(line, location), fout[line])
-        fout.close()
+            for line in self.f:
+                if isinstance(self.f[line], h5py.Group):
+                    try:
+                        fout.create_group(line)
+                    except ValueError:
+                        raise Exception("somehow, {0} already existed in "
+                                        "Survey.WriteHDF5(). This might be a "
+                                        "problem, and you should look into "
+                                        "it.". format(line))
+                    print "\t{0}".format(line)
+                    for location in list(self.f[line]):
+                        if self.retain[line][location]:
+                            self.f.copy('{0}/{1}'.format(line, location),
+                                        fout[line])
         return
 
     def close(self):

@@ -13,8 +13,8 @@ import math, copy, cPickle
 import os, sys
 import traceback, pdb
 
-import aaigrid as aai
-from filehandler import *
+import irlib.aaigrid as aai
+from irlib.filehandler import FileHandler, FileHandlerError
 from autovivification import AutoVivification
 
 try:
@@ -58,12 +58,13 @@ class Gather:
         arr : two-dimensional sounding data [numpy.ndarray]
         infile : (optional) the original HDF5 dataset file path [string]
         line : (optional) the line number [integer]
+        dc : (optional) datacapture number [integer]
         metadata : (optional) [RecordList]
         """
         self.raw_data = arr.copy()
         self.data = self.raw_data.copy()
-        self.line = line
-        self.datacapture = dc
+        self.line = int(line)
+        self.datacapture = int(dc)
         self.infile = infile
         self.metadata = metadata            # reference to a RecordList
         if self.metadata is not None:
@@ -813,6 +814,8 @@ class Gather:
             dc_points, bed_points = F.GetEventVals()
             self.dc_picks = np.array(dc_points)
             self.bed_picks = np.array(bed_points)
+        except FileHandlerError as fhe:
+            sys.stderr.write(str(fhe) + '\n')
         except:
             traceback.print_exc()
             sys.stderr.write("Load failed\n")
