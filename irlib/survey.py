@@ -198,7 +198,8 @@ class Survey:
         # *h5py.Dataset*, next discards picked data, and finally restricts the
         # names to the datacaptures specified by *datacapture*.
         try:
-            allowed_datacaptures = ["datacapture_{0}".format(dc) for dc in datacapture]
+            allowed_datacaptures = ["datacapture_{0}".format(dc)
+                                    for dc in datacapture]
         except TypeError:
             allowed_datacaptures = ["datacapture_{0}".format(datacapture)]
         datasets = filter(lambda c: c.split('/')[-2] in allowed_datacaptures,
@@ -213,23 +214,26 @@ class Survey:
             datasets.sort(key=(lambda s: int(s.split('/')[0].split('_')[1])))
         except:
             traceback.print_exc()
-            sys.stderr.write("Error sorting datasets by " + \
-                        "location number in ExtractLine()\n")
+            sys.stderr.write("Error sorting datasets by "
+                             "location number in ExtractLine()\n")
 
         # If bounds are specified, slice out the excess locations
         try:
-            if bounds[1] != None: datasets = datasets[:bounds[1]]
-            if bounds[0] != None: datasets = datasets[bounds[0]:]
+            if bounds[1] != None:
+                datasets = datasets[:bounds[1]]
+            if bounds[0] != None:
+                datasets = datasets[bounds[0]:]
         except TypeError:
-            sys.stderr.write("bounds kwarg in ExtractLine() " + \
-                            "must be a two element list or tuple\n")
+            sys.stderr.write("bounds kwarg in ExtractLine() "
+                             "must be a two element list or tuple\n")
 
         # Grab XML metadata
         metadata = RecordList(self.datafile)
         for trace in datasets:
             full_path = path + '/' + trace
             try:
-                metadata.AddDataset(self.f[path][trace], fid=self._path2fid(full_path))
+                metadata.AddDataset(self.f[path][trace],
+                                    fid=self._path2fid(full_path))
             except ParseError as e:
                 if verbose:
                     sys.stderr.write(e.message + '\n')
@@ -239,7 +243,8 @@ class Survey:
         try:
             arr = np.array((self.f[path][datasets[0]].value,)).T
         except IndexError:
-            sys.stderr.write("error indexing {0} - it might be empty\n".format(path))
+            sys.stderr.write("Failed to index {0} - it might be "
+                             "empty\n".format(path))
             return
 
         for dataset in datasets[1:]:
@@ -270,108 +275,6 @@ class Survey:
                 os.path.splitext(os.path.basename(self.datafile))[0] + \
                 '_line' + str(line) + '_' + str(dc) + '.ird')
         return cnm
-
-    def GetWaveletPolarity(self, line=None, aw_threshold=3., bw_threshold=5.,
-        window=31, bw_early_lim=60, outfile='polarity_data.csv'):
-        """ Attempt to identify wavelet polarities. Return a dictionary
-        with trace IDs as keys and a tuple with polarity tag and
-        estimates of certainty for the air and basal waves.
-
-        Parameters
-        ----------
-        line : line to be queried; if None, will do all lines
-        aw_threshold : factor of power increase required for a
-                       positive identification of air wave
-        bw_threshold : factor of power increase required for a
-                       positive identification of reflected wave
-        window : window for determining local background power;
-                 must be odd
-
-        Returns
-        -------
-        Polarity tag : `1` if air and basal reflection wave has same polarity,
-            `-1` if air and basal reflection wave have opposite polarity, and
-            `0` if uncertain
-
-        Certainty estimate : difference between instantaneous power and
-                             windowed power
-        """
-        aw_val = 0
-        bw_val = 0
-
-        datasets = self._getdatasets(line)
-        outdict = {}
-        for path in datasets:
-            vec = self.f[path].value
-            dc_phase = 0
-            bw_polarity = 0
-
-            # Calculate initial window rms
-            square_sum = (vec[0:window]**2).sum()
-
-            # Try to get the airwave polarity
-            for val in range((window-1)/2, bw_early_lim):
-                if vec[val]**2 > aw_threshold * square_sum/window:
-                    # Airwave found
-                    dc_phase = int(vec[val] / abs(vec[val]))
-                    aw_cert = abs(vec[val] - math.sqrt(square_sum/window))
-                    break
-                else:
-                    # Go to the next val after updating square_sum
-                    square_sum -= (vec[val - (window-1)/2]) ** 2
-                    square_sum += (vec[val + (window+1)/2]) ** 2
-
-            if dc_phase == 0:
-                aw_cert = 0.
-                bw_cert = 0.
-                aw_val = 0
-                # Skip looking for the reflection wave - no point
-
-            else:
-                # Calculate initial window rms
-                square_sum = (vec[bw_early_lim-(window-1)/2:bw_early_lim+(window+1)/2]**2).sum()
-
-                # Try to get the reflection polarity
-                for val in range(bw_early_lim, vec.shape[0]-(window+1)/2):
-                    if vec[val]**2 > bw_threshold * square_sum/window:
-                        # Bed reflection wave found
-                        # I make the polarity negative here, because it finds
-                        # the second cycle of a Ricker wavelet
-                        bw_polarity = -int(vec[val] / abs(vec[val]))
-                        bw_cert = abs(vec[val] - math.sqrt(square_sum/window))
-                        break
-                    else:
-                        # Go to the next val after updating square_sum
-                        square_sum -= (vec[val - (window-1)/2]) ** 2
-                        square_sum += (vec[val + (window+1)/2]) ** 2
-
-                if bw_polarity == 0:
-                    bw_cert = 0.
-                    bw_val = 0
-
-            # Compare polarities
-            if dc_phase == 0:
-                polbool = 0
-            elif dc_phase == bw_polarity:
-                polbool = 1
-            else:
-                polbool = -1
-
-            # Make a note
-            outdict[self._path2fid(path, linloc_only=True)] = \
-                (polbool, aw_cert, bw_cert)
-
-        # Write outdict to a CSV
-        keys = outdict.keys()
-        keys.sort()
-        with open(outfile, 'w') as f:
-            f.write('"FID","TAG","AW_CERT","BW_CERT"\n')
-            for key in keys:
-                dval = outdict[key]
-                f.write('\"{key}\",{tag},{aw_cert},{bw_cert}\n'.format(
-                    key=key, tag=dval[0], aw_cert=dval[1], bw_cert=dval[2]))
-        return
-
 
     def WriteHDF5(self, fnm, overwrite=False):
         """ Given a filename, write the contents of the original file to a
@@ -408,6 +311,7 @@ class Survey:
         return
 
     def close(self):
+        """ Close HDF datasource. """
         try:
             self.f.close()
         except AttributeError:
