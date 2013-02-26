@@ -239,24 +239,23 @@ class Survey:
                     sys.stderr.write(e.message + '\n')
                 metadata.CropRecords()
 
-        # Pull out all the data, concatenate into a single array
+        # Create a single numpy array of data
+        # Sometimes the number of samples changes within a line. When this
+        # happens, pad the short traces with zeros.
+        line_ptr = self.f[path]
         try:
-            arr = np.array((self.f[path][datasets[0]].value,)).T
-        except IndexError:
+            nsamples = [line_ptr[dataset].shape[0] for dataset in datasets]
+        except TypeError:
+            print "oops"
+        try:
+            maxsamples = max(nsamples)
+            arr = np.zeros((maxsamples, len(datasets)))
+            for j, dataset in enumerate(datasets):
+                arr[:nsamples[j],j] = line_ptr[dataset].value
+        except ValueError:
             sys.stderr.write("Failed to index {0} - it might be "
                              "empty\n".format(path))
             return
-
-        for dataset in datasets[1:]:
-            newrow = np.array((self.f[path][dataset].value,)).T
-            # Test to see if the sample length is the same.
-            # Resize to match the largest sample langth.
-            # This will cause some funny steps in the radargram
-            if newrow.shape[0] < arr.shape[0]:
-                newrow = np.vstack((newrow, np.zeros((arr.shape[0]-newrow.shape[0], 1))))
-            elif newrow.shape[0] > arr.shape[0]:
-                arr = np.vstack((arr, np.zeros((newrow.shape[0]-arr.shape[0], arr.shape[1]))))
-            arr = np.concatenate((arr, newrow), axis=1)
 
         return CommonOffsetGather(arr, infile=self.datafile, line=line,
                 metadata=metadata, retain=self.retain['line_{0}'.format(line)],
