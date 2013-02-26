@@ -816,6 +816,7 @@ class Gather:
             self.bed_picks = np.array(bed_points)
         except FileHandlerError as fhe:
             sys.stderr.write(str(fhe) + '\n')
+            raise fhe
         except:
             traceback.print_exc()
             sys.stderr.write("Load failed\n")
