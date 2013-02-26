@@ -11,10 +11,13 @@ from recordlist import RecordList
 import filehandler
 from filehandler import FileHandler, FileHandlerError
 
+import brp
+import polarity
 import misc
 import itools
 
 from filter_defs import ApplyFilter
 
-__all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'itools']
+__all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'itools',
+           'brp', 'polarity']
 
