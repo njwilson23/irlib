@@ -243,10 +243,7 @@ class Survey:
         # Sometimes the number of samples changes within a line. When this
         # happens, pad the short traces with zeros.
         line_ptr = self.f[path]
-        try:
-            nsamples = [line_ptr[dataset].shape[0] for dataset in datasets]
-        except TypeError:
-            print "oops"
+        nsamples = [line_ptr[dataset].shape[0] for dataset in datasets]
         try:
             maxsamples = max(nsamples)
             arr = np.zeros((maxsamples, len(datasets)))
