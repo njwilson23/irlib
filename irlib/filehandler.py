@@ -65,6 +65,21 @@ class FileHandler:
             raise FileHandlerError('Event file does not exist: {0}'.format(self.fnm))
         return self.dcvals, self.bedvals
 
+    def GetEventValsByFID(self, fids):
+        """ Return the airwave and bed reflection picks for a list of FIDs.
+        Raise FileHandlerError if the pick doesn't exist. """
+        if self.nrecs is None:
+            raise FileHandlerError('Event file does not exist: {0}'.format(self.fnm))
+        dcvals, bedvals = [], []
+        if hasattr(fids, '__iter__'):
+            for fid in fids:
+                dcvals.append(searchbylist(fid, self.fids, self.dcvals))
+                bedvals.append(searchbylist(fid, self.fids, self.bedvals))
+        else:
+            dcvals.append(searchbylist(fids, self.fids, self.dcvals))
+            bedvals.append(searchbylist(fids, self.fids, self.bedvals))
+        return dcvals, bedvals
+
     def GetEventVals_Interpolated(self, max_fid=None):
         """ Similar to GetEventVals, however returns a value for
         every FID. If max_fid is given, it is taken to be the ending
@@ -144,6 +159,18 @@ class FileHandler:
                     fid = self._linloc2fid(self.line, i)
                 f.write('{fid},{dcval},{bedval},{tt}\n'.format(
                     fid=fid, dcval=row[0], bedval=row[1], tt=row[2]))
+
+
+def searchbylist(key, keylist, vallist, notfound=999):
+    """ Search a `keylist` for a `key`, and return the corresponding value from
+    `vallist`. If `key` is not in `keylist`, return `notfound`.
+    """
+    out = notfound
+    for k,v in zip(keylist, vallist):
+        if k == key:
+            out = v
+            break
+    return out
 
 
 class FileHandlerError(Exception):

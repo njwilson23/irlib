@@ -811,7 +811,7 @@ class Gather:
         """ Load bed picks from a text file. Employs a FileHandler. """
         try:
             F = FileHandler(infile, self.line)
-            dc_points, bed_points = F.GetEventVals()
+            dc_points, bed_points = F.GetEventValsByFID(self.fids)
             self.dc_picks = np.array(dc_points)
             self.bed_picks = np.array(bed_points)
         except FileHandlerError as fhe:
