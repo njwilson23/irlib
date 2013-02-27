@@ -67,7 +67,7 @@ class FileHandler:
 
     def GetEventValsByFID(self, fids):
         """ Return the airwave and bed reflection picks for a list of FIDs.
-        Raise FileHandlerError if the pick doesn't exist. """
+        """
         if self.nrecs is None:
             raise FileHandlerError('Event file does not exist: {0}'.format(self.fnm))
         dcvals, bedvals = [], []
