@@ -17,9 +17,13 @@ def phase_angle(tr, pick, res=pi/16.0, **kwargs):
     """ Calculate the polarization angle in a picked trace as the wave rotation
     angle at which the power is maximized. `kwargs` are passed to
     `polarization_spectrum`. """
-    parray = phase_spectrum(tr, **kwargs)
-    pickslice = parray[:,pick]
-    return np.argmax(pickslice) * res
+    parray = phase_spectrum(tr, res=res, **kwargs)
+    try:
+        pickslice = parray[:,pick]
+        return np.argmax(pickslice) * res
+    except IndexError:
+        # Invalid pick index
+        return np.nan
 
 
 def phase_spectrum(tr, **kwargs):
@@ -34,12 +38,12 @@ def phase_spectrum(tr, **kwargs):
     """
     wavelength = int(kwargs.get('wavelength', 10))
     res = kwargs.get('res', pi/16.0)
-    n_omega = int(round(2*pi/res))
+    omega = np.arange(0, 2*pi, res)
+    n_omega = len(omega)
     ns = len(tr)
     parray = np.empty((n_omega, ns))
 
     t = np.linspace(0, 2*pi, wavelength) * np.ones((n_omega, wavelength))
-    omega = np.arange(0, 2*pi, res)
     mwave = np.sin((t + np.atleast_2d(omega).T))
     pad = wavelength / 2
     parray = sig.convolve(mwave, np.atleast_2d(tr), mode='full')[:,pad:-pad+1]
