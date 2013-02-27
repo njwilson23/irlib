@@ -1576,7 +1576,7 @@ class CommonOffsetGather(Gather):
         self.history.append(('projection_as_segments', bounds, dx))
         return (sections, Xdbg, Ydbg, Pdbg, Pgriddbg)
 
-    def MigrateFK(self, dx=4.0, t0_adjust=0):
+    def MigrateFK(self, dx=4.0, t0_adjust=0, verbose=True):
         """ Perform Stolt migration over multiple sections.
 
         Parameters
@@ -1606,7 +1606,8 @@ class CommonOffsetGather(Gather):
 
         # Add 1 to the last bound so that the full array is included
         migsections[-1] = (migsections[-1][0], migsections[-1][1]+1)
-        print "migrating in {0} sections".format(len(migsections))
+        if verbose:
+            print "migrating in {0} sections".format(len(migsections))
 
         # Migrate each of the sections separately
         for bounds in migsections:
