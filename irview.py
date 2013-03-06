@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
 import getopt
+import readline
 import traceback, pdb
 
 np.seterr(invalid='ignore')
@@ -403,7 +404,7 @@ def HandleCommand(s, S, IW, L):
         print 'available channels: ' + str(S.GetChannelsInLine(int(L.line)))
 
     elif args[0] == 'ls':                   # LS
-        print [str(lnstr) for lnstr in S.Lines()]
+        print [str(lnstr) for lnstr in S.GetLines()]
 
     elif args[0] == 'open':                 # OPEN
         try:

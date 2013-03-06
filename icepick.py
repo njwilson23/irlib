@@ -396,7 +396,7 @@ def HandleCommand(s, infile, line, S, L, P):
         print 'pick-mode: ' + P.mode
 
     elif args[0] == 'ls':                   # LS
-        print [str(lnstr) for lnstr in S.Lines()]
+        print [str(lnstr) for lnstr in S.GetLines()]
 
     elif args[0] == 'save':                 # SAVE
         outfile = 'picking/' + \
