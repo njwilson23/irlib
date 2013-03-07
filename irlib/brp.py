@@ -13,7 +13,7 @@ def get_pickfnm(L, directory):
                                        + '.csv')
     return loadfile
 
-def extract_window(tr, i, relwin):
+def extract_window_around(tr, i, relwin):
     """ Extract a window from vector `tr` at entry `i` of size tuple `relwin`
     """
     try:
@@ -22,14 +22,26 @@ def extract_window(tr, i, relwin):
         out = np.nan
     return out
 
-def brp_windowed(L, relwin=(None, None)):
+def get_brp_windowed(L, relwin=(None, None)):
     """ Calculate the bed reflection power within a window relative to the
     picks in Gather `L`. """
     if None in relwin:
         relwin = (int(round(-2e8*L.rate)), int(round(1e9*L.rate)))
     power = lambda a: np.sum(a**2) * L.rate
-    bed_wavelets = map(lambda tr, i: extract_window(tr, i, relwin),
+    bed_wavelets = map(lambda tr, i: extract_window_around(tr, i, relwin),
                        L.data.T, L.bed_picks)
     brp = map(power, bed_wavelets)
     return brp
+
+def get_irp(L):
+    """ Calculate the bed reflection power in line `L` between the airwave and
+    bed wave. """
+    power = lambda a: np.sum(a**2) * L.rate
+    air = L.dc_picks
+    bed = L.bed_picks
+    # Amount to avoid airwave/bedwave by, in samples:
+    pd = int(round(1e-7 / L.rate))
+    internal_windows = [L.data[a+pd:b-pd] for a,b in zip(air,bed)]
+    return map(power, internal_windows)
+
 
