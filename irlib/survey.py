@@ -44,10 +44,9 @@ class Survey:
                    [string]
         """
         self.datafile = datafile
+        # Create 2-level boolean map of the dataset
+        self._openh5()
         try:
-            self.f = h5py.File(self.datafile, 'r')
-            self.status = 'open'
-            # Create 2-level boolean map of the dataset
             self.retain = AutoVivification()
             for line in self.f:
                 if isinstance(self.f[line], h5py.Group):
@@ -56,6 +55,7 @@ class Survey:
         except IOError:
             sys.stdout.write("No survey exists with the" +
                              " filename:\n\t{0}\n".format(datafile))
+        finally:
             self.close()
         return
 
@@ -69,6 +69,18 @@ class Survey:
     def __repr__(self):
         return self.status + " survey object: " + self.datafile
 
+    def _openh5(self, mode='r'):
+        """ Open the reference H5 dataset. """
+        self.f = h5py.File(self.datafile, mode)
+        self.status = 'open'
+        return
+
+    def _closeh5(self):
+        """ Close the reference HDF5 dataset. """
+        self.f.close()
+        self.status = 'closed'
+        return
+
     def _getdatasets(self, line=None):
         """ Return a list of datasets.
 
@@ -81,12 +93,18 @@ class Survey:
         else:
             path = '/'
         names = []
-        self.f[path].visit(names.append)
-        datasets = []
-        for name in names:
-            if (type(self.f[name]) == h5py.Dataset) and \
-              ('picked' not in self.f[path][name].name):
-                datasets.append(path+name)
+        self._openh5()
+        try:
+            self.f[path].visit(names.append)
+            datasets = []
+            for name in names:
+                if (type(self.f[name]) == h5py.Dataset) and \
+                  ('picked' not in self.f[path][name].name):
+                    datasets.append(path+name)
+        except Exception as e:
+            raise e
+        finally:
+            self._closeh5()
         return datasets
 
     def _path2fid(self, path, linloc_only = False):
@@ -116,7 +134,13 @@ class Survey:
 
     def GetLines(self):
         """ Return a list of the lines contained within the survey. """
-        lines = [name for name in self.f.keys() if name[:4] == 'line']
+        self._openh5()
+        try:
+            lines = [name for name in self.f.keys() if name[:4] == 'line']
+        except Exception as e:
+            raise e
+        finally:
+            self._closeh5()
         lines.sort(key=(lambda s: int(s.split('_')[1])))
         return lines
 
@@ -134,7 +158,13 @@ class Survey:
         except IndexError:
             sys.stderr.write("lineno out of range ({0} not in {1}:{2})\n"
                     .format(lineno, 0, len(self.GetLines)))
-        dclist = [self.f[line][loc].keys() for loc in self.f[line].keys()]
+        self._openh5()
+        try:
+            dclist = [self.f[line][loc].keys() for loc in self.f[line].keys()]
+        except Exception as e:
+            raise e
+        finally:
+            self._closeh5()
         return max([len(a) for a in dclist])
 
     def ExtractTrace(self, line, location, datacapture=0, echogram=0):
@@ -150,7 +180,13 @@ class Survey:
         path = ('line_{lin}/location_{loc}/datacapture_{dc}/'
                 'echogram_{eg}'.format(lin=line, loc=location, dc=datacapture,
                                        eg=echogram))
-        vec = self.f[path].value
+        self._openh5()
+        try:
+            vec = self.f[path].value
+        except Exception as e:
+            raise e
+        finally:
+            self._closeh5()
         return vec
 
     def ExtractLine(self, line, bounds=(None,None), datacapture=0,
@@ -191,68 +227,75 @@ class Survey:
 
         # Separate out all datasets on the correct line
         names = []
-        self.f[path].visit(names.append)
-
-        # Filter out the datasets, then the correct datacaptures
-        # The following is a nested filter that first keeps elements of type
-        # *h5py.Dataset*, next discards picked data, and finally restricts the
-        # names to the datacaptures specified by *datacapture*.
+        self._openh5()
         try:
-            allowed_datacaptures = ["datacapture_{0}".format(dc)
-                                    for dc in datacapture]
-        except TypeError:
-            allowed_datacaptures = ["datacapture_{0}".format(datacapture)]
-        datasets = filter(lambda c: c.split('/')[-2] in allowed_datacaptures,
-                    filter(lambda b: 'picked' not in self.f[path][b].name,
-                    filter(lambda a: isinstance(self.f[path][a], h5py.Dataset),
-                    names)))
-        if len(datasets) == 0:
-            sys.stderr.write("no datasets match the specified channel(s)\n")
+            self.f[path].visit(names.append)
 
-        # Sort the datasets by location number
-        try:
-            datasets.sort(key=(lambda s: int(s.split('/')[0].split('_')[1])))
-        except:
-            traceback.print_exc()
-            sys.stderr.write("Error sorting datasets by "
-                             "location number in ExtractLine()\n")
-
-        # If bounds are specified, slice out the excess locations
-        try:
-            if bounds[1] != None:
-                datasets = datasets[:bounds[1]]
-            if bounds[0] != None:
-                datasets = datasets[bounds[0]:]
-        except TypeError:
-            sys.stderr.write("bounds kwarg in ExtractLine() "
-                             "must be a two element list or tuple\n")
-
-        # Grab XML metadata
-        metadata = RecordList(self.datafile)
-        for trace in datasets:
-            full_path = path + '/' + trace
+            # Filter out the datasets, then the correct datacaptures
+            # The following is a nested filter that first keeps elements of type
+            # *h5py.Dataset*, next discards picked data, and finally restricts the
+            # names to the datacaptures specified by *datacapture*.
             try:
-                metadata.AddDataset(self.f[path][trace],
-                                    fid=self._path2fid(full_path))
-            except ParseError as e:
-                if verbose:
-                    sys.stderr.write(e.message + '\n')
-                metadata.CropRecords()
+                allowed_datacaptures = ["datacapture_{0}".format(dc)
+                                        for dc in datacapture]
+            except TypeError:
+                allowed_datacaptures = ["datacapture_{0}".format(datacapture)]
+            datasets = filter(lambda c: c.split('/')[-2] in allowed_datacaptures,
+                        filter(lambda b: 'picked' not in self.f[path][b].name,
+                        filter(lambda a: isinstance(self.f[path][a], h5py.Dataset),
+                        names)))
+            if len(datasets) == 0:
+                sys.stderr.write("no datasets match the specified channel(s)\n")
 
-        # Create a single numpy array of data
-        # Sometimes the number of samples changes within a line. When this
-        # happens, pad the short traces with zeros.
-        line_ptr = self.f[path]
-        nsamples = [line_ptr[dataset].shape[0] for dataset in datasets]
-        try:
-            maxsamples = max(nsamples)
-            arr = np.zeros((maxsamples, len(datasets)))
-            for j, dataset in enumerate(datasets):
-                arr[:nsamples[j],j] = line_ptr[dataset].value
-        except ValueError:
-            sys.stderr.write("Failed to index {0} - it might be "
-                             "empty\n".format(path))
-            return
+            # Sort the datasets by location number
+            try:
+                datasets.sort(key=(lambda s: int(s.split('/')[0].split('_')[1])))
+            except:
+                traceback.print_exc()
+                sys.stderr.write("Error sorting datasets by "
+                                 "location number in ExtractLine()\n")
+
+            # If bounds are specified, slice out the excess locations
+            try:
+                if bounds[1] != None:
+                    datasets = datasets[:bounds[1]]
+                if bounds[0] != None:
+                    datasets = datasets[bounds[0]:]
+            except TypeError:
+                sys.stderr.write("bounds kwarg in ExtractLine() "
+                                 "must be a two element list or tuple\n")
+
+            # Grab XML metadata
+            metadata = RecordList(self.datafile)
+            for trace in datasets:
+                full_path = path + '/' + trace
+                try:
+                    metadata.AddDataset(self.f[path][trace],
+                                        fid=self._path2fid(full_path))
+                except ParseError as e:
+                    if verbose:
+                        sys.stderr.write(e.message + '\n')
+                    metadata.CropRecords()
+
+            # Create a single numpy array of data
+            # Sometimes the number of samples changes within a line. When this
+            # happens, pad the short traces with zeros.
+            line_ptr = self.f[path]
+            nsamples = [line_ptr[dataset].shape[0] for dataset in datasets]
+            try:
+                maxsamples = max(nsamples)
+                arr = np.zeros((maxsamples, len(datasets)))
+                for j, dataset in enumerate(datasets):
+                    arr[:nsamples[j],j] = line_ptr[dataset].value
+            except ValueError:
+                sys.stderr.write("Failed to index {0} - it might be "
+                                 "empty\n".format(path))
+                return
+
+        except Exception as e:
+            raise e
+        finally:
+            self._closeh5()
 
         return CommonOffsetGather(arr, infile=self.datafile, line=line,
                 metadata=metadata, retain=self.retain['line_{0}'.format(line)],
@@ -308,9 +351,6 @@ class Survey:
 
     def close(self):
         """ Close HDF datasource. """
-        try:
-            self.f.close()
-        except AttributeError:
-            pass
-        self.status = 'closed'
+        if self.status == 'open':
+            self._closeh5()
         return
