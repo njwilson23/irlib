@@ -56,14 +56,12 @@ class Survey:
             sys.stdout.write("No survey exists with the" +
                              " filename:\n\t{0}\n".format(datafile))
         finally:
-            self.close()
+            self._closeh5()
         return
 
     def __del__(self):
-        try:
-            self.f.close()
-        except AttributeError:
-            pass
+        if self.status == 'open':
+            self._closeh5()
         return
 
     def __repr__(self):
@@ -349,8 +347,3 @@ class Survey:
                                         fout[line])
         return
 
-    def close(self):
-        """ Close HDF datasource. """
-        if self.status == 'open':
-            self._closeh5()
-        return
