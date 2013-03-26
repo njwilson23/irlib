@@ -272,9 +272,8 @@ class Gather:
         smooth : (default `True`) apply a boxcare filter to soften the effects
                  of the DEM's discretization [boolean]
         """
-        G = aai.AAIGrid()
         if os.path.isfile(topofnm):
-            G.fromfile(topofnm)
+            G = aai.AAIGrid(topofnm)
             try:
                 self.topography = np.array(map(lambda x,y: G.sample(x,y)[0],
                         self.metadata.eastings, self.metadata.northings))
