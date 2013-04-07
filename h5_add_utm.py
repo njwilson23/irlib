@@ -4,6 +4,7 @@
 #
 
 import sys
+import os
 import shutil
 import traceback
 
@@ -45,7 +46,11 @@ else:
 print 'operating on {0}'.format(INFILE)
 
 # Open INFILE as an HDF5 dataset
-fin = h5py.File(INFILE, 'r')
+if os.path.exists(INFILE):
+    fin = h5py.File(INFILE, 'r')
+else:
+    print "No such file: {0}".format(INFILE)
+    sys.exit(0)
 
 # Get a list of all datasets and grab all metadata
 print "querying input dataset..."
