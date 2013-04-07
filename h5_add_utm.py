@@ -36,6 +36,7 @@ if len(sys.argv) < 3:
     sys.exit(0)
 else:
     import irlib
+    from irlib.recordlist import ParseError
     import h5py
     import pyproj
     INFILE = sys.argv[1]
@@ -50,13 +51,21 @@ fin = h5py.File(INFILE, 'r')
 print "querying input dataset..."
 names = []
 fin.visit(names.append)
-datasets = [name for name in names if (isinstance(fin[name], h5py.Dataset) and 'picked' not in name)]
+datasets = [name for name in names if (isinstance(fin[name], h5py.Dataset)
+                                       and 'picked' not in name)]
 
 metadata = irlib.RecordList(fin)
 print "reading metadata..."
-for dataset in datasets:
-    metadata.AddDataset(fin[dataset])
+failed = []
+for i, dataset in enumerate(datasets):
+    try:
+        metadata.AddDataset(fin[dataset])
+    except ParseError:
+        sys.stderr.write('Failed to read {0}\n'.format(dataset))
+        failed.append(i)
 fin.close()
+for i in failed[::-1]:
+    del datasets[i]
 print "\tdone"
 
 # Pull out the geographical data for convenience
@@ -102,12 +111,22 @@ for i, dataset in enumerate(datasets):
     try:
         xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml']
         new_xml = (
-                xml.replace('<Name>Datum</Name>\r\n<Val>NaN</Val>', '<Name>Datum</Name>\r\n<Val>WGS84</Val>')
-                .replace('<Name>Easting_m</Name>\r\n<Val></Val>', '<Name>Easting_m</Name>\r\n<Val>{0}</Val>'.format(eastings[i]))
-                .replace('<Name>Northing_m</Name>\r\n<Val>NaN</Val>', '<Name>Northing_m</Name>\r\n<Val>{0}</Val>'.format(northings[i]))
-                .replace('<Name>Zone</Name>\r\n<Val>NaN</Val>', '<Name>Zone</Name>\r\n<Val>7</Val>')
-                .replace('<Name>GPS Fix Valid (dup)</Name>\r\n<Val></Val>', '<Name>GPS Fix Valid (dup)</Name>\r\n<Val>{0}</Val>'.format(gps_fix_valid[i]))
-                .replace('<Name>GPS Message ok (dup)</Name>\r\n<Val></Val>', '<Name>GPS Message Valid (dup)</Name>\r\n<Val>{0}</Val>'.format(gps_message_ok[i]))
+                xml.replace('<Name>Datum</Name>\r\n<Val>NaN</Val>',
+                            '<Name>Datum</Name>\r\n<Val>WGS84</Val>')
+                .replace('<Name>Easting_m</Name>\r\n<Val></Val>',
+                         '<Name>Easting_m</Name>\r\n<Val>{0}</Val>'
+                            .format(eastings[i]))
+                .replace('<Name>Northing_m</Name>\r\n<Val>NaN</Val>',
+                         '<Name>Northing_m</Name>\r\n<Val>{0}</Val>'
+                            .format(northings[i]))
+                .replace('<Name>Zone</Name>\r\n<Val>NaN</Val>',
+                         '<Name>Zone</Name>\r\n<Val>7</Val>')
+                .replace('<Name>GPS Fix Valid (dup)</Name>\r\n<Val></Val>',
+                         '<Name>GPS Fix Valid (dup)</Name>\r\n<Val>{0}</Val>'
+                            .format(gps_fix_valid[i]))
+                .replace('<Name>GPS Message ok (dup)</Name>\r\n<Val></Val>',
+                         '<Name>GPS Message ok (dup)</Name>\r\n<Val>{0}</Val>'
+                            .format(gps_message_ok[i]))
                 )       # num_sats appears to already be there
         fout[dataset].attrs.modify('GPS Cluster_UTM-MetaData_xml', new_xml)
     except KeyError:
