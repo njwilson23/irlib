@@ -11,7 +11,6 @@ import sys
 import cPickle
 import h5py
 import numpy as np
-import traceback
 
 from irlib.gather import CommonOffsetGather
 from irlib.recordlist import RecordList, ParseError
@@ -125,10 +124,9 @@ class Survey:
             fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
                 + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
             return fid
-        except:
-            traceback.print_exc()
+        except Exception as e:
             sys.stderr.write('survey: failed at path2fid')
-            return None
+            raise e
 
     def GetLines(self):
         """ Return a list of the lines contained within the survey. """
@@ -209,13 +207,9 @@ class Survey:
             if print_fnm:
                 print fnm
             if os.path.isfile(fnm):
-                try:
-                    with open(fnm, 'r') as f:
-                        unpickler = cPickle.Unpickler(f)
-                        gatherdata = unpickler.load()
-                except:
-                    traceback.print_exc()
-                    gatherdata = None
+                with open(fnm, 'r') as f:
+                    unpickler = cPickle.Unpickler(f)
+                    gatherdata = unpickler.load()
                 return gatherdata
             else:
                 sys.stderr.write("Cached file {0} not available; loading from "
@@ -248,10 +242,10 @@ class Survey:
             # Sort the datasets by location number
             try:
                 datasets.sort(key=(lambda s: int(s.split('/')[0].split('_')[1])))
-            except:
-                traceback.print_exc()
+            except Exception as e:
                 sys.stderr.write("Error sorting datasets by "
                                  "location number in ExtractLine()\n")
+                raise e
 
             # If bounds are specified, slice out the excess locations
             try:
@@ -271,8 +265,7 @@ class Survey:
                     metadata.AddDataset(self.f[path][trace],
                                         fid=self._path2fid(full_path))
                 except ParseError as e:
-                    if verbose:
-                        sys.stderr.write(e.message + '\n')
+                    sys.stderr.write(e.message + '\n')
                     metadata.CropRecords()
 
             # Create a single numpy array of data

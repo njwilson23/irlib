@@ -41,7 +41,7 @@ class RecordList:
         if m is not None:
             return float(m.group().split('<Val>')[1].split('</Val>')[0])
         else:
-            return
+            return None
 
     def _xmlGetValI(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
@@ -51,7 +51,7 @@ class RecordList:
         if m is not None:
             return int(float(m.group().split('<Val>')[1].split('</Val>')[0]))
         else:
-            return
+            return None
 
     def _xmlGetValS(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
@@ -61,7 +61,7 @@ class RecordList:
         if m is not None:
             return m.group().split('<Val>')[1].split('</Val>')[0]
         else:
-            return
+            return None
 
     def _xmlGetValF0(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
@@ -73,7 +73,7 @@ class RecordList:
                 try:
                     return float(valstr.split('<Val>')[1].split('</Val>')[0])
                 except ValueError:
-                    return
+                    return None
         return
 
     def _xmlGetValI0(self, xml, name):
@@ -86,7 +86,7 @@ class RecordList:
                 try:
                     return int(valstr.split('<Val>')[1].split('</Val>')[0])
                 except ValueError:
-                    return
+                    return None
         return
 
     def _xmlGetValS0(self, xml, name):
@@ -99,7 +99,7 @@ class RecordList:
                 try:
                     return valstr.split('<Val>')[1].split('</Val>')[0]
                 except ValueError:
-                    return
+                    return None
         return
 
     def _dm2dec(self, dmstr):
@@ -111,8 +111,10 @@ class RecordList:
             a,b = dmstr.split(".")
             return round(float(a[:-2]) +
                          float(a[-2:])/60. + float("." + b)/60.,6)
+        except AttributeError:
+            return None
         except ValueError:
-            return
+            return None
         #except AttributeError:
         #    # *dmstr* is not a string or string-like
         #    return
@@ -175,6 +177,8 @@ class RecordList:
             self.geoid_height.append(self._xmlGetValF(xml, 'Geoid_Heigh_m'))
             self.gps_fix_valid.append(self._xmlGetValI(xml, 'GPS Fix valid'))
             self.gps_message_ok.append(self._xmlGetValI(xml, 'GPS Message ok'))
+        #except AttributeError:
+        #    sys.stderr.write("GPS metadata could not be read\n")
         except:
             with open('error.log', 'w') as f:
                 traceback.print_exc(file=f)
