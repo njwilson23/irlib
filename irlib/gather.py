@@ -11,7 +11,7 @@ import scipy.spatial as spatial
 import numpy as np
 import math, copy, cPickle
 import os, sys
-import traceback, pdb
+import traceback
 
 import irlib.aaigrid as aai
 from irlib.filehandler import FileHandler, FileHandlerError
@@ -278,7 +278,7 @@ class Gather:
                 self.topography = np.array(map(lambda x,y: G.sample(x,y)[0],
                         self.metadata.eastings, self.metadata.northings))
             except:
-                pdb.set_trace()
+                traceback.print_exc()
             if smooth:
                 self.SmoothenTopography()
             self.topography_copy = self.topography.copy()
@@ -1288,8 +1288,8 @@ class CommonOffsetGather(Gather):
         operating on static mode.
         """
         # Find regions where displacement is 0 for a while, and then large
-        eastings = np.array(self.metadata.eastings)
-        northings = np.array(self.metadata.northings)
+        eastings = np.array(self.metadata.eastings, dtype=float)
+        northings = np.array(self.metadata.northings, dtype=float)
         dx = eastings[1:] - eastings[:-1]
         dy = northings[1:] - northings[:-1]
         displacement = np.sqrt(dx**2 + dy**2)
@@ -1384,8 +1384,8 @@ class CommonOffsetGather(Gather):
         if self.metadata.hasUTM is False:
             raise LineGatherError('RemoveStationary: no UTM coordinates available')
             return
-        eastings = np.array(self.metadata.eastings)
-        northings = np.array(self.metadata.northings)
+        eastings = np.array(self.metadata.eastings, dtype=float)
+        northings = np.array(self.metadata.northings, dtype=float)
 
         dbg_traces_deleted = 0
 
@@ -1626,7 +1626,6 @@ class CommonOffsetGather(Gather):
                 proj_arr = self.Interpolate(Pmesh, P, arr=arr)
 
                 # Perform migration
-                #pdb.set_trace()
                 Dmig, tmig, xmig = fkmig(proj_arr, self.rate, dx, 1.68e8)
 
                 # Interpolate back
