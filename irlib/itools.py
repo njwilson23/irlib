@@ -17,7 +17,7 @@ font = FontProperties(family='sans-serif', weight='normal', size=11)
 defaultcm = matplotlib.cm.gray
 
 def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
-           cmap=cm.gray):
+           cmap=matplotlib.cm.gray):
     """ Make a radargram plot. Replaces `plotl()` and `plotlt()` functions.
 
     Parameters
