@@ -5,7 +5,7 @@ used as the metadata container for `Gather` objects. """
 import sys
 import os
 import re
-import traceback, pdb
+import traceback
 
 class RecordList:
     """ Class to simplify the extraction of metadata from HDF5 radar
@@ -180,7 +180,6 @@ class RecordList:
                 traceback.print_exc(file=f)
             raise ParseError('GPS cluster read failure', dataset.name)
 
-
         # Parse digitizer cluster
         try:
             xml = dataset.attrs['Digitizer-MetaData_xml']
@@ -205,7 +204,6 @@ class RecordList:
                 with open('error.log', 'w') as f:
                     traceback.print_exc(file=f)
                 raise ParseError('Digitizer cluster read failure', dataset.name)
-
 
         # Parse comment
         try:
