@@ -17,7 +17,7 @@ font = FontProperties(family='sans-serif', weight='normal', size=11)
 defaultcm = matplotlib.cm.gray
 
 def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
-           cmap=defaultcm):
+           cmap=cm.gray):
     """ Make a radargram plot. Replaces `plotl()` and `plotlt()` functions.
 
     Parameters
@@ -46,12 +46,14 @@ def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
     except LineGatherError:
         data = L.data
 
-    ax.imshow(data, aspect='auto', cmap=cmap, vmin=-lbnd, vmax=lbnd)
+    X, Y = np.meshgrid(np.arange(L.nx), L.rate * np.arange(L.ny))
+    ax.pcolormesh(X, Y, data, cmap=cmap, vmin=-lbnd, vmax=lbnd)
     ax.set_ylabel('Time (ns)', fontproperties=font)
     ax.set_xlabel('Trace number', fontproperties=font)
     ax.set_xticklabels([int(a) for a in ax.get_xticks()], fontproperties=font)
-    timevec = ax.get_yticks() * L.rate * 1e9
-    ax.set_yticklabels(timevec.astype(int), fontproperties=font)
+    ax.set_ylim(ax.get_ylim()[::-1])
+    ax.set_yticklabels((ax.get_yticks()*1e9).astype(int), fontproperties=font)
+    ax.axis('tight')
 
     if annotate:
         ax2 = ax.twinx()
