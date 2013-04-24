@@ -3,12 +3,16 @@ bits of code that aren't good enough to be in `irlib` proper, but that I got
 tired to rewriting to solve actual problems. """
 
 import os
+import sys
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import scipy.io
-import pywavelet
+try:
+    import pywavelet
+except:
+    sys.stderr.write("pywavelet not found\n")
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
