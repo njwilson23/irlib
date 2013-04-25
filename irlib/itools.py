@@ -9,10 +9,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import scipy.io
-try:
-    import pywavelet
-except:
-    sys.stderr.write("pywavelet not found\n")
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
