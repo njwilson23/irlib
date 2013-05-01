@@ -1064,14 +1064,14 @@ class Gather:
         """
         if fnm is None:
             fnm = self.GetCacheName()
-        try:
+        if os.path.isdir(os.path.split(fnm)[0]):
             with open(fnm, 'w') as f:
                 pickler = cPickle.Pickler(f, cPickle.HIGHEST_PROTOCOL)
                 pickler.dump(self)
             return True
-        except:
-            traceback.print_exc()
-            return False
+        else:
+            sys.stderr.write("Cache directory does not exist ({0}/)\n".format(
+                             os.path.split(fnm)[0]))
 
 
 class CommonOffsetGather(Gather):
