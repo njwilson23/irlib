@@ -1,12 +1,16 @@
 #! /usr/bin/python
 
 import os
+import sys
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import scipy.io
-import pywavelet
+try:
+    import pywavelet
+except ImportError:
+    sys.stderr.write("pywavelet not available")
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
