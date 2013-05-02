@@ -7,7 +7,6 @@ import irlib
 from irlib.misc import TryCache
 import numpy as np
 import matplotlib.pyplot as plt
-from h5py import Dataset
 import sys, os
 import getopt
 import readline
@@ -54,7 +53,8 @@ class ImageWindow:
         for i in self.fig1.canvas.callbacks.callbacks:
             try:
                 if i == 'key_press_event':
-                    self.fig1.canvas.mpl_disconnect(self.fig1.canvas.callbacks.callbacks[i].keys()[0])
+                    self.fig1.canvas.mpl_disconnect(
+                            self.fig1.canvas.callbacks.callbacks[i].keys()[0])
             except IndexError:
                 # Already disconnected
                 pass
@@ -112,7 +112,7 @@ class ImageWindow:
             self.AddFeature('')
 
         elif event.key == 'E':
-            sys.EndFeature()
+            self.EndFeature()
 
     def _linloc2fid(self, loc):
         """ Based on a line and location, return a unique FID for
@@ -339,6 +339,39 @@ def OpenLine(S, line, fh5, fromcache=True, tocache=True, datacapture=0):
     return IW, L
 
 
+def StrFilterHistory(L):
+    """ Return a printable string summarizing the filter history. """
+    s_out = ""
+    for operation in L.history:
+        if hasattr(operation, "__iter__"):
+            s_out += "\t" + operation[0] + " [ "
+            for option in operation[1:]:
+                s_out += str(option) + ", "
+            s_out += " ] \n"
+        else:
+            s_out += "\t" + operation + " [ ] \n"
+    return s_out
+
+def WriteFeatures(IW, outfnm):
+    """ Write digitized features from `IW` to `outfnm`, creating folder if
+    necessary. """
+    dict_list = IW.Export()
+
+    if not os.path.isdir(os.path.dirname(outfnm)):
+        os.makedirs(os.path.dirname(outfnm))
+
+    with open(outfnm, 'w') as fout:
+        for fdict in dict_list:
+            keys = fdict.keys()
+            keys.sort()
+            for key in keys:
+                vals = fdict[key]
+                if isinstance(vals, __builtins__.tuple):
+                    fout.write('{0}\t{1}\t{2}\t{3}\n'.format(
+                        key, vals[0], vals[1], vals[2]))
+            fout.write('\n')
+    return
+
 def HandleCommand(s, S, IW, L):
 
     # List args. Handle empty input.
@@ -371,7 +404,7 @@ def HandleCommand(s, S, IW, L):
         print 'available channels: ' + str(S.GetChannelsInLine(int(L.line)))
 
     elif args[0] == 'ls':                   # LS
-        print [str(lnstr) for lnstr in S.Lines()]
+        print [str(lnstr) for lnstr in S.GetLines()]
 
     elif args[0] == 'open':                 # OPEN
         try:
@@ -398,7 +431,8 @@ def HandleCommand(s, S, IW, L):
                     del L
                 IW, L = OpenLine(S, line, S.f, datacapture=datacapture)
             else:
-                print "Line {0} channel {1} does not exist".format(line, datacapture)
+                print ("Line {0} channel {1} does "
+                       "not exist".format(line, datacapture))
         except:
             traceback.print_exc()
 
@@ -408,7 +442,7 @@ def HandleCommand(s, S, IW, L):
             IW.arr = L.data
             IW.ShowRadargram(repaint=True)
         except IndexError:
-            print L.history
+            print StrFilterHistory(L)
 
     elif args[0] in ('nofilter', 'nf'):     # NOFILTER
         L.Reset()
@@ -441,21 +475,12 @@ def HandleCommand(s, S, IW, L):
         for key in IW.features.keys():
             print "{0}: {1} vertices".format(key, len(IW.features[key][1]))
 
-    elif args[0] == 'dexport':              # DEXPORT
+    elif args[0] == 'dsave':                # DSAVE
         try:
             dict_list = IW.Export()
             outfnm = IW.GetDigitizerFilename()
-            with open(outfnm, 'w') as fout:
-                for fdict in dict_list:
-                    keys = fdict.keys()
-                    keys.sort()
-                    for key in keys:
-                        vals = fdict[key]
-                        if isinstance(vals, __builtins__.tuple):
-                            fout.write('{0}\t{1}\t{2}\t{3}\n'.format(
-                                key, vals[0], vals[1], vals[2]))
-                    fout.write('\n')
-
+            WriteFeatures(IW, outfnm)
+            print "Features saved to " + outfnm
         except:
             traceback.print_exc()
 
@@ -507,7 +532,7 @@ def HandleCommand(s, S, IW, L):
         dnew                start digitizing new feature
         drm [#]             remove a feature
         dls                 list features
-        dexport             export features to text
+        dsave               export features to text
 
         imsave [file]       save the radargram as an image
         hist                show a brightness histogram

@@ -25,7 +25,8 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage',
+              'sphinx.ext.mathjax', 'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -177,7 +178,20 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': r"""
+\usepackage{amsmath}
+\DeclareUnicodeCharacter{00A0}{\nobreakspace}
+
+% In the parameters section, place a newline after the Parameters
+% header
+\usepackage{expdlist}
+\let\latexdescription=\description
+\def\description{\latexdescription{}{} \breaklabel}
+""",
+
+# Don't add blank bages between chapters
+'classoptions': ',oneside',
+'babel': '\\usepackage[english]{babel}'
 }
 
 # Grouping the document tree into LaTeX files. List of tuples

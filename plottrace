@@ -15,11 +15,7 @@ import traceback
 
 def print_syntax():
     print """
-    irtrace - viewing tool for ice radar traces
-
-    Syntax:
-
-    irtrace infile Nline Nlocation [options]
+    SYNTAX: plottrace infile Nline Nlocation [options]
 
     Options:
         -s          show single trace, without nearby traces

@@ -308,13 +308,13 @@ class PickWindow:
         self.ax2.clear()
 
 
-def LoadPicks(PickWindowObj, LineGatherObj, infile, event='bed'):
+def LoadPicks(pick_window, line_gather, infile, event='bed'):
     """ Load picks from file. """
     try:
-        F = irlib.FileHandler(infile, LineGatherObj.line)
+        F = irlib.FileHandler(infile, line_gather.line)
         dc_points, bed_points = F.GetEventVals()
-        PickWindowObj.bed_points = bed_points
-        PickWindowObj.dc_points = dc_points
+        pick_window.bed_points = bed_points
+        pick_window.dc_points = dc_points
         err = 0
     except irlib.FileHandlerError as err_message:
         print err_message
@@ -396,7 +396,7 @@ def HandleCommand(s, infile, line, S, L, P):
         print 'pick-mode: ' + P.mode
 
     elif args[0] == 'ls':                   # LS
-        print [str(lnstr) for lnstr in S.Lines()]
+        print [str(lnstr) for lnstr in S.GetLines()]
 
     elif args[0] == 'save':                 # SAVE
         outfile = 'picking/' + \
@@ -608,6 +608,9 @@ def main():
     # Initialize a PickWindow instance and load it with data
     P = PickWindow(rate=4e-9)
     S,L,P = OpenLine(P, infile, line, init_filters=False)
+
+    if not os.path.isdir('picking'):
+        os.mkdir('picking')
 
     # Begin main loop
     print "IcePick"

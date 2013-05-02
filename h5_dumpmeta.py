@@ -13,9 +13,7 @@ import traceback
 
 def syntax():
     sys.stderr.write("""
-    h5_dumpmeta - HDF5 metadata dump
-
-    SYNTAX: h5dumpmeta infile [-f] [--clobber] > outfile
+    SYNTAX: h5_dumpmeta infile [-f] [--clobber] > outfile
 
     Options:
         -f          automatically name the output file

@@ -1,23 +1,20 @@
-"""
- Defines various kinds of Gather() classes, which are perhaps the most
- important classes in the irlib library. These contain the data from
- individual radar lines, and make it easy to apply various processing steps to
- the data. The Gather() class is a parent class for the CommonOffsetGather()
- and CommonMidpointGather() subclasses. The LineGather() object is deprecated
- and is now just an alias for the CommonOffsetGather(), kept for backwards
- compatibility.
-"""
+""" Defines various kinds of `Gather` classes, which are perhaps the most
+important classes in the `irlib` library. These contain the data from
+individual radar lines, and make it easy to apply various processing steps to
+the data. The `Gather` class is a base class for the `CommonOffsetGather` and
+`CommonMidpointGather` daughter classes. The `LineGather` object is deprecated
+and is now just an alias for the `CommonOffsetGather`, kept for backwards
+compatibility. """
 
 import scipy.signal as sig
 import scipy.spatial as spatial
 import numpy as np
-import matplotlib.pyplot as plt
 import math, copy, cPickle
 import os, sys
-import traceback, pdb
+import traceback
 
-import aaigrid_driver as aai
-from filehandler import *
+import irlib.aaigrid as aai
+from irlib.filehandler import FileHandler, FileHandlerError
 from autovivification import AutoVivification
 
 try:
@@ -37,20 +34,37 @@ except ImportError:
 
 
 class Gather:
-    """ Base class for common offset and common midpoint lines. """
+    """ Gathers (radar lines) are collections of radar traces (soundings). This
+    is the base class for CommonOffsetGather and CommonMidpointGather classes,
+    which should be chosen instead when directly creating an object.
+
+    A new `Gather` (or one of it's subclasses) is typically created by calling
+    the `ExtractLine` method of a `Survey` instance. Alternatively, a `Gather`
+    (or it's subclasses) can be created by passing a Numpy array as a first
+    argument, e.g.::
+
+        G = CommonOffsetGather(mydata)
+
+    where `mydata` is a data array. Some gather functionality will require that
+    metadata be provided in the form of a `RecordList` instance.
+    """
 
     def __init__(self, arr, infile=None, line=None, metadata=None, retain=None,
         dc=0):
-        """
-        arr         data held within a numpy array
-        infile      the original HDF5 dataset
-        line        the line enumeration
-        metadata    RecordList instance
+        """ Instantiate a new Gather.
+
+        Parameters
+        ----------
+        arr : two-dimensional sounding data [numpy.ndarray]
+        infile : (optional) the original HDF5 dataset file path [string]
+        line : (optional) the line number [integer]
+        dc : (optional) datacapture number [integer]
+        metadata : (optional) [RecordList]
         """
         self.raw_data = arr.copy()
         self.data = self.raw_data.copy()
-        self.line = line
-        self.datacapture = dc
+        self.line = int(line)
+        self.datacapture = int(dc)
         self.infile = infile
         self.metadata = metadata            # reference to a RecordList
         if self.metadata is not None:
@@ -79,8 +93,8 @@ class Gather:
         self.bed_phase = 999 * np.ones(self.nx)
         self.dc_picks = 999 * np.ones(self.nx)
         self.dc_phase = 999 * np.ones(self.nx)
-
         self.history = [('init')]
+        return
 
     def __repr__(self):
         return ("Gather instance for {fnm} at line {line}, "
@@ -90,27 +104,26 @@ class Gather:
     def _path2fid(self, path, linloc_only = False):
         """ Based on a path, return a unique FID for database
         relations. """
+        path = path.lstrip('/').lstrip('\\')
         try:
-            # Index from [1:] to cut out any '/' that might be present
             # Line number
-            lin = int(path[1:].split('/',1)[0].split('_',1)[1])
+            lin = int(path.split('/',1)[0].split('_',1)[1])
             # Location number
-            loc = int(path[1:].split('/',2)[1].split('_',1)[1])
+            loc = int(path.split('/',2)[1].split('_',1)[1])
             if not linloc_only:
                 # Datacapture number
-                dc = int(path[1:].split('/',3)[2].split('_',1)[1])
+                dc = int(path.split('/',3)[2].split('_',1)[1])
                 # Echogram number
-                eg = int(path[1:].split('/',3)[2].split('_',1)[1])
+                eg = int(path.split('/',3)[2].split('_',1)[1])
             else:
                 dc = 0
                 eg = 0
             fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
                 + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-            return fid
         except:
             traceback.print_exc()
-            sys.stderr.write('LineGather: failed at path2fid\n')
-            return None
+            fid = None
+        return fid
 
     def _getkernel(self, width, kind):
         """ Generate a lowpass convolution kernel. """
@@ -130,12 +143,14 @@ class Gather:
             kernel /= kernel.sum()
 
         elif kind == 'blackman':
+
             def integrate_blackman(w, a0, a1, a2):
                 # Compute the integral of a blackman window
                 val = a0*w \
                     - a1*(w-1)/(2*math.pi)*math.sin(2*math.pi*w/(w-2)) \
                     + a2*(w-1)/(2*math.pi)*math.sin(4*math.pi*w/(w-1))
                 return val
+
             alpha = 0.16
             a0 = (1-alpha)/2.
             a1 = 1./2.
@@ -169,6 +184,7 @@ class Gather:
             self.data[:,i] = _trace.copy()
 
         self.history.append(('convolution_A', width, kind, 'lowpass'))
+        return
 
     def _highpassma(self, width, kind='boxcar'):
         """ Internal high-pass convolution filter implementation.
@@ -192,6 +208,7 @@ class Gather:
             self.data[:,i] = _trace.copy()
 
         self.history.append(('convolution_A', width, kind, 'highpass'))
+        return
 
     def _svd(self):
         """ Perform SVD on trace data. Results are:
@@ -208,15 +225,22 @@ class Gather:
 
 
     def GetFID(self, loc):
-        """ Given a location (array index), return the location's
-        FID. This solves the problem of knowing the FID of an array
-        that has been sliced.
+        """ Return a FID. This solves the problem of knowing the FID of an
+        array that has been sliced.
+
+        Parameters
+        ----------
+        location : location index [integer]
         """
         return self.fids[loc]
 
     def FindFID(self, fid):
-        """ Given a FID, find the index within the data array. Takes
-        either a single FID, or a list. """
+        """ Find the index if a FID within the data array.
+
+        Parameters
+        ----------
+        fid : FID(s) to find [either string or list(strings)]
+        """
         if hasattr(fid, "__iter__"):
             return [self.fids.index(i) for i in fid]
         else:
@@ -231,30 +255,34 @@ class Gather:
         return cnm
 
     def GetDigitizerFilename(self):
-        """ Returns the likely name of a file containing digitized line data. """
+        """ Returns the likely name of a file containing digitized line data.
+        """
         fnm = 'englacial/' + os.path.basename(self.infile).split('.')[0] + \
             "_line" + str(self.line) + ".txt"
         return fnm
 
     def LoadTopography(self, topofnm, smooth=True):
-        """ Load topography along line gather, reading from an ASC file.
-        Obviously, this requires the Gather to have a valid metadata attribute.
+        """ Load topography along the Gather's transect. The `metadata`
+        attribute must be valid and must contain valid `northings` and
+        `eastings`.
 
-        If smooth=True, then apply a boxcar filter to soften the effects of the
-        DEM discretization.
+        Parameters
+        ----------
+        topofnm : ESRI ASCII grid file
+        smooth : (default `True`) apply a boxcare filter to soften the effects
+                 of the DEM's discretization [boolean]
         """
-        G = aai.Grid()
         if os.path.isfile(topofnm):
-            G.FromFile(topofnm)
+            G = aai.AAIGrid(topofnm)
             try:
-                self.topography = np.array(map(lambda x,y: G.Sample(x,y)[0],
+                self.topography = np.array(map(lambda x,y: G.sample(x,y)[0],
                         self.metadata.eastings, self.metadata.northings))
             except:
-                pdb.set_trace()
-            self.history.append(('load_topo', topofnm))
+                traceback.print_exc()
             if smooth:
                 self.SmoothenTopography()
             self.topography_copy = self.topography.copy()
+            self.history.append(('load_topo', topofnm))
         else:
             print "{0} is not a file".format(topofnm)
         return
@@ -263,8 +291,8 @@ class Gather:
         """ Load topography along line gather, reading from an ASC file.
         Obviously, this requires the Gather to have a valid metadata attribute.
 
-        If smooth=True, then apply a boxcar filter to soften the effects of the
-        DEM discretization.
+        If `smooth`=True, then apply a boxcar filter to soften the effects of
+        the DEM discretization.
         """
         def interpolate_nans(V):
             Vreal = np.nonzero(np.isnan(V) == False)[0]
@@ -368,9 +396,9 @@ class Gather:
         frequency signals. This is a step up from using a simple
         demean operation.
 
-            cutoff: cutoff minimum frequency, in Hz
-
-        This is just an interface to _highpassma.
+        Parameters
+        ----------
+        cutoff : cutoff minimum frequency, in Hz
         """
         # Compute filter width as a function of the cutoff frequency
         width = 41      # SEEMS TO WORK
@@ -386,16 +414,16 @@ class Gather:
     def DoTimeGainControl(self, ncoef=1., npow=1., nexp=0., gamma=1., bias=0.):
         """ Apply a gain enhancement as a function of time.
 
-            Transform F: f(t) -> F(f(t))
+        Transform :math:`F`:
 
-            F: (f(t) * t^npow * exp(nexp*t)) ^ gamma + bias
+        .. math:: f(t) \\to F(f(t)) \\
+            F = (f(t) * t^\\text{npow} * \\exp(\\text{nexp}*t))^\\text{gamma} \\
+                + \\text{bias}
 
-            Note: ncoef functionality has been removed and average
-            power is preserved instead.
+        Note: `ncoef` functionality has been removed and average
+        power is preserved instead.
 
-            Claerbout (1985) suggests:
-                npow = 2.
-                gamma = 0.5
+        Claerbout (1985) suggests `npow` = 2 and `gamma` = 0.5.
         """
         if self.rate is not None:
             dt = self.rate
@@ -421,7 +449,9 @@ class Gather:
         """ Apply a time-power gain enhancement up to a time limit,
         after which gain is constant (e.g. Murray et al, 1997).
 
-            tswitch is in samples
+        Parameters
+        ----------
+        tswitch : sample number at which to switch to constant gain
         """
         t = np.arange(1, self.data.shape[0]+1)
         tf = min((tswitch, self.data.shape[0]))
@@ -436,16 +466,17 @@ class Gather:
     def DoAutoGainControl(self, timewin=20e-8):
         """ Apply the RMS-based AGC algorithm from Seismic Unix*.
 
-            timewin: time half-window in seconds
-            dt: sample interval in seconds
-
         Try to use a fast Cython-accellerated version. If that fails, fall
         back to the Numpy version.
 
         *Cohen, J.K. and Stockwell, J.W. CWP/SU: Seismic Unix Release
         42. Colorado School of Mines, Center for Wave Phenomena. (1996)
-        """
 
+        Parameters
+        ----------
+        timewin : time half-window in seconds
+        dt : sample interval in seconds
+        """
         if self.rate is not None:
             dt = self.rate
         else:
@@ -503,9 +534,11 @@ class Gather:
         better performance characteristics than a Chebyschev filter, at
         the expense of execution speed.
 
-            cutoff: cutoff frequency in Hz
-            bandwidth: transition bandwidth in Hz
-            mode: 'lowpass' or 'highpass'
+        Parameters
+        ----------
+        cutoff : cutoff frequency in Hz
+        bandwidth : transition bandwidth in Hz
+        mode : 'lowpass' or 'highpass'
         """
         if self.rate is not None:
             r = 1.0 / self.rate
@@ -563,7 +596,6 @@ class Gather:
         # Convolve every trace
         for i in range(self.data.shape[1]):
             self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
-        # Record
         self.history.append(('windowed_sinc', cutoff, bandwidth, mode))
         return
 
@@ -621,14 +653,18 @@ class Gather:
 
     def WaveletTransform(self, trno, m=0):
         """ Perform a wavelet transform of a single trace.
-        Arguments:
-            trno:       trace number to transform (< self.data.shape[1])
-            mother:     mother wavelet (0==Morlet (default), 1==Paul, 2==DOG)
+
+        Parameters
+        ----------
+        trno : trace number to transform (< self.data.shape[1])
+        mother : mother wavelet (0==Morlet (default), 1==Paul, 2==DOG)
+
         Returns
-            wva:        complex 2-D array, where amplitude is np.abs(wva)
-            scales:     scales used
-            period:     fourier periods of the scales used
-            coi:        e-folding factor used for cone-of-influence
+        -------
+        wva : complex 2-D array, where amplitude is np.abs(wva)
+        scales : scales used
+        period : fourier periods of the scales used
+        coi : e-folding factor used for cone-of-influence
         """
         y = self.data[:,trno].copy()
         dt = self.rate
@@ -656,10 +692,11 @@ class Gather:
         """ Attempt to pick bed reflections along the line. Return pick
         data and estimated polarity in vectors (also stored internally).
 
-            sbracket: tuple defining minimum and maximum times (by
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
                 sample number) during which the event can be picked
-
-            bounds: location number limits for picking
+        bounds : location number limits for picking
         """
         if self.rate is not None:
             rate = self.rate
@@ -714,10 +751,11 @@ class Gather:
         """ Attempt to pick direct coupling waves along the line.
         Return pick data in a vector (also stored internally).
 
-            sbracket: tuple defining minimum and maximum times (by
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
                 sample number) during which the event can be picked
-
-            bounds: location number limits for picking
+        bounds : location number limits for picking
         """
         if bounds[0] == None:
             istart = 0
@@ -768,25 +806,16 @@ class Gather:
         del FH
         return
 
-    def _loadpicks(self, infile):
-        """ Load picks from a text file.
-        Future: this should probably be done with a FileHandler() instead.
-        """
-        with open(infile, 'r') as f:
-            loadvec = 999 * np.ones(self.bed_picks.shape)
-            _ = f.readline()
-            for i in range(len(loadvec)):
-                fline = f.readline()
-                loadvec[i] = int(float(fline.split(',')[1]))
-        return loadvec
-
     def LoadPicks(self, infile):
         """ Load bed picks from a text file. Employs a FileHandler. """
         try:
             F = FileHandler(infile, self.line)
-            dc_points, bed_points = F.GetEventVals()
+            dc_points, bed_points = F.GetEventValsByFID(self.fids)
             self.dc_picks = np.array(dc_points)
             self.bed_picks = np.array(bed_points)
+        except FileHandlerError as fhe:
+            sys.stderr.write(str(fhe) + '\n')
+            raise fhe
         except:
             traceback.print_exc()
             sys.stderr.write("Load failed\n")
@@ -798,7 +827,7 @@ class Gather:
         """
         features = {}
         i = 0
-        fidlist = self.fids.tolist()
+        fidlist = list(self.fids)
 
         with open(infile, 'r') as f:
             while True:
@@ -849,6 +878,7 @@ class Gather:
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
         self.fids_copy = copy.copy(self.fids)
+
         self.history.append(('remove_blank', nsmp, threshold))
         return
 
@@ -870,6 +900,7 @@ class Gather:
         self.bed_phase = 999 * np.ones(self.data.shape[1])
         self.dc_picks = 999 * np.ones(self.data.shape[1])
         self.dc_phase = 999 * np.ones(self.data.shape[1])
+
         self.history = [('init')]
         return
 
@@ -1033,19 +1064,19 @@ class Gather:
         """
         if fnm is None:
             fnm = self.GetCacheName()
-        try:
+        if os.path.isdir(os.path.split(fnm)[0]):
             with open(fnm, 'w') as f:
                 pickler = cPickle.Pickler(f, cPickle.HIGHEST_PROTOCOL)
                 pickler.dump(self)
             return True
-        except:
-            traceback.print_exc()
-            return False
+        else:
+            sys.stderr.write("Cache directory does not exist ({0}/)\n".format(
+                             os.path.split(fnm)[0]))
 
 
 class CommonOffsetGather(Gather):
-    """ Subclass defining common-offset specific data and
-    operations. """
+    """ This is a subclass  of `Gather` that defines a common-offset radar
+    line. """
 
     def Reverse(self):
         """ Flip gather data. """
@@ -1130,20 +1161,32 @@ class CommonOffsetGather(Gather):
             breaks = None
         return breaks
 
-    def ProjNearestNeighbour(self, dx):
-        """ Determine an equally-spaced best fit straight line, and
-        place the nearest trace onto each node.
-        Spacing in meters is given by dx.
-        DEPRECATED - SEE self.LineProject_Nearest()
-        """
-        Xmesh, Ymesh, proj_arr, sum_dist = self.LineProject_Nearest(dp=dx)
-        return proj_arr
+    #def ProjNearestNeighbour(self, dx):
+    #    """ Determine an equally-spaced best fit straight line, and
+    #    place the nearest trace onto each node.
+    #    Spacing in meters is given by dx.
+    #    DEPRECATED - SEE self.LineProject_Nearest()
+    #    """
+    #    Xmesh, Ymesh, proj_arr, sum_dist = self.LineProject_Nearest(dp=dx)
+    #    return proj_arr
 
     def LineProjectXY(self, bounds=None, eastings=None, northings=None, sane=True):
-        """ Project coordinates onto a best-fit line. Return the
-        projected eastings and northings and the line fit information.
+        """ Project coordinates onto a best-fit line.
 
-        If sane is False, sanity checks on coordinates will be skipped
+        Parameters
+        ----------
+        bounds : (optional) side limits on projection [tuple x2]
+        eastings : (optional) coordinate eastings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        northings: (optional) coordinate northings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        sane : (default `True`) perform sanity checks on coordinate [boolean]
+
+        Returns
+        -------
+        X : projected eastings
+        Y : projected northings
+        p : a list of polynomial fitting information
         """
         # Fit a line, using metadata if no coordinates are provided
         if (eastings is None) or (northings is None):
@@ -1199,10 +1242,23 @@ class CommonOffsetGather(Gather):
 
     def LineProject_Nearest(self, bounds=None, eastings=None, northings=None, dp=4.0):
         """ Populate a best-fit line with traces nearest to equally-spaced
-        points. Return the selected traces in a 2D array, as well as the
-        coordinates of the projection.
+        points.
 
-        argument dp is point spacing in meters
+        Parameters
+        ----------
+        bounds : (optional) side limits on projection [tuple x2]
+        eastings : (optional) coordinate eastings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        northings: (optional) coordinate northings; overrides coordinates in
+                   self.metadata [numpy.ndarray]
+        dp : (default `4.0`) point spacing in meters [float]
+
+        Returns
+        -------
+        Xmesh : projected eastings
+        Ymesh : projected northings
+        proj_arr : projected data
+        sum_dist : best-fit line length in meters
         """
         # Get the best-fit line p and the projections of all traces onto p
         X, Y, p = self.LineProjectXY(bounds=bounds, eastings=eastings,
@@ -1232,8 +1288,8 @@ class CommonOffsetGather(Gather):
         operating on static mode.
         """
         # Find regions where displacement is 0 for a while, and then large
-        eastings = np.array(self.metadata.eastings)
-        northings = np.array(self.metadata.northings)
+        eastings = np.array(self.metadata.eastings, dtype=float)
+        northings = np.array(self.metadata.northings, dtype=float)
         dx = eastings[1:] - eastings[:-1]
         dy = northings[1:] - northings[:-1]
         displacement = np.sqrt(dx**2 + dy**2)
@@ -1265,14 +1321,23 @@ class CommonOffsetGather(Gather):
                 xf = self.metadata.eastings[region[1]]
                 y0 = self.metadata.northings[region[0]]
                 yf = self.metadata.northings[region[1]]
+                z0 = self.metadata.elevations[region[0]]
+                zf = self.metadata.elevations[region[1]]
                 di = region[1] - region[0] - 1
                 dx = (xf-x0) / float(di)
                 dy = (yf-y0) / float(di)
+                if None not in (z0, zf):
+                    dz = (zf-z0) / float(di)
+                else:
+                    dz = None
                 for i in range(1, di+1):
                     new_x = x0 + dx*float(i)
                     new_y = y0 + dy*float(i)
                     self.metadata.eastings[i+region[0]] = new_x
                     self.metadata.northings[i+region[0]] = new_y
+                    if dz is not None:
+                        new_z = z0 + dz*float(i)
+                        self.metadata.elevations[i+region[0]] = new_z
 
         self.raw_data = self.data.copy()        # I hope I don't regret this
         self.metadata_copy = copy.deepcopy(self.metadata)
@@ -1285,7 +1350,9 @@ class CommonOffsetGather(Gather):
         """ Remove traces where the location is None or outside of an
         optional bounding box.
 
-            bbox    [east, west, south, north] bounding box (optional)
+        Parameters
+        ----------
+        bbox : (optional) [east, west, south, north] bounding box [tuple]
         """
         kill_list = []
         for i, (x, y) in enumerate(zip(self.metadata.eastings,
@@ -1306,16 +1373,19 @@ class CommonOffsetGather(Gather):
     def RemoveStationary(self, threshold=3.0, debug=False):
         """ Remove consecutive points with very similar GPS locations. Do this
         by finding points within a minimum distance of each other, and averaging
-        them.
-        Beware incorrect GPS readings, which need to be rectified first.
+        them. Beware incorrect GPS readings, which need to be fixed first.
 
-            threshold is the minimum distance to be considered to be moving
+        Parameters
+        ----------
+        threshold : (default `3.0`) minimum offset in meters to recognize that
+                    a position has moved [float]
+        debug : (default `False`) print debugging messages [boolean]
         """
         if self.metadata.hasUTM is False:
             raise LineGatherError('RemoveStationary: no UTM coordinates available')
             return
-        eastings = np.array(self.metadata.eastings)
-        northings = np.array(self.metadata.northings)
+        eastings = np.array(self.metadata.eastings, dtype=float)
+        northings = np.array(self.metadata.northings, dtype=float)
 
         dbg_traces_deleted = 0
 
@@ -1380,14 +1450,20 @@ class CommonOffsetGather(Gather):
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
         self.fids_copy = copy.copy(self.fids)
-
         self.history.append(('remove_stationary', threshold))
         return
 
     def Interpolate(self, X_int, X, arr=None):
-        """ Returns array of data interpolated over space.
-                X_int       locations to interpolate to
-                X           current x locations
+        """ Interpolate data over space.
+
+        Parameters
+        ----------
+        X_int : location to interpolate at
+        X : data locations
+
+        Returns
+        -------
+        D_int : linearly interpolated data
         """
         if arr is None: arr = self.data
         D_int = np.zeros([self.data.shape[0], X_int.shape[0]])
@@ -1396,22 +1472,25 @@ class CommonOffsetGather(Gather):
         return D_int
 
     def LineProjectMultiSegment(self, dx=4.0, threshold=0.35, verbose=False):
-        """ Projects data to a sequence of approximating line
-        segments with even specing.
+        """ Projects data to a sequence of approximating line segments with
+        even spacing.
 
-            dx          :   point spacing in meters
-            threshold   :   threshold for segment bending
-            verbose     :   print out status message
-
-        Returns a tuple containing:
-            segments
-            Xdbg
-            Ydbg
-            Pdbg
-            Pgriddbg
-
-        THIS MAY BREAK THINGS because picks and metadata aside from
+        **THIS MAY BREAK THINGS** because picks and metadata aside from
         coordinates aren't handled. Use with caution.
+
+        Parameters
+        ----------
+        dx          :   point spacing in meters
+        threshold   :   threshold for segment bending
+        verbose     :   print out status message
+
+        Returns
+        -------
+        segments
+        Xdbg
+        Ydbg
+        Pdbg
+        Pgriddbg
         """
         # Find places where line direction changed
         breaks = self.FindLineBreaks(threshold=threshold)
@@ -1492,19 +1571,23 @@ class CommonOffsetGather(Gather):
             self.topography = proj_topo
         except AttributeError:
             pass
+
         self.history.append(('projection_as_segments', bounds, dx))
         return (sections, Xdbg, Ydbg, Pdbg, Pgriddbg)
 
-    def MigrateFK(self, dx=4.0, t0_adjust=0):
+    def MigrateFK(self, dx=4.0, t0_adjust=0, verbose=True):
         """ Perform Stolt migration over multiple sections.
 
-            dx          :   gridding interval
+        Parameters
+        ----------
+        dx          :   gridding interval
+        t0_adjust   :   zero-time offset from top of self.data, in samples
+                        e.g. if the radargram contains data from before t0,
+                        this corrects for that.
 
-            t0_adjust   :   zero-time offset from top of self.data, in samples
-                            e.g. if the radargram contains data from before t0,
-                            this corrects for that.
-
-        Returns a dictionary of statistics about the transformation.
+        Returns
+        -------
+        migsections : list of quasilinear migration sections
         """
         full_Dmig = np.zeros(self.data.shape)
 
@@ -1522,7 +1605,8 @@ class CommonOffsetGather(Gather):
 
         # Add 1 to the last bound so that the full array is included
         migsections[-1] = (migsections[-1][0], migsections[-1][1]+1)
-        print "migrating in {0} sections".format(len(migsections))
+        if verbose:
+            print "migrating in {0} sections".format(len(migsections))
 
         # Migrate each of the sections separately
         for bounds in migsections:
@@ -1542,7 +1626,6 @@ class CommonOffsetGather(Gather):
                 proj_arr = self.Interpolate(Pmesh, P, arr=arr)
 
                 # Perform migration
-                #pdb.set_trace()
                 Dmig, tmig, xmig = fkmig(proj_arr, self.rate, dx, 1.68e8)
 
                 # Interpolate back
@@ -1560,38 +1643,15 @@ class CommonOffsetGather(Gather):
             self.data = np.roll(full_Dmig, t0_adjust, axis=0)
         else:
             self.data = full_Dmig
+
         self.history.append(('fk_migration', bounds, dx))
         return migsections
-
-    def Plot(self, outfile=None, cmap='gray', title='Radar Line',
-        rate=1e-8, c=1.68e8):
-        """ Plot an array containing radar data along a line. """
-        n = self.data.shape[0]
-        T = np.arange(0, n*rate, rate)      # time axis
-
-        # Find the luminescence range so that plot intensity is symmetric
-        lum_bound = max((abs(self.data.max()), abs(self.data.min())))
-
-        # Draw it
-        img = plt.imshow(self.data, aspect='auto', cmap=cmap,
-                         vmin=-lum_bound, vmax=lum_bound)
-        plt.title(title)
-        plt.xlabel("Location Number")
-        plt.ylabel("Time (ns)")
-        locs, labels = plt.yticks()
-        plt.yticks(locs, locs*1.e9*rate)
-
-        if outfile == None:
-            plt.show()
-        else:
-            plt.savefig(outfile)
-        return img
 
 
 class CommonMidpointGather(Gather):
     """ Subclass defining common-midpoint specific data and operations. """
 
-    def ReadIndex(index):
+    def ReadIndex(self, index):
         """ Read CMP index file and return the offsets as a 1-d array and
         location key as a 2-d array. """
         with open(index, 'r') as f:
@@ -1618,7 +1678,7 @@ class CommonMidpointGather(Gather):
         OFFSETS = np.abs(XR - XT)
         return OFFSETS, KEY
 
-    def CalcAveragePicks(key, picks):
+    def CalcAveragePicks(self, key, picks):
         """ Average picks by location, based on a key. The key is a list of
         paired iterables, containing first and last locations for every shot
         gather.
@@ -1634,30 +1694,8 @@ class CommonMidpointGather(Gather):
             avg_picks = None
         return np.array(avg_picks)
 
-    def Plot(offsets, events, curve=None):
-        """ Plot picked events. If a set of points defining a reference NMO
-        hyperbola is provided, plot that too. """
-        plt.ion()
-        plt.plot(offsets, -events, 'xk')
-        if analytical is not None:
-            try:
-                plt.plot(offsets, -curve, '-r')
-            except:
-                pass
-        return
 
-
-class LineGather(CommonOffsetGather):
-    """ Class for handling individual survey lines.
-
-        arr         data held within a numpy array
-        infile      the original HDF5 dataset
-        line        the line enumeration
-        metadata    RecordList instance containing metadata
-
-        DEPRECATED
-    """
-    pass
+LineGather = CommonOffsetGather
 
 
 class LineGatherError(Exception):

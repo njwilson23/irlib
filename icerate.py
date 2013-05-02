@@ -294,7 +294,7 @@ def HandleCommand(s, infile, R, L, S):
         print 'unrated: ' + str(sum([1 for r in R.ratings if r == -9]))
 
     elif args[0] == 'ls':                   # LS
-        print S.Lines()
+        print S.GetLines()
 
     elif args[0] == 'save':                 # SAVE
         outfile = 'rating/' + \
@@ -439,6 +439,9 @@ def main():
         os.path.basename(infile).split('.')[0] + \
         "_line" + str(line) + ".csv"
     R,L,S = OpenLine(infile, line, pickfile)
+
+    if not os.path.isdir('rating'):
+        os.mkdir('rating')
 
     # Begin main loop
     print "IceRate"

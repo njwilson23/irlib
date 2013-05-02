@@ -73,43 +73,43 @@ def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=True):
     imported into a GIS.
     """
     # Open the file object
-    f = h5py.File(h5file, 'r')
+    try:
+        f = h5py.File(h5file, 'r')
 
-    # Get all of the names of datasets in the file
-    names = []
-    f.visit(names.append)
-    datasets = []
-    for name in names:
-        if (type(f[name]) == h5py.Dataset) and \
-          ('picked' not in f[name].name):
-            datasets.append(name)
-    sys.stderr.write("\t{n} datasets found\n".format(n=len(names)))
+        # Get all of the names of datasets in the file
+        names = []
+        f.visit(names.append)
+        datasets = []
+        for name in names:
+            if (type(f[name]) == h5py.Dataset) and \
+              ('picked' not in f[name].name):
+                datasets.append(name)
+        sys.stderr.write("\t{n} datasets found\n".format(n=len(names)))
 
-    # Record the ID params, UTC time, and coordinates for each dataset
-    records = RecordList(h5file)
-    e = 0
-    for name in datasets:
-        fid = path2fid(name)
-        e += records.AddDataset(f[name], fid=fid)
+        # Record the ID params, UTC time, and coordinates for each dataset
+        records = RecordList(h5file)
+        for name in datasets:
+            fid = path2fid(name)
+            records.AddDataset(f[name], fid=fid)
 
-    sys.stderr.write("\t{f} read: {e} problems\n".format(
-            f=os.path.basename(h5file), e=e))
+        sys.stderr.write("\t{f} read: {e} problems\n".format(
+                f=os.path.basename(h5file), e=e))
 
-    eout = 0
-    if outfile:
-        # Export as a CSV, creating a file with name outfile
-        with open(outfile, 'w') as fout:
-            eout = records.Write(fout, flip_lon=flip_lon)
-        sys.stderr.write("\t{f} written: {e} problems\n".format(
-                f=os.path.basename(output), e=eout))
-    elif fout:
-        # Export as a CSV, using the provided file object
-        eout = records.Write(fout, flip_lon=flip_lon)
-        sys.stderr.write("\tstream generated: {e} problems\n".format(e=eout))
+        if outfile:
+            # Export as a CSV, creating a file with name outfile
+            with open(outfile, 'w') as fout:
+                records.Write(fout, flip_lon=flip_lon)
+            sys.stderr.write("\t{f} written: {e} problems\n".format(
+                    f=os.path.basename(output), e=eout))
+        elif fout:
+            # Export as a CSV, using the provided file object
+            records.Write(fout, flip_lon=flip_lon)
+            sys.stderr.write("\tstream generated: {e} problems\n".format(e=eout))
 
-    f.close()
+    finally:
+        f.close()
 
-    return e+eout, records
+    return records
 
 def ExtractTrace(h5file, line, location, datacapture=0, echogram=0):
     """ Extract the values for a trace and return as a vector. """

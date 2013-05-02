@@ -12,15 +12,11 @@ efficient and simple way to apply established methodologies for analysing radar
 data. Pre-written filters and processing routines are called by typing
 keywords.
 
-![Delimiting an englacial
-region](https://dl.dropbox.com/u/375008/irlib_bitbucket_images/irview_demo_small.png)
+![](http://njwilson23.github.com/radar_tools/images/repo_image.png)
 
 The second way is to use the ``irlib`` API directly. This makes it possible to
 programmatically analyze radar data from the Python programming language. New
 filters and processing routines can be implemented using the API.
-
-![Using the `irlib` API from
-IPython](https://dl.dropbox.com/u/375008/irlib_bitbucket_images/api_demo_small.png)
 
 Finally, there is experimental support for reading other types of datasets
 using *radar_tools*. Right now, it's possible to read CReSIS lines, which makes
@@ -86,7 +82,17 @@ Documentation:
 
 In addition to the basic information here, documentation can be found in `doc`.
 In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
-installed. If LaTeX is available, the documentation can be compiled into a PDF.
+installed, with the ``numpydoc`` extension. The extensions can be installed by
+
+    easy_install numpydoc
+
+Then, type
+
+    make html
+
+If LaTeX is available, the documentation can be compiled into a PDF. Type
+
+    make latexpdf
 
 License:
 --------

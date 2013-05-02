@@ -64,10 +64,10 @@ def ApplyFilter(GatherInstance, cmd):
 
         # Frequency filters
         elif cmd == 'lowpass':
-            GatherInstance.DoWindowedSinc(cutoff=25.e6, bandwidth=15.e6, mode='lowpass')
+            GatherInstance.DoWindowedSinc(cutoff=25.e6, bandwidth=5.e6, mode='lowpass')
 
         elif cmd == 'highpass':
-            GatherInstance.DoWindowedSinc(cutoff=5.e6, bandwidth=10.e6, mode='highpass')
+            GatherInstance.DoWindowedSinc(cutoff=25.e6, bandwidth=5.e6, mode='highpass')
 
         elif cmd == 'lowpass_ma':
             GatherInstance.DoMoveAvg(21, kind='blackman', mode='lowpass')
@@ -75,10 +75,10 @@ def ApplyFilter(GatherInstance, cmd):
         elif cmd == 'highpass_ma':
             GatherInstance.DoMoveAvg(7, kind='blackman', mode='highpass')
 
-        elif cmd == 'iir40low':
-            GatherInstance.DoRecursiveFilter(20e6, 35e6, ftype='cheby1')
+        elif cmd == 'iir30low':
+            GatherInstance.DoRecursiveFilter(20e6, 40e6, ftype='cheby1')
 
-        elif cmd == 'iir3020':
+        elif cmd == 'iir25high':
             GatherInstance.DoRecursiveFilter(30e6, 20e6, ftype='cheby1')
 
         elif cmd == 'wiener':

@@ -11,11 +11,9 @@ import pdb
 
 def print_syntax():
     print """
+    SYNTAX: h52a infile Nline|all [options] > file
+
     h52a - export a line from HDF5 to an ASCII (or binary) file
-
-    Syntax:
-
-    h52a infile Nline|all [options] > file
 
         Instead of Nline, all may be specified to extract all lines.
         In this case, [-f] is assumed.
