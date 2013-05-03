@@ -6,11 +6,12 @@ the data. The `Gather` class is a base class for the `CommonOffsetGather` and
 and is now just an alias for the `CommonOffsetGather`, kept for backwards
 compatibility. """
 
+import os
+import sys
 import scipy.signal as sig
 import scipy.spatial as spatial
 import numpy as np
 import math, copy, cPickle
-import os, sys
 import traceback
 
 import irlib.aaigrid as aai
@@ -97,9 +98,9 @@ class Gather:
         return
 
     def __repr__(self):
-        return ("Gather instance for {fnm} at line {line}, "
-                "channel{chan}".format(fnm=self.infile, line=self.line,
-                                       chan=self.datacapture))
+        return ("Gather instance from {fnm} at line {line}, "
+                "channel {chan}".format(fnm=os.path.split(self.infile)[1],
+                                       line=self.line, chan=self.datacapture))
 
     def _path2fid(self, path, linloc_only = False):
         """ Based on a path, return a unique FID for database
