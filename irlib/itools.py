@@ -12,7 +12,7 @@ import scipy.io
 try:
     import pywavelet
 except ImportError:
-    sys.stderr.write("pywavelet not available")
+    sys.stderr.write("pywavelet not available\n")
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
