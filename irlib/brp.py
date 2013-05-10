@@ -17,7 +17,7 @@ def extract_window_around(tr, i, relwin):
     """ Extract a window from vector `tr` at entry `i` of size tuple `relwin`
     """
     try:
-        out = tr[i-relwin[0]:i+relwin[1]]
+        out = tr[i+relwin[0]:i+relwin[1]]
     except TypeError:
         out = np.nan
     return out
