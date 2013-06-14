@@ -51,7 +51,7 @@ def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
         data = L.data
 
     X, Y = np.meshgrid(np.arange(L.nx), L.rate * np.arange(L.ny))
-    ax.pcolormesh(X, Y, data, cmap=cmap, vmin=-lbnd, vmax=lbnd)
+    ax.pcolormesh(X, Y, data, cmap=cmap, vmin=-lbnd, vmax=lbnd, rasterized=True)
     ax.set_ylabel('Time (ns)', fontproperties=font)
     ax.set_xlabel('Trace number', fontproperties=font)
     ax.set_xticklabels([int(a) for a in ax.get_xticks()], fontproperties=font)
