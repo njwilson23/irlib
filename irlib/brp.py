@@ -23,8 +23,8 @@ def extract_window_around(tr, i, relwin):
     return out
 
 def get_brp_windowed(L, relwin=(None, None)):
-    """ Calculate the bed reflection power within a window relative to the
-    picks in Gather `L`. """
+    """ Calculate the bed reflection power within a window (specified in
+    samples) relative to the picks in Gather `L`. """
     if None in relwin:
         #relwin = (int(round(-1e9*L.rate)), int(round(5e9*L.rate)))
         # Use Copland and Sharp's window (100 ns prior, 400 ns after)
