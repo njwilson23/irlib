@@ -913,6 +913,7 @@ class Gather:
         kill_list.reverse()
         keep_list = list(set(range(
                 len(self.metadata.locations))).difference(set(kill_list)))
+        keep_list.sort()
 
         if len(keep_list) > 0:
 
