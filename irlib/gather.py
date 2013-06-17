@@ -1344,7 +1344,11 @@ class CommonOffsetGather(Gather):
         self.raw_data = self.data.copy()        # I hope I don't regret this
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.fids_copy = copy.copy(self.fids)
-        self.nx = self.data.shape[1]
+        if len(self.data.shape) >= 2:
+            self.nx = self.data.shape[1]
+        else:
+            self.nx = np.nan
+            sys.stderr.write('FixStaticGPS: radargram reduced to single trace\n')
         self.history.append(('fix_static_gps'))
         return
 
