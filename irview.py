@@ -300,7 +300,7 @@ class ImageWindow:
         self.fig1.canvas.mpl_disconnect(self.cid_key)
 
 
-def OpenLine(S, line, fh5, fromcache=True, tocache=True, datacapture=0):
+def OpenLine(S, line, fh5, fromcache=True, tocache=False, datacapture=0):
     """ Start up an AppWindow object. Optionally attempts to read Gather
     instance from a cache. If not, or if this fails, it can write a cached
     version for future use.
@@ -329,7 +329,7 @@ def OpenLine(S, line, fh5, fromcache=True, tocache=True, datacapture=0):
             if tocache:
                 L.Dump(cnm)
         IW = ImageWindow(L, fh5=fh5)
-    except SystemExit:
+    except (IndexError, SystemExit):
         L = None
         IW = None
     except AssertionError:
