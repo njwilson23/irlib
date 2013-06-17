@@ -5,6 +5,7 @@ used as the metadata container for `Gather` objects. """
 import sys
 import os
 import re
+import numpy as np
 import traceback
 
 class RecordList:
@@ -41,7 +42,7 @@ class RecordList:
         if m is not None:
             return float(m.group().split('<Val>')[1].split('</Val>')[0])
         else:
-            return None
+            return np.nan
 
     def _xmlGetValI(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
@@ -61,7 +62,7 @@ class RecordList:
         if m is not None:
             return m.group().split('<Val>')[1].split('</Val>')[0]
         else:
-            return None
+            return ''
 
     def _xmlGetValF0(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
