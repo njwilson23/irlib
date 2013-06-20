@@ -47,7 +47,6 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 import pdb, traceback
 
 def csinci():
@@ -274,17 +273,6 @@ def fkmig(D, dt, dx, v, params=None):
     t = np.arange(0, nsamp) * dt
     x = np.arange(0, ntr) * dx
     interpolated = True
-
-    if 0:
-        plt.ion()
-        plt.figure(2)
-        plt.subplot(2,1,1)
-        plt.plot(x)
-        plt.subplot(2,1,2)
-        plt.plot(np.diff(x))
-        plt.figure(1)
-        return D, None, None
-
 
     fnyq = 1.0 / (2.0*dt)
     knyq = 1.0 / (2.0*dx)
