@@ -92,19 +92,17 @@ def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=True):
             fid = path2fid(name)
             records.AddDataset(f[name], fid=fid)
 
-        sys.stderr.write("\t{f} read: {e} problems\n".format(
-                f=os.path.basename(h5file), e=e))
+        sys.stderr.write("\t{f} read\n".format(f=os.path.basename(h5file)))
 
         if outfile:
             # Export as a CSV, creating a file with name outfile
             with open(outfile, 'w') as fout:
                 records.Write(fout, flip_lon=flip_lon)
-            sys.stderr.write("\t{f} written: {e} problems\n".format(
-                    f=os.path.basename(output), e=eout))
+            sys.stderr.write("\t{f} written\n".format(f=os.path.basename(output)))
         elif fout:
             # Export as a CSV, using the provided file object
             records.Write(fout, flip_lon=flip_lon)
-            sys.stderr.write("\tstream generated: {e} problems\n".format(e=eout))
+            sys.stderr.write("\tstream generated\n")
 
     finally:
         f.close()

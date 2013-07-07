@@ -36,7 +36,7 @@ else:
         stringbuffer = StringIO.StringIO()
 
         try:
-            ret, records = irlib.misc.ExtractAttrs(infile, fout=stringbuffer, flip_lon=True)
+            records = irlib.misc.ExtractAttrs(infile, fout=stringbuffer, flip_lon=True)
         except:
             traceback.print_exc()
             sys.stderr.write("Error reading radar data\n")
@@ -44,26 +44,23 @@ else:
 
         stringbuffer.seek(0)
 
-        if ret == 0:
-            if '-f' in dict(optlist).keys():
-                # Print it to an auto-generated file
-                outfile = infile.rsplit('.',1)[0] + '.csv'
-                if not os.path.isfile(outfile):
+        if '-f' in dict(optlist).keys():
+            # Print it to an auto-generated file
+            outfile = infile.rsplit('.',1)[0] + '.csv'
+            if not os.path.isfile(outfile):
+                with open(outfile, 'w') as f:
+                    f.write(stringbuffer.read())
+            else:
+                if '--clobber' in dict(optlist).keys():
                     with open(outfile, 'w') as f:
                         f.write(stringbuffer.read())
+                    sys.stderr.write(
+                        "\t{fnm} overwritten\n".format(
+                            fnm=os.path.basename(outfile)))
                 else:
-                    if '--clobber' in dict(optlist).keys():
-                        with open(outfile, 'w') as f:
-                            f.write(stringbuffer.read())
-                        sys.stderr.write(
-                            "\t{fnm} overwritten\n".format(
-                                fnm=os.path.basename(outfile)))
-                    else:
-                        sys.stderr.write(
-                            "\t{fnm} already exists\n".format(
-                                fnm=os.path.basename(outfile)))
-            else:
-                # Print to stdout
-                sys.stdout.write(stringbuffer.read())
+                    sys.stderr.write(
+                        "\t{fnm} already exists\n".format(
+                            fnm=os.path.basename(outfile)))
         else:
-            sys.stderr.write("\tErrors occured - output not written")
+            # Print to stdout
+            sys.stdout.write(stringbuffer.read())
