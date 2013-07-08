@@ -64,45 +64,6 @@ class RecordList:
         else:
             return ''
 
-    def _xmlGetValF0(self, xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
-        """
-        xmlsplit = xml.splitlines()
-        for i, line in enumerate(xmlsplit):
-            if line == '<Name>'+name+'</Name>':
-                valstr = xmlsplit[i+1]
-                try:
-                    return float(valstr.split('<Val>')[1].split('</Val>')[0])
-                except ValueError:
-                    return None
-        return
-
-    def _xmlGetValI0(self, xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
-        """
-        xmlsplit = xml.splitlines()
-        for i, line in enumerate(xmlsplit):
-            if line == '<Name>'+name+'</Name>':
-                valstr = xmlsplit[i+1]
-                try:
-                    return int(valstr.split('<Val>')[1].split('</Val>')[0])
-                except ValueError:
-                    return None
-        return
-
-    def _xmlGetValS0(self, xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
-        """
-        xmlsplit = xml.splitlines()
-        for i, line in enumerate(xmlsplit):
-            if line == '<Name>'+name+'</Name>':
-                valstr = xmlsplit[i+1]
-                try:
-                    return valstr.split('<Val>')[1].split('</Val>')[0]
-                except ValueError:
-                    return None
-        return
-
     def _dm2dec(self, dmstr):
         """ Convert the degree - decimal minute codes in radar data
         to a decimal degree coordinate. dmstr is expected to a string.
