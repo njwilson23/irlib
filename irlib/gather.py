@@ -262,14 +262,16 @@ class Gather:
             "_line" + str(self.line) + ".txt"
         return fnm
 
-    def LoadTopography(self, topofnm, smooth=True):
-        """ Load topography along the Gather's transect. The `metadata`
-        attribute must be valid and must contain valid `northings` and
-        `eastings`.
+    def LoadTopography(self, topofnm=None, smooth=True):
+        """ Load topography along the Gather's transect. If a *topofnm* is
+        provided, then the `metadata` attribute must be valid and must contain
+        `northings` and `eastings`.
 
         Parameters
         ----------
-        topofnm : ESRI ASCII grid file
+
+        topofnm : Either and ESRI ASCII grid file or None, in which case
+                 elevations are loaded from the onboard GPS.
         smooth : (default `True`) apply a boxcare filter to soften the effects
                  of the DEM's discretization [boolean]
         """
@@ -284,6 +286,9 @@ class Gather:
                 self.SmoothenTopography()
             self.topography_copy = self.topography.copy()
             self.history.append(('load_topo', topofnm))
+        elif topofnm is None:
+            self.topography = copy.copy(self.metadata.alt_asl)
+            raise LineGatherError('loading topo from GPS not fully implemented yet')
         else:
             print "{0} is not a file".format(topofnm)
         return
