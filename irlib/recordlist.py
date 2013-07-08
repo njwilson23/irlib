@@ -37,7 +37,7 @@ class RecordList:
     def _xmlGetValF(self, xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
         """
-        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>([0-9.]+?)</Val>'.format(
+        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.]+?)</Val>'.format(
                         name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
         if m is not None:
             return float(m.group().split('<Val>')[1].split('</Val>')[0])
@@ -178,8 +178,6 @@ class RecordList:
             self.geoid_height.append(self._xmlGetValF(xml, 'Geoid_Heigh_m'))
             self.gps_fix_valid.append(self._xmlGetValI(xml, 'GPS Fix valid'))
             self.gps_message_ok.append(self._xmlGetValI(xml, 'GPS Message ok'))
-        #except AttributeError:
-        #    sys.stderr.write("GPS metadata could not be read\n")
         except:
             with open('error.log', 'w') as f:
                 traceback.print_exc(file=f)
