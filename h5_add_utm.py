@@ -97,14 +97,12 @@ print "Projecting to UTM zone {0}{1}".format(zone, hemi)
 for i, (lon, lat) in enumerate(zip(lons, lats)):
     if lon is not None and lat is not None:
         x, y = projector(-lon, lat)
-        #if (x < 600000) or (x > 700000) or (y < 6000000) or (y > 7000000):
-        #    print "Warning:",i,'\t',-lon,'\t',lat,'\t',x,'\t',y
     else:
         x = 'NaN'
         y = 'NaN'
     eastings.append(x)
     northings.append(y)
-print "{0} coordinate pairs projected".format(sum([1 for i in eastings if i != 'NaN']))
+print "\t{0} coordinate pairs projected".format(len([i for i in eastings if i != 'NaN']))
 
 print "writing new HDF5..."
 # Copy INFILE to OUTFILE, and open in read/write mode
