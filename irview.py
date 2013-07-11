@@ -405,7 +405,8 @@ def HandleCommand(s, S, IW, L):
         print 'available channels: ' + str(S.GetChannelsInLine(int(L.line)))
 
     elif args[0] == 'ls':                   # LS
-        print [str(lnstr) for lnstr in S.GetLines()]
+        print reduce(lambda a,b: a + "{0:>9}".format(b), S.GetLines())
+        print 9*" "*IW.line + 4*" " + "^"
 
     elif args[0] == 'open':                 # OPEN
         try:
