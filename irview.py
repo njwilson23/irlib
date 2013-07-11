@@ -523,16 +523,15 @@ def HandleCommand(s, S, IW, L):
 
     elif args[0] == 'help':                 # HELP
         if len(args) == 1:
-            print """
+            print """\tApplication commands:
+
             info                print line metadata
             ls                  list lines in survey
             open [line#]        open a different line
             gain [#]            adjust display contrast
 
-            filter [lowpass|highpass|lowpass_ma|highpass_ma|dewow|
-                    gc|agc|englacial|fkmig [bounds]
-                                use a filter
-            nofilter            remove filters
+            filter *name*       apply a filter (see below)
+            nofilter            remove all filters
 
             dnew                start digitizing new feature
             drm [#]             remove a feature
@@ -544,6 +543,11 @@ def HandleCommand(s, S, IW, L):
             exit                exit irview
             debug
             """
+
+            print "\tAvailable filter commands:\n"
+            for name in app.command_parser.list_filters():
+                print "\t\t{0}".format(name)
+
         else:
             print app.command_parser.help_filter(args[1])
 

@@ -43,9 +43,7 @@ def help_filter(cmd):
          raise CommandSearchError("No command definition '{0}' found".format(cmd))
 
 def list_filters():
-    for cmd in sorted(get_commands(filters).keys()):
-        print cmd
-    return
+    return sorted(get_commands(filters).keys())
 
 class CommandSearchError(Exception):
     def __init__(self, message="No message"):
