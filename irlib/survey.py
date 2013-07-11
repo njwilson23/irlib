@@ -187,7 +187,7 @@ class Survey:
 
     def ExtractLine(self, line, bounds=(None,None), datacapture=0,
                     fromcache=False, cache_dir="cache", print_fnm=False,
-                    verbose=False):
+                    verbose=False, gather_type=CommonOffsetGather):
         """ Extract every trace on a line. If bounds are supplied
         (min, max), limit extraction to only the range specified.
         Return a CommonOffsetGather instance.

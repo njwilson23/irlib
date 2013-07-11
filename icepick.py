@@ -333,7 +333,7 @@ def OpenLine(P, infile, line, init_filters=False, fromcache=True, tocache=True):
         if fromcache:
             loaded, L = irlib.misc.TryCache(cnm)
         if loaded == False:
-            L = S.ExtractLine(line)
+            L = S.ExtractLine(line, gather_type=irlib.PickableCOGather)
             try:
                 L.FixStaticGPS()
                 L.RemoveStationary(threshold=3.0)
