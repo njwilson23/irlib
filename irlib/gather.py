@@ -90,10 +90,6 @@ class Gather:
                             + str(i).rjust(4,'0') + 8*'0')
         self.fids = [gen_fid(i) for i in range(self.nx)]
         self.fids_copy = copy.copy(self.fids)
-        self.bed_picks = 999 * np.ones(self.nx)
-        self.bed_phase = 999 * np.ones(self.nx)
-        self.dc_picks = 999 * np.ones(self.nx)
-        self.dc_phase = 999 * np.ones(self.nx)
         self.history = [('init')]
         return
 
@@ -694,139 +690,6 @@ class Gather:
         return wva, scales, periods, coi
 
 
-    def PickBed(self, sbracket=(60,200), bounds=(None,None), phase=1):
-        """ Attempt to pick bed reflections along the line. Return pick
-        data and estimated polarity in vectors (also stored internally).
-
-        Parameters
-        ----------
-        sbracket : tuple defining minimum and maximum times (by
-                sample number) during which the event can be picked
-        bounds : location number limits for picking
-        """
-        if self.rate is not None:
-            rate = self.rate
-        else:
-            rate = 4e-9
-
-        if bounds[0] == None:
-            istart = 0
-        else:
-            istart = int(bounds[0])
-
-        if bounds[1] == None:
-            iend = self.data.shape[1]
-        else:
-            iend = int(bounds[1]) + 1
-
-        def first_break_bed(A, prewin=30):
-            """ Find the most negative point, and then find the first positive
-            dV/dt before, within a buffer **prewin**. May require dewow for
-            good performance. """
-            try:
-                # Most negative V
-                ineg = (A == A[prewin:].min()).nonzero()[0][0]
-                # Most positive dV/dt prior
-                dA = np.diff(A[ineg-prewin:ineg])
-                ipos1 = np.argmax(dA[10:]) + ineg - prewin + 10
-                # Closest point with V ~ 0 prior
-                prewin = min((ipos1, prewin))
-                abs_win = np.abs(A[ipos1-prewin:ipos1])
-                try:
-                    izero = (abs_win < 1e-3).nonzero()[0][-1] + ipos1 - prewin
-                except IndexError:
-                    izero = np.argmin(abs_win) + ipos1 - prewin
-            except:
-                # Except what?
-                izero = np.nan
-            return izero
-
-        # Apply function over all traces
-        try:
-            picks = map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)
-            picks = np.where(np.isnan(picks), 999, picks)
-            self.bed_picks[istart:iend] = picks + sbracket[0]
-            self.bed_phase[istart:iend] = 1
-        except:
-            traceback.print_exc()
-
-        self.history.append(('pick_bed',sbracket,bounds))
-        return self.bed_picks, self.bed_phase
-
-    def PickDC(self, sbracket=(20,50), bounds=(None,None)):
-        """ Attempt to pick direct coupling waves along the line.
-        Return pick data in a vector (also stored internally).
-
-        Parameters
-        ----------
-        sbracket : tuple defining minimum and maximum times (by
-                sample number) during which the event can be picked
-        bounds : location number limits for picking
-        """
-        if bounds[0] == None:
-            istart = 0
-        else:
-            istart = int(bounds[0])
-
-        if bounds[1] == None:
-            iend = self.data.shape[1]
-        else:
-            iend = int(bounds[1]) + 1
-
-        def first_break_dc(A, prewin=10, dmax=1e-3):
-            """ Find the first break of a voltage spike that is 50% of
-            the highest in the window. The first break is where dV/dt
-            is less than dmax.
-            """
-            try:
-                # High energy indices
-                he_bool = abs(A) > 0.5 * abs(A).max()
-                ihalfpwr = he_bool.nonzero()[0][0]
-                # Indices of sufficiently low power change
-                le_bool = np.diff(A[ihalfpwr-prewin:ihalfpwr]) < dmax
-                return le_bool.nonzero()[0][-1] + ihalfpwr - prewin
-            except:
-                return 999
-
-        # Apply function over all traces
-        try:
-            picks = map(first_break_dc, self.data[sbracket[0]:sbracket[1],istart:iend].T)
-            self.dc_picks[istart:iend] = picks
-            self.dc_picks[istart:iend] += sbracket[0]
-            self.dc_phase[istart:iend] = 1
-        except:
-            traceback.print_exc()
-
-        self.history.append(('pick_dc',sbracket,bounds))
-        return self.dc_picks, self.dc_phase
-
-    def SavePicks(self, outfile, picks, mode='bed'):
-        """ Save picks to a text file. """
-        FH = FileHandler(outfile, self.line, fids=self.metadata.fids)
-        if mode is 'bed':
-            FH.AddBedPicks(picks)
-        elif mode is 'dc':
-            FH.AddDCPicks(picks)
-        FH.ComputeTravelTimes()
-        FH.Write()
-        del FH
-        return
-
-    def LoadPicks(self, infile):
-        """ Load bed picks from a text file. Employs a FileHandler. """
-        try:
-            F = FileHandler(infile, self.line)
-            dc_points, bed_points = F.GetEventValsByFID(self.fids)
-            self.dc_picks = np.array(dc_points)
-            self.bed_picks = np.array(bed_points)
-        except FileHandlerError as fhe:
-            sys.stderr.write(str(fhe) + '\n')
-            raise fhe
-        except:
-            traceback.print_exc()
-            sys.stderr.write("Load failed\n")
-        return
-
     def LoadLineFeatures(self, infile):
         """ Load digitized line features, such as those generated by irview's
         dexport command. Returns a dictionary with the feature data.
@@ -888,6 +751,18 @@ class Gather:
         self.history.append(('remove_blank', nsmp, threshold))
         return
 
+    def Reverse(self):
+        """ Flip gather data. """
+        self.data = self.data[:,::-1]
+        self.fids.reverse()
+        self.metadata.Reverse()
+        try:
+            self.topography = self.topography[::-1]
+        except AttributeError:
+            # no topography
+            pass
+        return
+
     def Reset(self):
         """ Reset data and metadata using the internal *_copy attribute
         variables. Does not undo the effects of operations that overwrite
@@ -902,18 +777,13 @@ class Gather:
         except AttributeError:
             pass
         self.fids = copy.copy(self.fids_copy)
-        self.bed_picks = 999 * np.ones(self.data.shape[1])
-        self.bed_phase = 999 * np.ones(self.data.shape[1])
-        self.dc_picks = 999 * np.ones(self.data.shape[1])
-        self.dc_phase = 999 * np.ones(self.data.shape[1])
 
         self.history = [('init')]
         return
 
     def RemoveTraces(self, kill_list):
         """ Remove the traces indicated by indices in kill_list (iterable).
-        Remove metadata as well. This is intended to be easier to use than
-        the CutRegion() and CutSingle() methods. """
+        Remove metadata as well. """
         kill_list.sort()
         kill_list.reverse()
         keep_list = list(set(range(
@@ -925,10 +795,6 @@ class Gather:
             try:
                 self.fids = [self.fids[i] for i in keep_list]
                 self.data = np.vstack([self.data[:,i] for i in keep_list]).T
-                self.bed_picks = np.hstack([self.bed_picks[i] for i in keep_list])
-                self.bed_phase = np.hstack([self.bed_phase[i] for i in keep_list])
-                self.dc_picks = np.hstack([self.dc_picks[i] for i in keep_list])
-                self.dc_phase = np.hstack([self.dc_phase[i] for i in keep_list])
             except IndexError:
                 print "Inconsistent data lengths in {0}".format(repr(self))
                 traceback.print_exc()
@@ -945,10 +811,6 @@ class Gather:
         else:
             self.fids = []
             self.data = np.array([])
-            self.bed_picks = np.array([])
-            self.bed_phase = np.array([])
-            self.dc_picks = np.array([])
-            self.dc_phase = np.array([])
 
             if hasattr(self, 'topography'):
                 self.topography = np.array([])
@@ -958,13 +820,12 @@ class Gather:
                 self.retain['location_{0}'.format(i)] = False
 
             self.nx = 0
-
         return
 
     def RemoveMetadata(self, kill_list, update_registers=True):
-        """ Remove the metadata corresponding to traces indicated by indices
-        in kill_list (iterable). This is intended to be easier to use than
-        the CutRegion() and CutSingle() methods. """
+        """ Remove the metadata corresponding to traces indicated by indices in
+        kill_list (iterable). This is more granular than the RemoveTraces
+        method. """
         kill_list.sort()
         kill_list.reverse()
         all_locs = range(len(self.metadata.locations))
@@ -972,10 +833,6 @@ class Gather:
 
         try:
             self.fids = [self.fids[i] for i in keep_list]
-            self.bed_picks = np.hstack([self.bed_picks[i] for i in keep_list])
-            self.bed_phase = np.hstack([self.bed_phase[i] for i in keep_list])
-            self.dc_picks = np.hstack([self.dc_picks[i] for i in keep_list])
-            self.dc_phase = np.hstack([self.dc_phase[i] for i in keep_list])
         except IndexError:
             print "Inconsistent data lengths in {0}".format(repr(self))
             traceback.print_exc()
@@ -986,82 +843,6 @@ class Gather:
         for i in kill_list:
             self.metadata.Cut(i, i+1)
             self.retain['location_{0}'.format(i)] = False
-        return
-
-    def CutRegion(self, start=None, end=None, cut_data=False):
-        """ Cleanly cut a region specified start, end from working data and
-        internal pick registers. If either start or end is None, then cut
-        to the limit of the array. If both are None, raise an exception.
-
-        Does not adjust metadata; this should be done manually with the
-        RecordList.Cut() method.
-
-        Try RemoveTraces(). It's better.
-        """
-        if (start is None) and (end is None):
-            raise LineGatherError('must specify limits in Cut()')
-        elif start is None:
-            if cut_data:
-                self.data = self.data[:,end+1:]
-            self.fids = self.fids[end+1:]
-            self.bed_picks = self.bed_picks[end+1:]
-            self.bed_phase = self.bed_phase[end+1:]
-            self.dc_picks = self.dc_picks[end+1:]
-            self.dc_phase = self.dc_phase[end+1:]
-        elif end is None:
-            if cut_data:
-                self.data = self.data[:,:start]
-            self.fids = self.fids[:start]
-            self.bed_picks = self.bed_picks[:start]
-            self.bed_phase = self.bed_phase[:start]
-            self.dc_picks = self.dc_picks[:start]
-            self.dc_phase = self.dc_phase[:start]
-        else:
-            if cut_data:
-                self.data = np.hstack(
-                    [self.data[:,:start], self.data[:,end+1:]])
-            del self.fids[start:end+1]
-            self.bed_picks = np.hstack(
-                    [self.bed_picks[:start], self.bed_picks[end+1:]])
-            self.bed_phase = np.hstack(
-                    [self.bed_phase[:start], self.bed_phase[end+1:]])
-            self.dc_picks = np.hstack(
-                    [self.dc_picks[:start], self.dc_phase[end+1:]])
-            self.dc_phase = np.hstack(
-                    [self.dc_phase[:start], self.dc_phase[end+1:]])
-        return
-
-    def CutSingle(self, loc, cut_data=False):
-        """ Cleanly cut a single location from working data and
-        internal pick registers. If cut_data is True, then cut the data.
-        Otherwise, just cut the pick registers.
-
-        Does not adjust metadata; this should be done manually with the
-        RecordList.Cut() method.
-
-        Try RemoveTraces(). It's better.
-        """
-        if loc != len(self.fids):
-            if cut_data:
-                self.data = np.hstack(
-                    [self.data[:,:loc], self.data[:,loc+1:]])
-            del self.fids[loc]
-            self.bed_picks = np.hstack(
-                    [self.bed_picks[:loc], self.bed_picks[loc+1:]])
-            self.bed_phase = np.hstack(
-                    [self.bed_phase[:loc], self.bed_phase[loc+1:]])
-            self.dc_picks = np.hstack(
-                    [self.dc_picks[:loc], self.dc_phase[loc+1:]])
-            self.dc_phase = np.hstack(
-                    [self.dc_phase[:loc], self.dc_phase[loc+1:]])
-        else:
-            if cut_data:
-                self.data = self.data[:,:loc]
-            del self.fids[loc]
-            self.bed_picks = self.bed_picks[:loc]
-            self.bed_phase = self.bed_phase[:loc]
-            self.dc_picks = self.dc_phase[:loc]
-            self.dc_phase = self.dc_phase[:loc]
         return
 
     def Dump(self, fnm=None):
@@ -1079,27 +860,12 @@ class Gather:
         else:
             sys.stderr.write("Cache directory does not exist ({0}/)\n".format(
                              os.path.split(fnm)[0]))
+        return
 
 
 class CommonOffsetGather(Gather):
     """ This is a subclass  of `Gather` that defines a common-offset radar
     line. """
-
-    def Reverse(self):
-        """ Flip gather data. """
-        self.data = self.data[:,::-1]
-        self.fids.reverse()
-        self.metadata.Reverse()
-        self.bed_picks = self.bed_picks[::-1]
-        self.bed_phase = self.bed_picks[::-1]
-        self.dc_picks = self.bed_picks[::-1]
-        self.dc_phase = self.bed_picks[::-1]
-        try:
-            self.topography = self.topography[::-1]
-        except AttributeError:
-            # no topography
-            pass
-        return
 
     def GetTopoCorrectedData(self):
         """ Stop-gap method for getting topographically corrected
@@ -1315,11 +1081,7 @@ class CommonOffsetGather(Gather):
             except IndexError:
                 # Data ended during the last region (no way to fix this)
                 # Best to discard this data
-                self.CutRegion(start=i, cut_data=True)
-                self.metadata.Cut(i, self.nx)
-                self.metadata.Cut(i, self.nx)
-                for iloc in range(i, self.nx):
-                    self.retain['location_{0}'.format(iloc)] = False
+                self.RemoveTraces(range(i, self.nx+1))
 
         # Interpolate linearly, fixing the metadata as we go
         if len(static_regions) > 0:
@@ -1689,11 +1451,163 @@ class CommonMidpointGather(Gather):
         OFFSETS = np.abs(XR - XT)
         return OFFSETS, KEY
 
+
+LineGather = CommonOffsetGather
+
+
+class PickableGather(Gather):
+    """ Subclass of gather adding attributes and methods relevant to event
+    picking. """
+
+    def __init__(self, arr, infile=None, line=None, metadata=None, retain=None, dc=0):
+
+        super(PickableGather, self).__init__(arr, infile=infile, line=line,
+                                             metadata=metadata, retain=retain,
+                                             dc=dc)
+
+        self.bed_picks = 999 * np.ones(self.nx)
+        self.bed_phase = 999 * np.ones(self.nx)
+        self.dc_picks = 999 * np.ones(self.nx)
+        self.dc_phase = 999 * np.ones(self.nx)
+
+    def LoadPicks(self, infile):
+        """ Load bed picks from a text file. Employs a FileHandler. """
+        try:
+            F = FileHandler(infile, self.line)
+            dc_points, bed_points = F.GetEventValsByFID(self.fids)
+            self.dc_picks = np.array(dc_points)
+            self.bed_picks = np.array(bed_points)
+        except FileHandlerError as fhe:
+            sys.stderr.write(str(fhe) + '\n')
+            raise fhe
+        except:
+            traceback.print_exc()
+            sys.stderr.write("Load failed\n")
+        return
+
+    def SavePicks(self, outfile, picks, mode='bed'):
+        """ Save picks to a text file. """
+        FH = FileHandler(outfile, self.line, fids=self.metadata.fids)
+        if mode is 'bed':
+            FH.AddBedPicks(picks)
+        elif mode is 'dc':
+            FH.AddDCPicks(picks)
+        FH.ComputeTravelTimes()
+        FH.Write()
+        del FH
+        return
+
+    def PickBed(self, sbracket=(60,200), bounds=(None,None), phase=1):
+        """ Attempt to pick bed reflections along the line. Return pick
+        data and estimated polarity in vectors (also stored internally).
+
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
+                sample number) during which the event can be picked
+        bounds : location number limits for picking
+        """
+        if self.rate is not None:
+            rate = self.rate
+        else:
+            rate = 4e-9
+
+        if bounds[0] == None:
+            istart = 0
+        else:
+            istart = int(bounds[0])
+
+        if bounds[1] == None:
+            iend = self.data.shape[1]
+        else:
+            iend = int(bounds[1]) + 1
+
+        def first_break_bed(A, prewin=30):
+            """ Find the most negative point, and then find the first positive
+            dV/dt before, within a buffer **prewin**. May require dewow for
+            good performance. """
+            try:
+                # Most negative V
+                ineg = (A == A[prewin:].min()).nonzero()[0][0]
+                # Most positive dV/dt prior
+                dA = np.diff(A[ineg-prewin:ineg])
+                ipos1 = np.argmax(dA[10:]) + ineg - prewin + 10
+                # Closest point with V ~ 0 prior
+                prewin = min((ipos1, prewin))
+                abs_win = np.abs(A[ipos1-prewin:ipos1])
+                try:
+                    izero = (abs_win < 1e-3).nonzero()[0][-1] + ipos1 - prewin
+                except IndexError:
+                    izero = np.argmin(abs_win) + ipos1 - prewin
+            except:
+                # Except what?
+                izero = np.nan
+            return izero
+
+        # Apply function over all traces
+        try:
+            picks = map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)
+            picks = np.where(np.isnan(picks), 999, picks)
+            self.bed_picks[istart:iend] = picks + sbracket[0]
+            self.bed_phase[istart:iend] = 1
+        except:
+            traceback.print_exc()
+
+        self.history.append(('pick_bed',sbracket,bounds))
+        return self.bed_picks, self.bed_phase
+
+    def PickDC(self, sbracket=(20,50), bounds=(None,None)):
+        """ Attempt to pick direct coupling waves along the line.
+        Return pick data in a vector (also stored internally).
+
+        Parameters
+        ----------
+        sbracket : tuple defining minimum and maximum times (by
+                sample number) during which the event can be picked
+        bounds : location number limits for picking
+        """
+        if bounds[0] == None:
+            istart = 0
+        else:
+            istart = int(bounds[0])
+
+        if bounds[1] == None:
+            iend = self.data.shape[1]
+        else:
+            iend = int(bounds[1]) + 1
+
+        def first_break_dc(A, prewin=10, dmax=1e-3):
+            """ Find the first break of a voltage spike that is 50% of
+            the highest in the window. The first break is where dV/dt
+            is less than dmax.
+            """
+            try:
+                # High energy indices
+                he_bool = abs(A) > 0.5 * abs(A).max()
+                ihalfpwr = he_bool.nonzero()[0][0]
+                # Indices of sufficiently low power change
+                le_bool = np.diff(A[ihalfpwr-prewin:ihalfpwr]) < dmax
+                return le_bool.nonzero()[0][-1] + ihalfpwr - prewin
+            except:
+                return 999
+
+        # Apply function over all traces
+        try:
+            picks = map(first_break_dc, self.data[sbracket[0]:sbracket[1],istart:iend].T)
+            self.dc_picks[istart:iend] = picks
+            self.dc_picks[istart:iend] += sbracket[0]
+            self.dc_phase[istart:iend] = 1
+        except:
+            traceback.print_exc()
+
+        self.history.append(('pick_dc',sbracket,bounds))
+        return self.dc_picks, self.dc_phase
+
     def CalcAveragePicks(self, key, picks):
         """ Average picks by location, based on a key. The key is a list of
         paired iterables, containing first and last locations for every shot
-        gather.
-        """
+        gather. This is useful for CMP-style surveys, where multple shots need
+        to be averaged. """
         avg_picks = []
         avg = lambda L: sum(L) / len(L)
         try:
@@ -1705,8 +1619,78 @@ class CommonMidpointGather(Gather):
             avg_picks = None
         return np.array(avg_picks)
 
+    def RemoveTraces(self, kill_list):
+        """ Remove the traces indicated by indices in kill_list (iterable).
+        Remove metadata as well. """
 
-LineGather = CommonOffsetGather
+        super(PickableGather, self).RemoveTraces(kill_list)
+        kill_list.sort()
+        kill_list.reverse()
+        keep_list = list(set(range(
+                len(self.metadata.locations))).difference(set(kill_list)))
+        keep_list.sort()
+
+        if len(keep_list) > 0:
+            self.bed_picks = np.hstack([self.bed_picks[i] for i in keep_list])
+            self.bed_phase = np.hstack([self.bed_phase[i] for i in keep_list])
+            self.dc_picks = np.hstack([self.dc_picks[i] for i in keep_list])
+            self.dc_phase = np.hstack([self.dc_phase[i] for i in keep_list])
+        else:
+            self.bed_picks = np.array([])
+            self.bed_phase = np.array([])
+            self.dc_picks = np.array([])
+            self.dc_phase = np.array([])
+        return
+
+    def RemoveMetadata(self, kill_list, update_registers=True):
+        """ Remove the metadata corresponding to traces indicated by indices in
+        kill_list (iterable). This is more granular than the RemoveTraces
+        method. """
+
+        super(PickableGather, self).RemoveMetadata(kill_list, update_registers=update_registers)
+        kill_list.sort()
+        kill_list.reverse()
+        all_locs = range(len(self.metadata.locations))
+        keep_list = list(set(all_locs).difference(set(kill_list)))
+
+        try:
+            self.bed_picks = np.hstack([self.bed_picks[i] for i in keep_list])
+            self.bed_phase = np.hstack([self.bed_phase[i] for i in keep_list])
+            self.dc_picks = np.hstack([self.dc_picks[i] for i in keep_list])
+            self.dc_phase = np.hstack([self.dc_phase[i] for i in keep_list])
+        except IndexError:
+            print "Inconsistent data lengths in {0}".format(repr(self))
+            traceback.print_exc()
+        return
+
+    def Reverse(self):
+        """ Flip gather data. """
+        super(PickableGather, self).Reverse()
+        self.bed_picks = self.bed_picks[::-1]
+        self.bed_phase = self.bed_picks[::-1]
+        self.dc_picks = self.bed_picks[::-1]
+        self.dc_phase = self.bed_picks[::-1]
+        return
+
+    def Reset(self):
+        """ Reset data and metadata using the internal *_copy attribute
+        variables. Does not undo the effects of operations that overwrite
+        these attribute (such as most preprocessing routines).
+        """
+        super(PickableGather, self).Reset()
+        self.bed_picks = 999 * np.ones(self.data.shape[1])
+        self.bed_phase = 999 * np.ones(self.data.shape[1])
+        self.dc_picks = 999 * np.ones(self.data.shape[1])
+        self.dc_phase = 999 * np.ones(self.data.shape[1])
+        return
+
+
+class PickableCOGather(CommonOffsetGather, PickableGather):
+    pass
+
+
+class PickableCMPGather(CommonMidpointGather, PickableGather):
+    pass
 
 
 class LineGatherError(Exception):
