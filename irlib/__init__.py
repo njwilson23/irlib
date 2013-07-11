@@ -1,3 +1,4 @@
+# General package libs
 import survey
 from survey import Survey
 
@@ -11,12 +12,15 @@ from recordlist import RecordList
 import filehandler
 from filehandler import FileHandler, FileHandlerError
 
+# Application-specific libs
+import app
+from filter_defs import ApplyFilter
+
+# Accessory modules
 import brp
 import polarity
 import misc
 import itools
-
-from filter_defs import ApplyFilter
 
 __all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'itools',
            'brp', 'polarity']

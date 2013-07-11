@@ -5,6 +5,7 @@
 
 import irlib
 from irlib.misc import TryCache
+from irlib import app
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
@@ -438,9 +439,12 @@ def HandleCommand(s, S, IW, L):
 
     elif args[0] in ('filter', 'f'):        # FILTER
         try:
-            irlib.ApplyFilter(L, args[1:])
+            #irlib.ApplyFilter(L, args[1:])
+            app.command_parser.apply_filter(args[1:], L)
             IW.arr = L.data
             IW.ShowRadargram(repaint=True)
+        except app.command_parser.CommandSearchError as e:
+            print e.message
         except IndexError:
             print StrFilterHistory(L)
 
@@ -518,27 +522,34 @@ def HandleCommand(s, S, IW, L):
         pdb.set_trace()
 
     elif args[0] == 'help':                 # HELP
-        print """
-        info                print line metadata
-        ls                  list lines in survey
-        open [line#]        open a different line
-        gain [#]            adjust display contrast
+        if len(args) == 1:
+            print """\tApplication commands:
 
-        filter [lowpass|highpass|lowpass_ma|highpass_ma|dewow|
-                gc|agc|englacial|fkmig [bounds]
-                            use a filter
-        nofilter            remove filters
+            info                print line metadata
+            ls                  list lines in survey
+            open [line#]        open a different line
+            gain [#]            adjust display contrast
 
-        dnew                start digitizing new feature
-        drm [#]             remove a feature
-        dls                 list features
-        dsave               export features to text
+            filter *name*       apply a filter (see below)
+            nofilter            remove all filters
 
-        imsave [file]       save the radargram as an image
-        hist                show a brightness histogram
-        exit                exit irview
-        debug
-        """
+            dnew                start digitizing new feature
+            drm [#]             remove a feature
+            dls                 list features
+            dsave               export features to text
+
+            imsave [file]       save the radargram as an image
+            hist                show a brightness histogram
+            exit                exit irview
+            debug
+            """
+
+            print "\tAvailable filter commands:\n"
+            for name in app.command_parser.list_filters():
+                print "\t\t{0}".format(name)
+
+        else:
+            print app.command_parser.help_filter(args[1])
 
     else:
         print "Command not recognized"
