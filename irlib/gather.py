@@ -820,13 +820,12 @@ class Gather:
                 self.retain['location_{0}'.format(i)] = False
 
             self.nx = 0
-
         return
 
     def RemoveMetadata(self, kill_list, update_registers=True):
-        """ Remove the metadata corresponding to traces indicated by indices
-        in kill_list (iterable). This is intended to be easier to use than
-        the CutRegion() and CutSingle() methods. """
+        """ Remove the metadata corresponding to traces indicated by indices in
+        kill_list (iterable). This is more granular than the RemoveTraces
+        method. """
         kill_list.sort()
         kill_list.reverse()
         all_locs = range(len(self.metadata.locations))
@@ -844,82 +843,6 @@ class Gather:
         for i in kill_list:
             self.metadata.Cut(i, i+1)
             self.retain['location_{0}'.format(i)] = False
-        return
-
-    def CutRegion(self, start=None, end=None, cut_data=False):
-        """ Cleanly cut a region specified start, end from working data and
-        internal pick registers. If either start or end is None, then cut
-        to the limit of the array. If both are None, raise an exception.
-
-        Does not adjust metadata; this should be done manually with the
-        RecordList.Cut() method.
-
-        Try RemoveTraces(). It's better.
-        """
-        if (start is None) and (end is None):
-            raise LineGatherError('must specify limits in Cut()')
-        elif start is None:
-            if cut_data:
-                self.data = self.data[:,end+1:]
-            self.fids = self.fids[end+1:]
-            self.bed_picks = self.bed_picks[end+1:]
-            self.bed_phase = self.bed_phase[end+1:]
-            self.dc_picks = self.dc_picks[end+1:]
-            self.dc_phase = self.dc_phase[end+1:]
-        elif end is None:
-            if cut_data:
-                self.data = self.data[:,:start]
-            self.fids = self.fids[:start]
-            self.bed_picks = self.bed_picks[:start]
-            self.bed_phase = self.bed_phase[:start]
-            self.dc_picks = self.dc_picks[:start]
-            self.dc_phase = self.dc_phase[:start]
-        else:
-            if cut_data:
-                self.data = np.hstack(
-                    [self.data[:,:start], self.data[:,end+1:]])
-            del self.fids[start:end+1]
-            self.bed_picks = np.hstack(
-                    [self.bed_picks[:start], self.bed_picks[end+1:]])
-            self.bed_phase = np.hstack(
-                    [self.bed_phase[:start], self.bed_phase[end+1:]])
-            self.dc_picks = np.hstack(
-                    [self.dc_picks[:start], self.dc_phase[end+1:]])
-            self.dc_phase = np.hstack(
-                    [self.dc_phase[:start], self.dc_phase[end+1:]])
-        return
-
-    def CutSingle(self, loc, cut_data=False):
-        """ Cleanly cut a single location from working data and
-        internal pick registers. If cut_data is True, then cut the data.
-        Otherwise, just cut the pick registers.
-
-        Does not adjust metadata; this should be done manually with the
-        RecordList.Cut() method.
-
-        Try RemoveTraces(). It's better.
-        """
-        if loc != len(self.fids):
-            if cut_data:
-                self.data = np.hstack(
-                    [self.data[:,:loc], self.data[:,loc+1:]])
-            del self.fids[loc]
-            self.bed_picks = np.hstack(
-                    [self.bed_picks[:loc], self.bed_picks[loc+1:]])
-            self.bed_phase = np.hstack(
-                    [self.bed_phase[:loc], self.bed_phase[loc+1:]])
-            self.dc_picks = np.hstack(
-                    [self.dc_picks[:loc], self.dc_phase[loc+1:]])
-            self.dc_phase = np.hstack(
-                    [self.dc_phase[:loc], self.dc_phase[loc+1:]])
-        else:
-            if cut_data:
-                self.data = self.data[:,:loc]
-            del self.fids[loc]
-            self.bed_picks = self.bed_picks[:loc]
-            self.bed_phase = self.bed_phase[:loc]
-            self.dc_picks = self.dc_phase[:loc]
-            self.dc_phase = self.dc_phase[:loc]
         return
 
     def Dump(self, fnm=None):
@@ -1158,11 +1081,7 @@ class CommonOffsetGather(Gather):
             except IndexError:
                 # Data ended during the last region (no way to fix this)
                 # Best to discard this data
-                self.CutRegion(start=i, cut_data=True)
-                self.metadata.Cut(i, self.nx)
-                self.metadata.Cut(i, self.nx)
-                for iloc in range(i, self.nx):
-                    self.retain['location_{0}'.format(iloc)] = False
+                self.RemoveTraces(range(i, self.nx+1))
 
         # Interpolate linearly, fixing the metadata as we go
         if len(static_regions) > 0:
