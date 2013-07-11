@@ -3,37 +3,47 @@ import filters
 
 def get_commands(module):
     """ Return the commands in module """
-    commands = [a.cmd for a in module.__dict__ if super(a) is filters.Command]
+    commands = [a for a in module.__dict__.values()
+                                    if (type(a) is type)
+                                        and a.__base__ is filters.Command]
+    commands = {}
+    for key in module.__dict__:
+        val = module.__dict__[key]
+        if (type(val) is type) and val.__base__ is filters.Command:
+            commands[val.cmd] = val
     return commands
 
-def apply_filter(input_string, G):
+def apply_filter(inputs, G):
     """ Attempt to find a Command matching an input_string, and apply. Raises
     CommandSearchError otherwise. """
-    if " " in input_string:
-        cmd, args = input_string.split(None, 1)
+    if len(inputs) > 1:
+        cmd = inputs[0]
+        args = inputs[1:]
     else:
-        cmd = input_string
-        args = None
+        cmd = inputs[0]
+        args = []
 
-    if cmd in get_commands(filters):
+    command_dict = get_commands(filters)
+    if cmd in command_dict:
         try:
-            filters.__dict__[cmd].apply(G, args)
+            cmdobj = command_dict[cmd]()
+            cmdobj.apply(G, args)
         except Exception as e:
-            raise CommandApplicationError(e.message)
+            raise CommandApplicationError(e)
     else:
          raise CommandSearchError("No command definition '{0}' found".format(cmd))
 
 def help_filter(cmd):
     """ Print the help documentation for *cmd*, or raise CommandSearchError if
     it cannot be found. """
-    if cmd in get_commands(filters):
-        print filters.__dict__[cmd].helpstr
+    command_dict = get_commands(filters)
+    if cmd in command_dict:
+        return command_dict[cmd].helpstr
     else:
          raise CommandSearchError("No command definition '{0}' found".format(cmd))
-    return
 
 def list_filters():
-    for cmd in sorted(get_commands(filters)):
+    for cmd in sorted(get_commands(filters).keys()):
         print cmd
     return
 
@@ -44,8 +54,8 @@ class CommandSearchError(Exception):
         return self.message
 
 class CommandApplicationError(Exception):
-    def __init__(self, message="No message"):
-        self.message = message
+    def __init__(self, exception):
+        self.e = exception
     def __str__(self):
-        return self.message
+        return e.__str__
 

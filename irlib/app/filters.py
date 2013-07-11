@@ -7,9 +7,7 @@ class Command(object):
 
     helpstr = "No help"
 
-    def __init__(self, cmd):
-        self.cmd = cmd
-        self.args = args
+    def __init__(self):
         return
 
     def apply(self, G):
@@ -25,8 +23,8 @@ class LinearGainControl(Command):
     Apply a time-dependent linear gain control (t^n) to each trace, with the
     exponent `n` taking the default value of 1.0. """
 
-    def apply(self, G, *args):
-        if len(self.args) > 0:
+    def apply(self, G, args):
+        if len(args) > 0:
             npow = float(args[0])
         else:
             npow = 1.0
@@ -35,20 +33,20 @@ class LinearGainControl(Command):
 
 class AutoGainControl(Command):
     cmd = "agc"
-    helpstr """Automatic gain control
+    helpstr = """Automatic gain control
 
     agc
 
     Apply automatic gain control, normalizing the power in a finite window to a
     constant value."""
 
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.DoAutoGainControl(5e-8)
         return
 
 class ReflectionPower(Command):
     cmd = "power"
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.data = G.data**2
         return
 
@@ -60,7 +58,7 @@ class Lowpass_FD(Command):
 
     Apply a frequency domain lowpass filter implemented using a windowed sinc
     kernel."""
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G. DoWindowedSinc(cutoff=25e6, bandwidth=5e6, mode="lowpass")
         return
 
@@ -72,7 +70,7 @@ class Highpass_FD(Command):
 
     Apply a frequency domain highpass filter implemented using a windowed sinc
     kernel."""
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.DoWindowedSinc(cutoff=25.e6, bandwidth=5.e6, mode='highpass')
         return
 
@@ -84,7 +82,7 @@ class Lowpass_TD(Command):
 
     Apply a frequency domain lowpass filter implemented as a
     moving average with a blackman window."""
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G. DoMoveAvg(21, kind="blackman", mode="lowpass")
         return
 
@@ -96,7 +94,7 @@ class Highpass_TD(Command):
 
     Apply a frequency domain highpass filter implemented as a
     spectrally-inverted moving average with a blackman window."""
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.DoMoveAvg(7, kind="blackman", mode='highpass')
         return
 
@@ -107,7 +105,7 @@ class Dewow(Command):
     dewow
 
     Apply a "dewowing" filter to remove instrument drift."""
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.Dewow()
         return
 
@@ -119,7 +117,7 @@ class RemoveRinging(Command):
     Remove constant horizontal reflectors (e.g. instrument ringing) through
     eigenimage decomposition."""
     cmd = "ringing"
-    def apply(self, G, *args):
+    def apply(self, G, args):
         G.RemoveRinging()
         return
 
@@ -133,7 +131,7 @@ class MigrateFK(Command):
     takes `t0_offset`, which is an amount to vertically adjust the radargram to
     align zero-time."""
 
-    def apply(self, G, *args):
+    def apply(self, G, args):
         if len(args) > 0:
             t0_offset = int(round(float(args[0])))
         else:
