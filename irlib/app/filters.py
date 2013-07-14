@@ -41,6 +41,7 @@ class AutoGainControl(Command):
     constant value."""
 
     def apply(self, G, args):
+        G.Dewow()
         G.DoAutoGainControl(5e-8)
         return
 
