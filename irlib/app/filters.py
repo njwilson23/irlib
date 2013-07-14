@@ -55,48 +55,73 @@ class Lowpass_FD(Command):
     cmd = "lowpass"
     helpstr = """Frequency-domain lowpass
 
-    lowpass
+    lowpass [cut [bw]]
 
     Apply a frequency domain lowpass filter implemented using a windowed sinc
-    kernel."""
+    kernel. Optional arguments are cutoff frequency and bandwidth. """
     def apply(self, G, args):
-        G. DoWindowedSinc(cutoff=25e6, bandwidth=5e6, mode="lowpass")
+        if len(args) > 0:
+            co = float(args[0])
+        else:
+            co = 25e6
+        if len(args) > 1:
+            bw = float(args[1])
+        else:
+            bw = 5e6
+        G. DoWindowedSinc(cutoff=co, bandwidth=bw, mode="lowpass")
         return
 
 class Highpass_FD(Command):
     cmd = "highpass"
     helpstr = """Frequency-domain highpass
 
-    highpass
+    highpass [cut [bw]]
 
     Apply a frequency domain highpass filter implemented using a windowed sinc
-    kernel."""
+    kernel. Optional arguments are cutoff frequency and bandwidth. """
     def apply(self, G, args):
-        G.DoWindowedSinc(cutoff=25.e6, bandwidth=5.e6, mode='highpass')
+        if len(args) > 0:
+            co = float(args[0])
+        else:
+            co = 25e6
+        if len(args) > 1:
+            bw = float(args[1])
+        else:
+            bw = 5e6
+        G.DoWindowedSinc(cutoff=co, bandwidth=bw, mode='highpass')
         return
 
 class Lowpass_TD(Command):
     cmd = "lowpass_td"
     helpstr = """Time-domain lowpass
 
-    lowpass
+    lowpass [nsamp]
 
-    Apply a frequency domain lowpass filter implemented as a
-    moving average with a blackman window."""
+    Apply a frequency domain lowpass filter implemented as a moving average
+    with a blackman window. Optional argument is sample width of the filter. """
     def apply(self, G, args):
-        G. DoMoveAvg(21, kind="blackman", mode="lowpass")
+        if len(args) > 0:
+            ns = int(args[0])
+        else:
+            ns = 21
+        G. DoMoveAvg(ns, kind="blackman", mode="lowpass")
         return
 
 class Highpass_TD(Command):
     cmd = "highpass_td"
     helpstr = """Time-domain highpass
 
-    highpass
+    highpass [nsamp]
 
     Apply a frequency domain highpass filter implemented as a
-    spectrally-inverted moving average with a blackman window."""
+    spectrally-inverted moving average with a blackman window. Optional
+    argument is sample width of the filter. """
     def apply(self, G, args):
-        G.DoMoveAvg(7, kind="blackman", mode='highpass')
+        if len(args) > 0:
+            ns = int(args[0])
+        else:
+            ns = 7
+        G.DoMoveAvg(ns, kind="blackman", mode='highpass')
         return
 
 class Dewow(Command):
