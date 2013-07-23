@@ -29,7 +29,7 @@ def apply_filter(inputs, G):
             cmdobj = command_dict[cmd]()
             cmdobj.apply(G, args)
         except Exception as e:
-            raise CommandApplicationError(e)
+            print CommandApplicationError(e)
     else:
          raise CommandSearchError("No command definition '{0}' found".format(cmd))
 
@@ -55,5 +55,5 @@ class CommandApplicationError(Exception):
     def __init__(self, exception):
         self.e = exception
     def __str__(self):
-        return e.__str__
+        return self.e.__str__()
 
