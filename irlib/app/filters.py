@@ -102,6 +102,8 @@ class Lowpass_TD(Command):
     def apply(self, G, args):
         if len(args) > 0:
             ns = int(args[0])
+            if ns % 2 == 0:
+                ns += 1
         else:
             ns = 21
         G. DoMoveAvg(ns, kind="blackman", mode="lowpass")
@@ -119,6 +121,8 @@ class Highpass_TD(Command):
     def apply(self, G, args):
         if len(args) > 0:
             ns = int(args[0])
+            if ns % 2 == 0:
+                ns += 1
         else:
             ns = 7
         G.DoMoveAvg(ns, kind="blackman", mode='highpass')
