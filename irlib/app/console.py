@@ -4,10 +4,12 @@ v0.4. """
 import sys
 import getopt
 import readline
+import matplotlib.pyplot as plt
 import irlib
 import command_parser
-from .components import Radargram
+from .components import Radargram, MapWindow
 import traceback
+import pdb
 
 class Console(object):
 
@@ -77,10 +79,19 @@ class Console(object):
         return cmd
 
     def get_appwindows(self, t=None):
+        """ Get all windows of a particular type from the window list. """
         if t is None:
             return self.appwindows
         else:
             return [a for a in self.appwindows if type(a) == t]
+
+    def remove_appwindow(self, ref):
+        """ Remove a window from the window list. """
+        for i, win in enumerate(self.appwindows):
+            if win is ref:
+                break
+        self.appwindows.pop(i)
+        return
 
     def handle_command(self, cmd):
         # List args. Handle empty input.
@@ -151,8 +162,12 @@ class Console(object):
                     print "Opening line {0}, channel {1}".format(lineno, dcno)
                     del self.line
                     self.open_line(lineno, dcno=dcno)
+
                     for rg in self.get_appwindows(Radargram):
                         rg._newline(self.line)
+
+                    for mw in self.get_appwindows(MapWindow):
+                        mw._newline(self.line)
 
                 else:
                     print ("Line {0} channel {1} does "
@@ -234,6 +249,25 @@ class Console(object):
             except IndexError:
                 print "gain: " + str(1.0 / self.get_appwindows(Radargram)[0].lum_scale)
 
+        elif args[0] == 'map':                  # MAP
+            if len(args) < 2:
+                if len(self.get_appwindows(MapWindow)) < 1:
+                    print "Map window: off"
+                else:
+                    print "Map window: on"
+            else:
+                if args[1] == "on":
+                    mw = MapWindow(self.line)
+                    self.appwindows.append(mw)
+
+                elif args[1] == "off":
+                    for mw in self.get_appwindows(MapWindow):
+                        plt.close(mw.fig)
+                        self.remove_appwindow(mw)
+                        del mw
+                else:
+                    print "Command not recognized"
+
         elif args[0] == 'debug':                # DEBUG
             pdb.set_trace()
 
@@ -253,9 +287,10 @@ class Console(object):
                 drm [#]             remove a feature
                 dls                 list features
                 dsave               export features to text
-
                 imsave [file]       save the radargram as an image
-                hist                show a brightness histogram
+
+                map on|off          open a map of the displayed line
+
                 exit                exit irview
                 debug
                 """

@@ -36,9 +36,10 @@ class AppWindow(object):
         return
 
     def __del__(self):
-        self.fig.clf()
+        #self.fig.clf()
         self.fig.canvas.mpl_disconnect(self.cid_click)
         self.fig.canvas.mpl_disconnect(self.cid_key)
+        plt.close(self.fig)
         del self.fig
         return
 
@@ -50,7 +51,7 @@ class AppWindow(object):
 
     def update(self):
         """ Redraw the axes """
-        self.ax.draw()
+        self.fig.canvas.draw()
         return
 
 
@@ -81,7 +82,6 @@ class Radargram(AppWindow):
         self.update()
         return
 
-
     def _onclick(self, event):
         """ Event handler for mouse clicks."""
         if self.digitize_mode:
@@ -110,8 +110,7 @@ class Radargram(AppWindow):
                     self.ax.plot((x, x), yr, "-k")
                     print x, y
                     print xr, yr
-                    plt.draw()
-                    #self.ax.update()
+                    self.fig.canvas.draw()
 
 
 
@@ -199,6 +198,7 @@ class Radargram(AppWindow):
         self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*self.rate*1e9)
+        self.fig.canvas.draw()
         return
 
     def update(self, cmap='gray', c=1.68e8, repaint=False, lum_scale=None):
@@ -238,7 +238,7 @@ class Radargram(AppWindow):
             self.ax.set_title("Line {0} [feature {1}]".format(self.line, self.fid))
         else:
             self.ax.set_title("Line {0} [viewing]".format(self.L.line))
-        plt.draw()
+        self.fig.canvas.draw()
         return
 
     def get_digitizer_filename(self):
@@ -324,5 +324,26 @@ class PickWindow(AppWindow):
     pass
 
 class MapWindow(AppWindow):
-    pass
+    """ Displays a simple map of trace locations """
+
+    def __init__(self, L):
+        super(MapWindow, self).__init__((4, 4))
+        self._newline(L)
+        return
+
+    def _newline(self, L):
+        """ Replace internal state with a new radar line, discarding all
+        digitizing and feature information and redrawing. """
+        self.L = L
+        self.x = L.metadata.eastings
+        self.y = L.metadata.northings
+        self.ax.cla()
+        self.update()
+        return
+
+    def update(self):
+        self.ax.set_xlabel("Eastings (m)")
+        self.ax.set_ylabel("Northings (m)")
+        self.ax.plot(self.x, self.y, ".k")
+        self.fig.canvas.draw()
 
