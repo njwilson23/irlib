@@ -7,6 +7,8 @@ from irlib.misc import TryCache
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.ion()
+
 class AppWindow(object):
     """ This is the generic application window class, and contains an axes
     instance and event-handling and update machinery.
@@ -61,16 +63,24 @@ class Radargram(AppWindow):
     features = {}
     digitize_mode = False
 
-    def __init__(self, L):
+    lum_scale = 0.25
+    cmap = plt.cm.binary
 
+    def __init__(self, L):
         super(Radargram, self).__init__((8, 4))
+        self._newline(L)
+        return
+
+    def _newline(self, L):
+        """ Replace internal state with a new radar line, discarding all
+        digitizing and feature information and redrawing. """
         self.rate = L.metadata.sample_rate[0]
         self.L = L
         self.data = L.data
-
+        self.repaint()
         self.update()
-
         return
+
 
     def _onclick(self, event):
         """ Event handler for mouse clicks."""
@@ -90,19 +100,32 @@ class Radargram(AppWindow):
 
             try:
                 x = int(round(event.xdata))
+                y = int(round(event.ydata))
 
                 if event.button == 1:
+
+                    xr = self.ax.get_xlim()
+                    yr = self.ax.get_ylim()
+                    self.ax.plot(xr, (y, y), "-k")
+                    self.ax.plot((x, x), yr, "-k")
+                    print x, y
+                    print xr, yr
+                    plt.draw()
+                    #self.ax.update()
+
+
+
                     print ("\n\tFID: {0}\n\tx: {1}\t\ty:{2}\t\t\tt: {3} ns "
-                            .format(self.radar_fids[x],
+                            .format(self.L.fids[x],
                                 int(round(event.xdata)), int(round(event.ydata)),
                                 round(event.ydata*self.rate*1e-9,2)))
 
                 elif event.button == 2:
-                    self.update()
                     self.repaint()
+                    self.update()
 
                 else:
-                    print ("\n\teasting: {0:.1f}\tnorthing: {1:.1f}\n>> "
+                    print ("\n\teasting: {0:.1f}\tnorthing: {1:.1f}"
                             .format(self.L.metadata.eastings[x],
                                     self.L.metadata.northings[x]))
 
@@ -148,7 +171,7 @@ class Radargram(AppWindow):
         try:
             self.features.pop(fid)
             self.active_coords = []
-            self.update(repaint=True)
+            self.update()
         except KeyError:
             pass
 
@@ -173,7 +196,7 @@ class Radargram(AppWindow):
         lum_bound = max((abs(self.data.max()), abs(self.data.min()))) * lum_scale
 
         self.ax.cla()
-        self.ax.imshow(self.data, aspect='auto', cmap=cmap, vmin=-lum_bound, vmax=lum_bound)
+        self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*self.rate*1e9)
         return

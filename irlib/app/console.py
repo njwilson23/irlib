@@ -149,10 +149,11 @@ class Console(object):
                 if 'line_{0}'.format(lineno) in self.survey.GetLines() and \
                     dcno < self.survey.GetChannelsInLine(lineno):
                     print "Opening line {0}, channel {1}".format(lineno, dcno)
-                    for rg in self.get_appwindows(Radargram):
-                        del rg
-                        del self.line
+                    del self.line
                     self.open_line(lineno, dcno=dcno)
+                    for rg in self.get_appwindows(Radargram):
+                        rg._newline(self.line)
+
                 else:
                     print ("Line {0} channel {1} does "
                            "not exist".format(lineno, dcno))
