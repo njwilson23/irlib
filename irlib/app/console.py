@@ -38,8 +38,6 @@ class Console(object):
 
         self.open_line(lineno)
         self.appwindows.append(Radargram(self.line))
-        for rg in self.get_appwindows(Radargram):
-            rg.update()
 
         # Begin main loop
         print bannertext
