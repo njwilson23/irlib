@@ -4,9 +4,8 @@ import sys
 import os
 import irlib
 from irlib.misc import TryCache
-from irlib import app
 import numpy as np
-import matplotlib
+import matplotlib.pyplot as plt
 
 class AppWindow(object):
     """ This is the generic application window class, and contains an axes
@@ -17,7 +16,7 @@ class AppWindow(object):
 
     def __init__(self, winsize):
         self.fig = plt.figure(figsize=winsize)
-        self.ax = fig.add_subplot(1,1,1)
+        self.ax = self.fig.add_subplot(1,1,1)
 
         # Turn off default shortcuts
         for i in self.fig.canvas.callbacks.callbacks:
@@ -128,10 +127,10 @@ class Radargram(AppWindow):
         return fid
 
     def add_feature(self, s):
-        if self.digitize:
+        if self.digitize_mode:
             self.end_feature()
         else:
-            self.digitize = True
+            self.digitize_mode = True
         self.active_feature_name = s
         self.active_coords = []
         self.update()
@@ -140,7 +139,7 @@ class Radargram(AppWindow):
     def end_feature(self):
         self.features[self.fid] = [self.active_feature_name,
                             [xy for xy in self.active_coords]]
-        self.digitize = False
+        self.digitize_mode = False
         self.fid += 1
         self.update()
         return self.fid-1
@@ -171,10 +170,10 @@ class Radargram(AppWindow):
         else:
             self.lum_scale = lum_scale
 
-        lum_bound = max((abs(self.arr.max()), abs(self.arr.min()))) * lum_scale
+        lum_bound = max((abs(self.data.max()), abs(self.data.min()))) * lum_scale
 
         self.ax.cla()
-        self.ax.imshow(self.arr, aspect='auto', cmap=cmap, vmin=-lum_bound, vmax=lum_bound)
+        self.ax.imshow(self.data, aspect='auto', cmap=cmap, vmin=-lum_bound, vmax=lum_bound)
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*self.rate*1e9)
         return
@@ -185,50 +184,50 @@ class Radargram(AppWindow):
         forces the background to be redrawn (for example, after a
         filter opperation).
         """
-        n = self.arr.shape[0]
-        self.ax1.lines = []
+        n = self.data.shape[0]
+        self.ax.lines = []
 
         # Draw nodes
-        drawxy = lambda xy: self.ax1.plot(xy[0], xy[1], 'or', markersize=5.0,
+        drawxy = lambda xy: self.ax.plot(xy[0], xy[1], 'or', markersize=5.0,
                                           markeredgewidth=0.0, alpha=0.5)
         points_ = map(drawxy, self.active_coords)
 
         # Draw previous features
         if len(self.features) > 0:
 
-            drawline = lambda lsxy: self.ax1.plot(
+            drawline = lambda lsxy: self.ax.plot(
                 [i[0] for i in lsxy[1]], [i[1] for i in lsxy[1]],
                 '--r')
             lines_ = map(drawline, self.features.values())
 
-            labelfeature = lambda key, lsxy: self.ax1.text(lsxy[1][-1][0],
+            labelfeature = lambda key, lsxy: self.ax.text(lsxy[1][-1][0],
                 lsxy[1][-1][1]-20, str(key), fontsize=12, color='r')
             text_ = map(labelfeature, self.features.keys(), self.features.values())
 
         # Force tight bounding
-        self.ax1.set_xlim([0, self.arr.shape[1]-1])
-        self.ax1.set_ylim([self.arr.shape[0]-1, 0])
+        self.ax.set_xlim([0, self.data.shape[1]-1])
+        self.ax.set_ylim([self.data.shape[0]-1, 0])
 
         # Decorate and draw
-        self.ax1.set_ylabel("Time (ns)")
-        self.ax1.set_xlabel("Location number")
-        if self.digitize:
-            self.ax1.set_title("Line {0} [feature {1}]".format(self.line, self.fid))
+        self.ax.set_ylabel("Time (ns)")
+        self.ax.set_xlabel("Location number")
+        if self.digitize_mode:
+            self.ax.set_title("Line {0} [feature {1}]".format(self.line, self.fid))
         else:
-            self.ax1.set_title("Line {0} [viewing]".format(self.line))
+            self.ax.set_title("Line {0} [viewing]".format(self.L.line))
         plt.draw()
         return
 
     def get_digitizer_filename(self):
         fnm = os.path.join("englacial",
-            os.path.basename(self.L.infile).split(".")[0] + "_line" + str(self.line) + ".txt")
+            os.path.basename(self.L.infile).split(".")[0] + "_line" + str(self.L.line) + ".txt")
         return fnm
 
     def load(self, f):
         """ Parse a digitizer file and return a dictionary with list
         entries that can be dropped directly into an ImageWindow.
         """
-        self.digitize = False
+        self.digitize_mode = False
         features = {}
         i = 0
 

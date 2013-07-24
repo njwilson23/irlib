@@ -2,15 +2,20 @@
 v0.4. """
 
 import sys
+import getopt
+import readline
 import irlib
-from irlib.app.components import Radargram
+import command_parser
+from .components import Radargram
+import traceback
 
 class Console(object):
 
     survey = None
+    line = None
     appwindows = []
 
-    def __init__(self, progname):
+    def __init__(self, progname, bannertext=""):
 
         self.progname = progname
 
@@ -35,10 +40,7 @@ class Console(object):
         self.appwindows.append(Radargram(self.line))
 
         # Begin main loop
-        print "Ice Radar Viewing Tool (IRView)"
-        print "Press [shift+n] to digitize a feature."
-        print "Right-click or press [shift+e] to end the feature."
-        print "Type 'help' for additional commands."
+        print bannertext
 
         while True:
             cmd = self.get_command()
@@ -46,7 +48,7 @@ class Console(object):
         return
 
     def print_syntax(self):
-        print "\t {0} -f file_name [-L line_number]".format(progname)
+        print "\t {0} -f file_name [-L line_number]".format(self.progname)
         return
 
     def open_line(self, lineno, dcno=0, fromcache=True):
@@ -55,7 +57,7 @@ class Console(object):
         loaded = False
         if fromcache:
             cachename = self.survey.GetLineCacheName(lineno, dcno)
-            loaded, line = self.try_cache(cachename)
+            loaded, line = irlib.misc.TryCache(cachename)
         if loaded == False:
             line = self.survey.ExtractLine(lineno, datacapture=dcno)
             try:
@@ -84,7 +86,7 @@ class Console(object):
         # List args. Handle empty input.
         args = cmd.split(' ')
 
-        if s == '':
+        if cmd == '':
             return
 
         # Remove double spaces
@@ -99,30 +101,33 @@ class Console(object):
 
         elif args[0] == 'info':                 # INFO
             print self.survey.datafile
-            print 'line: ' + str(IW.line)
+            print 'line: ' + str(self.line.line)
             try:
                 print 'channel: ' + str(self.line.datacapture)
             except AttributeError:
                 pass
             print '# traces: ' + str(self.line.data.shape[1])
             print '# samples: ' + str(self.line.data.shape[0])
-            rate = self.line.metadata.sample_rate[0]
+            rate = 1.0 / self.line.metadata.sample_rate[0]
             print 'sample interval: ' + str(rate) + ' s'
             print 'depth resolution: ' + str(rate * 1.68e8 / 2.0) + ' m'
-            print 'vertical range: ' + str(1.68e8*self.line.shape[0]*rate / 2.0) + ' m'
+            print 'vertical range: ' + str(1.68e8*self.line.data.shape[0]*rate / 2.0) + ' m'
             print 'available channels: ' + str(self.survey.GetChannelsInLine(int(self.line.line)))
 
         elif args[0] == 'ls':                   # LS
-            cursor = 0
+            cursor = 2
+            print "Lines:"
+            print "  ",
             for linestr in self.survey.GetLines():
                 lineno = int(linestr.split("_")[1])
                 if self.line.line == lineno:
-                    print " <{0}> ".format(lineno),
+                    print "<{0}>".format(lineno),
                 else:
-                    print "  {0}  ".format(lineno),
-                cursor += 5
+                    print " {0} ".format(lineno),
+                cursor += (2 + len(str(lineno)))
                 if cursor > 70:
                     print
+                    print "  ",
             print
 
         elif args[0] == 'open':                 # OPEN
@@ -141,13 +146,13 @@ class Console(object):
                 return
 
             try:
-                if 'line_{0}'.format(line) in self.survey.GetLines() and \
+                if 'line_{0}'.format(lineno) in self.survey.GetLines() and \
                     dcno < self.survey.GetChannelsInLine(lineno):
                     print "Opening line {0}, channel {1}".format(lineno, dcno)
                     for rg in self.get_appwindows(Radargram):
                         del rg
                         del self.line
-                    self.open_line(self.infile, lineno, dcno=dcno)
+                    self.open_line(lineno, dcno=dcno)
                 else:
                     print ("Line {0} channel {1} does "
                            "not exist".format(lineno, dcno))
@@ -255,11 +260,11 @@ class Console(object):
                 """
 
                 print "\tAvailable filter commands:\n"
-                for name in app.command_parser.list_filters():
+                for name in command_parser.list_filters():
                     print "\t\t{0}".format(name)
 
             else:
-                print app.command_parser.help_filter(args[1])
+                print command_parser.help_filter(args[1])
 
         else:
             print "Command not recognized"
