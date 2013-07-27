@@ -70,7 +70,7 @@ class Radargram(AppWindow):
     cmap = plt.cm.binary
 
     def __init__(self, L):
-        super(Radargram, self).__init__((8, 4))
+        super(Radargram, self).__init__((10, 4))
         self._newline(L)
         return
 
@@ -80,6 +80,7 @@ class Radargram(AppWindow):
         self.rate = L.metadata.sample_rate[0]
         self.L = L
         self.data = L.data
+        self.annotations = {}
         self.repaint()
         self.update()
         return
@@ -109,7 +110,6 @@ class Radargram(AppWindow):
                     if "crosshair" in self.annotations:
                         for line in self.annotations["crosshair"]:
                             line.remove()
-                            #self.ax.remove(line)
                         self.annotations["clicktext"].remove()
 
                     xr = self.ax.get_xlim()
@@ -337,7 +337,247 @@ class Radargram(AppWindow):
         return dict_list
 
 class PickWindow(AppWindow):
-    pass
+    """ Show a series of A-scan traces and allow picking """
+
+    annotations = {}
+    spacing = 0.1
+    trace0 = 0
+    mode = "bed"
+    activetrace = None
+    rg = None
+
+    def __init__(self, L, ntraces=8):
+        super(PickWindow, self).__init__((10, 8))
+        self.ax.set_autoscale_on(False)
+        self.ntraces = ntraces
+        self._newline(L)
+        return
+
+    def _newline(self, L):
+        """ Replace internal state with a new radar line, discarding all
+        digitizing and feature information and redrawing. """
+        self.rate = L.metadata.sample_rate[0]
+        self.L = L
+        self.data = L.data
+        self.annotations = {}
+        self.activetrace = None
+        self.update()
+        return
+
+    def _onclick(self, event):
+        """ Event handler for mouse clicks. Attempts to place a pick
+        point where the mouse was clicked. """
+
+        #if event.button == 2 and (rg is not None):
+        #    self.rg.repaint()
+        #    return
+
+        if event.button == 2:
+
+            newmode = "bed" if (self.mode == "dc") else "dc"
+            self.change_mode(newmode)
+
+        else:
+
+            # Identify the trace that was aimed for
+            if event.xdata == None: return
+            activetrace = int(round(event.xdata/self.spacing + self.ntraces/2))
+            try:
+                trace = self.data[:,self.trace0 + activetrace]
+            except IndexError:
+                return
+
+            # Determine if trace already has a point, and if so, remove it
+            pr = self._active_reg()
+            if pr[activetrace] is not None:
+                self.ax.lines.remove(pr[activetrace][0])
+                pr[activetrace] = None
+
+            if event.button == 1:
+                # Now put a point there
+                yi = round(-event.ydata / self.rate)
+                self._drawpick(trace, yi, activetrace)
+
+                # Save the picked point
+                self.points[activetrace + self.trace0] = yi
+
+                self.yi = yi
+                self.activetrace = activetrace
+
+            elif event.button == 3:
+                # Remove the point
+                pr[activetrace] = None
+                self.points[activetrace + self.trace0] = np.nan
+                self.activetrace = None
+
+        self.update()
+        return
+
+    def _active_reg(self):
+        if self.mode == "bed":
+            return self.bed_pick_reg
+        else:
+            return self.dc_pick_reg
+
+    def _onkeypress(self, event):
+        """ Event handler for keystrokes. Moves pick locations or loads
+        different traces.
+        """
+
+        # See about moving a placed pick
+        if self.activetrace is not None:
+
+            trace = self.data[:,self.trace0 + self.activetrace]
+
+            if event.key == 'j':
+                self._clearlastpick()
+                self.yi += 1
+                self._drawpick(trace, self.yi, self.activetrace)
+                self.points[self.activetrace + self.trace0] = self.yi
+
+            elif event.key == 'k':
+                self._clearlastpick()
+                self.yi -= 1
+                self._drawpick(trace, self.yi, self.activetrace)
+                self.points[self.activetrace + self.trace0] = self.yi
+
+            self.fig.canvas.draw()
+
+        if event.key == 'h':
+            # Try moving to the left
+            if self.trace0 > 0:
+                self.trace0 -= self.ntraces
+                self.activetrace = None
+                self._clear_registers()
+                self.update()
+
+        elif event.key == 'l':
+            # Try moving to the right
+            if self.trace0 < self.data.shape[1] - self.ntraces:
+                self.trace0 += self.ntraces
+                self.activetrace = None
+                self._clear_registers()
+                self.update()
+
+        return
+
+    def _shiftx(self, n):
+        """ Shift an x-coordinate to the proper trace position on a
+        multi-trace plot. """
+        return n*self.spacing - self.ntraces/2*self.spacing
+
+    def _clear_registers(self):
+        self.bed_pick_reg = [None for i in self.bed_pick_reg]
+        self.dc_pick_reg = [None for i in self.dc_pick_reg]
+        return
+
+    def _clearlastpick(self):
+        """ Remove the last pick point drawn, according to the
+        registry. """
+        pr = self._active_reg()
+        if self.activetrace is not None:
+            self.ax.lines.remove(pr[self.activetrace][0])
+            pr[self.activetrace] = None
+        return
+
+    def _drawpick(self, trace, yi, activetrace):
+        """ Draw a pick mark on the given trace at yi, and update the
+        registry. """
+        trace = trace / trace.max() * self.spacing / 3.0
+
+        if self.mode == 'bed':
+            pr = self.bed_pick_reg
+            sty = "ob"
+        elif self.mode == 'dc':
+            pr = self.dc_pick_reg
+            sty = "or"
+
+        pr[activetrace] = \
+            self.ax.plot(trace[yi] + self._shiftx(activetrace),
+                         -self.time[yi], sty, alpha=0.4)
+
+        return self.ax.lines
+
+    def _newline(self, L):
+        """ Replace internal state with a new radar line, discarding all
+        digitizing and feature information and redrawing. """
+        self.rate = L.metadata.sample_rate[0]
+        self.L = L
+        self.data = L.data
+        self.time = np.arange(L.data.shape[0]) * self.rate
+
+        self.bed_points = np.nan * np.zeros(self.data.shape[1])
+        self.dc_points = np.nan * np.zeros(self.data.shape[1])
+        self.bed_pick_reg = [None for i in range(self.ntraces)]
+        self.dc_pick_reg = [None for i in range(self.ntraces)]
+
+        self.points = self.bed_points
+
+        self.trace0 = 0
+        self.annotations = {}
+        self.update()
+        return
+
+    def update(self):
+        """ Redraw axes and data """
+        self.ax.lines = []
+        self.ax.set_xlim(-self.spacing * (self.ntraces+2) / 2,
+                          self.spacing * self.ntraces / 2)
+        self.ax.cla()
+
+        for i in range(self.ntraces):
+            trno = self.trace0 + i
+
+            # Plot the trace
+            trace = self.data[:,trno]
+            trace = trace / max(abs(trace)) * self.spacing / 3.0
+            self.ax.plot(trace + self._shiftx(i), -self.time, '-k')
+
+            # Plot any existing picks
+            oldmode = self.mode
+            if not np.isnan(self.bed_points[trno]):
+                self.mode = 'bed'
+                self._drawpick(trace, self.bed_points[trno], i)
+            if not np.isnan(self.dc_points[trno]):
+                self.mode = 'dc'
+                self._drawpick(trace, self.dc_points[trno], i)
+            self.mode = oldmode
+
+        locs = self.ax.get_yticks()
+        self.ax.set_yticklabels(locs*-1e9)
+
+        self.ax.set_title("Mode: {0}".format(self.mode))
+
+        self.fig.canvas.draw()
+
+        if self.rg is not None:
+            for name in ("picklim0", "picklim1"):
+                if name in self.rg.annotations:
+                    self.rg.annotations[name][0].remove()
+            yl = self.rg.ax.get_ylim()
+            self.rg.annotations["picklim0"] = \
+                self.rg.ax.plot((self.trace0, self.trace0), yl, "-y")
+            self.rg.annotations["picklim1"] = \
+                self.rg.ax.plot((self.trace0+self.ntraces, self.trace0+self.ntraces), yl, "-y")
+            self.rg.fig.canvas.draw()
+
+        return
+
+    def change_mode(self, mode):
+        """ Change picking mode between bed and direct coupling. """
+        self.mode = mode
+        if mode == 'bed':
+            self.points = self.bed_points
+        elif mode == 'dc':
+            self.points = self.dc_points
+        return
+
+    def connect_radargram(self, rg):
+        """ Connect a Radargram instance so that the PickWindow can modify it. """
+        self.rg = rg
+        self.update()
+        return
+
 
 class MapWindow(AppWindow):
     """ Displays a simple map of trace locations """

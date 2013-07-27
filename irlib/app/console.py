@@ -7,7 +7,7 @@ import readline
 import matplotlib.pyplot as plt
 import irlib
 import command_parser
-from .components import Radargram, MapWindow
+from .components import Radargram, MapWindow, PickWindow
 import traceback
 import pdb
 
@@ -177,11 +177,11 @@ class Console(object):
 
         elif args[0] in ('filter', 'f'):        # FILTER
             try:
-                app.command_parser.apply_filter(args[1:], self.line)
+                command_parser.apply_filter(args[1:], self.line)
                 for rg in self.get_appwindows(Radargram):
                     rg.data = self.line.data
                     rg.repaint()
-            except app.command_parser.CommandSearchError as e:
+            except command_parser.CommandSearchError as e:
                 print e.message
             except IndexError:
                 print StrFilterHistory(self.line)
@@ -257,14 +257,34 @@ class Console(object):
                     print "Map window: on"
             else:
                 if args[1] == "on":
-                    mw = MapWindow(self.line)
-                    self.appwindows.append(mw)
+                    w = MapWindow(self.line)
+                    self.appwindows.append(w)
 
                 elif args[1] == "off":
-                    for mw in self.get_appwindows(MapWindow):
-                        plt.close(mw.fig)
-                        self.remove_appwindow(mw)
-                        del mw
+                    for w in self.get_appwindows(MapWindow):
+                        plt.close(w.fig)
+                        self.remove_appwindow(w)
+                        del w
+                else:
+                    print "Command not recognized"
+
+        elif args[0] == 'pick':                 # PICK
+            if len(args) < 2:
+                if len(self.get_appwindows(MapWindow)) < 1:
+                    print "Picking window: off"
+                else:
+                    print "Picking window: on"
+            else:
+                if args[1] == "on":
+                    w = PickWindow(self.line)
+                    w.connect_radargram(self.get_appwindows(Radargram)[0])
+                    self.appwindows.append(w)
+
+                elif args[1] == "off":
+                    for w in self.get_appwindows(PickWindow):
+                        plt.close(w.fig)
+                        self.remove_appwindow(w)
+                        del w
                 else:
                     print "Command not recognized"
 
