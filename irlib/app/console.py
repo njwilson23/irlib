@@ -82,8 +82,10 @@ class Console(object):
         """ Get all windows of a particular type from the window list. """
         if t is None:
             return self.appwindows
-        else:
+        elif not hasattr(t, "__iter__"):
             return [a for a in self.appwindows if type(a) == t]
+        else:
+            return reduce(lambda a,b: a+b, [self.get_appwindows(a) for a in t])
 
     def remove_appwindow(self, ref):
         """ Remove a window from the window list. """
@@ -163,11 +165,8 @@ class Console(object):
                     del self.line
                     self.open_line(lineno, dcno=dcno)
 
-                    for rg in self.get_appwindows(Radargram):
-                        rg._newline(self.line)
-
-                    for mw in self.get_appwindows(MapWindow):
-                        mw._newline(self.line)
+                    for w in self.get_appwindows((Radargram, MapWindow, PickWindow)):
+                        w._newline(self.line)
 
                 else:
                     print ("Line {0} channel {1} does "
