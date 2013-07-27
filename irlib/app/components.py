@@ -50,6 +50,11 @@ class AppWindow(object):
     def _onkeypress(self, event):
         pass
 
+    def _newline(self, line):
+        """ This method must be overloaded to define how the AppWindow reacts
+        when the line changes. """
+        return
+
     def update(self):
         """ Redraw the axes """
         self.fig.canvas.draw()
@@ -368,10 +373,6 @@ class PickWindow(AppWindow):
         """ Event handler for mouse clicks. Attempts to place a pick
         point where the mouse was clicked. """
 
-        #if event.button == 2 and (rg is not None):
-        #    self.rg.repaint()
-        #    return
-
         if event.button == 2:
 
             newmode = "bed" if (self.mode == "dc") else "dc"
@@ -551,14 +552,23 @@ class PickWindow(AppWindow):
         self.fig.canvas.draw()
 
         if self.rg is not None:
-            for name in ("picklim0", "picklim1"):
+            for name in ("picklim0", "picklim1", "bedpick", "dcpick"):
                 if name in self.rg.annotations:
                     self.rg.annotations[name][0].remove()
+                    del self.rg.annotations[name]
+            xl = self.rg.ax.get_xlim()
             yl = self.rg.ax.get_ylim()
+
             self.rg.annotations["picklim0"] = \
                 self.rg.ax.plot((self.trace0, self.trace0), yl, "-y")
             self.rg.annotations["picklim1"] = \
                 self.rg.ax.plot((self.trace0+self.ntraces, self.trace0+self.ntraces), yl, "-y")
+
+            self.rg.annotations["bedpick"] = \
+                self.rg.ax.plot(self.bed_points, "-b", alpha=0.5)
+            self.rg.annotations["dcpick"] = \
+                self.rg.ax.plot(self.dc_points, "-r", alpha=0.7)
+
             self.rg.fig.canvas.draw()
 
         return
