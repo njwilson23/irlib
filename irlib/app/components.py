@@ -6,6 +6,7 @@ import irlib
 from irlib.misc import TryCache
 import numpy as np
 import matplotlib.pyplot as plt
+import traceback
 
 plt.ion()
 
@@ -61,7 +62,8 @@ class Radargram(AppWindow):
 
     fid = 0
     active_coords = []
-    features = {}
+    annotations = {}
+    #features = {}
     digitize_mode = False
 
     lum_scale = 0.25
@@ -104,20 +106,29 @@ class Radargram(AppWindow):
 
                 if event.button == 1:
 
+                    if "crosshair" in self.annotations:
+                        for line in self.annotations["crosshair"]:
+                            line.remove()
+                            #self.ax.remove(line)
+                        self.annotations["clicktext"].remove()
+
                     xr = self.ax.get_xlim()
                     yr = self.ax.get_ylim()
-                    self.ax.plot(xr, (y, y), "-k")
-                    self.ax.plot((x, x), yr, "-k")
-                    print x, y
-                    print xr, yr
+                    lines = []
+                    lines.extend(self.ax.plot(xr, (y, y), ":k"))
+                    lines.extend(self.ax.plot((x, x), yr, ":k"))
+                    self.annotations["crosshair"] = lines
+
+                    s = "samp {samp}\ntime {time} ns".format(samp=y,
+                                        time=round(y*self.rate*1e-9,2))
+
+                    ha = "left" if (x < self.L.data.shape[1]//2) else "right"
+                    va = "top" if (y < self.L.data.shape[0]//2) else "bottom"
+
+                    txt = self.ax.text(x, y, s, size=9, ha=ha, va=va)
+                    self.annotations["clicktext"] = txt
+
                     self.fig.canvas.draw()
-
-
-
-                    print ("\n\tFID: {0}\n\tx: {1}\t\ty:{2}\t\t\tt: {3} ns "
-                            .format(self.L.fids[x],
-                                int(round(event.xdata)), int(round(event.ydata)),
-                                round(event.ydata*self.rate*1e-9,2)))
 
                 elif event.button == 2:
                     self.repaint()
@@ -148,43 +159,43 @@ class Radargram(AppWindow):
             + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
         return fid
 
-    def add_feature(self, s):
-        if self.digitize_mode:
-            self.end_feature()
-        else:
-            self.digitize_mode = True
-        self.active_feature_name = s
-        self.active_coords = []
-        self.update()
-        return self.fid
+    #def add_feature(self, s):
+    #    if self.digitize_mode:
+    #        self.end_feature()
+    #    else:
+    #        self.digitize_mode = True
+    #    self.active_feature_name = s
+    #    self.active_coords = []
+    #    self.update()
+    #    return self.fid
 
-    def end_feature(self):
-        self.features[self.fid] = [self.active_feature_name,
-                            [xy for xy in self.active_coords]]
-        self.digitize_mode = False
-        self.fid += 1
-        self.update()
-        return self.fid-1
+    #def end_feature(self):
+    #    self.features[self.fid] = [self.active_feature_name,
+    #                        [xy for xy in self.active_coords]]
+    #    self.digitize_mode = False
+    #    self.fid += 1
+    #    self.update()
+    #    return self.fid-1
 
-    def remove_feature(self, fid):
-        try:
-            self.features.pop(fid)
-            self.active_coords = []
-            self.update()
-        except KeyError:
-            pass
+    #def remove_feature(self, fid):
+    #    try:
+    #        self.features.pop(fid)
+    #        self.active_coords = []
+    #        self.update()
+    #    except KeyError:
+    #        pass
 
-    def add_point(self, event):
-        """ Record a vertex. """
-        self.active_coords.append((event.xdata, event.ydata))
-        self.update()
+    #def add_point(self, event):
+    #    """ Record a vertex. """
+    #    self.active_coords.append((event.xdata, event.ydata))
+    #    self.update()
 
-    def remove_last_point(self):
-        try:
-            self.active_coords.pop()
-            self.update()
-        except IndexError:
-            pass
+    #def remove_last_point(self):
+    #    try:
+    #        self.active_coords.pop()
+    #        self.update()
+    #    except IndexError:
+    #        pass
 
     def repaint(self, lum_scale=None):
         if lum_scale is None:
@@ -197,7 +208,7 @@ class Radargram(AppWindow):
         self.ax.cla()
         self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
         locs = self.ax.get_yticks()
-        self.ax.set_yticklabels(locs*self.rate*1e9)
+        self.ax.set_yticklabels(locs*self.rate*1e-9)
         self.fig.canvas.draw()
         return
 
@@ -215,17 +226,22 @@ class Radargram(AppWindow):
                                           markeredgewidth=0.0, alpha=0.5)
         points_ = map(drawxy, self.active_coords)
 
-        # Draw previous features
-        if len(self.features) > 0:
+        # Draw annotations
+        for annotation in self.annotations:
+            for item in self.annotations[annotation]:
+                self.ax.add_line(item)
 
-            drawline = lambda lsxy: self.ax.plot(
-                [i[0] for i in lsxy[1]], [i[1] for i in lsxy[1]],
-                '--r')
-            lines_ = map(drawline, self.features.values())
+        ## Draw previous features
+        #if len(self.features) > 0:
 
-            labelfeature = lambda key, lsxy: self.ax.text(lsxy[1][-1][0],
-                lsxy[1][-1][1]-20, str(key), fontsize=12, color='r')
-            text_ = map(labelfeature, self.features.keys(), self.features.values())
+        #    drawline = lambda lsxy: self.ax.plot(
+        #        [i[0] for i in lsxy[1]], [i[1] for i in lsxy[1]],
+        #        '--r')
+        #    lines_ = map(drawline, self.features.values())
+
+        #    labelfeature = lambda key, lsxy: self.ax.text(lsxy[1][-1][0],
+        #        lsxy[1][-1][1]-20, str(key), fontsize=12, color='r')
+        #    text_ = map(labelfeature, self.features.keys(), self.features.values())
 
         # Force tight bounding
         self.ax.set_xlim([0, self.data.shape[1]-1])
