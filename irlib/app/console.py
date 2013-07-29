@@ -174,16 +174,23 @@ class Console(object):
             except:
                 traceback.print_exc()
 
+        elif args[0] == 'anno':                 # DEBUG statement
+            rg = self.get_appwindows(Radargram)[0]
+            print rg.annotations
+            return
+
         elif args[0] in ('filter', 'f'):        # FILTER
-            try:
-                command_parser.apply_filter(args[1:], self.line)
-                for rg in self.get_appwindows(Radargram):
-                    rg.data = self.line.data
-                    rg.repaint()
-            except command_parser.CommandSearchError as e:
-                print e.message
-            except IndexError:
+            if len(args) == 0:
                 print StrFilterHistory(self.line)
+            else:
+                try:
+                    command_parser.apply_filter(args[1:], self.line)
+                    for rg in self.get_appwindows(Radargram):
+                        rg.data = self.line.data
+                        rg.repaint()
+                        rg.update()
+                except command_parser.CommandSearchError as e:
+                    print e.message
 
         elif args[0] in ('nofilter', 'nf'):     # NOFILTER
             self.line.Reset()
