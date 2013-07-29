@@ -77,6 +77,7 @@ class Radargram(AppWindow):
     def __init__(self, L):
         super(Radargram, self).__init__((10, 4))
         self._newline(L)
+        self.fig.tight_layout()
         return
 
     def _newline(self, L):
@@ -112,10 +113,12 @@ class Radargram(AppWindow):
 
                 if event.button == 1:
 
-                    if "crosshair" in self.annotations:
-                        for line in self.annotations["crosshair"]:
-                            line.remove()
-                        self.annotations["clicktext"].remove()
+                    self.remove_annotation("crosshair")
+                    self.remove_annotation("clicktext")
+                    #if "crosshair" in self.annotations:
+                    #    for line in self.annotations["crosshair"]:
+                    #        line.remove()
+                    #    self.annotations["clicktext"].remove()
 
                     xr = self.ax.get_xlim()
                     yr = self.ax.get_ylim()
@@ -202,7 +205,17 @@ class Radargram(AppWindow):
     #    except IndexError:
     #        pass
 
+    def remove_annotation(self, name):
+        """ Properly remove an annotation from the Radargram axes. """
+        if name in self.annotations:
+            self.annotations[name][0].remove()
+            del self.annotations[name]
+            return True
+        else:
+            return False
+
     def repaint(self, lum_scale=None):
+        """ Redraw the radargram raster """
         if lum_scale is None:
             lum_scale = self.lum_scale
         else:
@@ -553,9 +566,7 @@ class PickWindow(AppWindow):
 
         if self.rg is not None:
             for name in ("picklim0", "picklim1", "bedpick", "dcpick"):
-                if name in self.rg.annotations:
-                    self.rg.annotations[name][0].remove()
-                    del self.rg.annotations[name]
+                self.rg.remove_annotation(name)
             xl = self.rg.ax.get_xlim()
             yl = self.rg.ax.get_ylim()
 
