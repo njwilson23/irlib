@@ -95,27 +95,31 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
     make latexpdf
 
 
-# Changes in irlib version 0.4-dev
+Changes in irlib version 0.4-dev
+--------------------------------
 
 *irlib* 0.4 represents significant refactoring and cleaning of both the library
 and app design. Breaking changes in the final version will be kept to a minimum,
-bit the develoment period may be a bit turbulent. Use the *stable-0.3* branch in
+bit the development period may be a bit turbulent. Use the *stable-0.3* branch in
 the meantime.
 
-## Implemented
+Implemented
+~~~~~~~~~~~
 
     - remove deprecated `CutSingle`, `CutRegion` methods
     - refactor pickable gathers into separate subclasses
     - refactor CLI filter commands into filter classes to allow introspection
+    - map window
+    - refactor icepick, irview, icerate into a single codebase, kept in
+      `irlib/app/` (partially done)
 
+To do
+~~~~~
 
-## To do
-
-    - refactor icepick, irview, icerate into a single codebase, kept in `irlib/app/`
     - composable line gathers and surveys by overloading arithmetic operators
     - HDF file write
-    - map window
     - project config file
+
 
 
 License:
