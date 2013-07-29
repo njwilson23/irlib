@@ -174,11 +174,6 @@ class Console(object):
             except:
                 traceback.print_exc()
 
-        elif args[0] == 'anno':                 # DEBUG statement
-            rg = self.get_appwindows(Radargram)[0]
-            print rg.annotations
-            return
-
         elif args[0] in ('filter', 'f'):        # FILTER
             if len(args) == 0:
                 print StrFilterHistory(self.line)
