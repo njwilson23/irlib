@@ -297,6 +297,28 @@ class Console(object):
                 elif args[1] == "load":
                     for w in self.get_appwindows(PickWindow):
                         w.load_picks()
+                elif args[1] == "bed":
+                    for w in self.get_appwindows(PickWindow):
+                        if len(args) > 2:
+                            try:
+                                pickargs = [int(a) for a in args[2:]]
+                            except ValueError:
+                                print "arguments must be integer"
+                                return
+                        else:
+                            pickargs = []
+                        w.autopick_bed(*pickargs)
+                elif args[1] == "dc":
+                    for w in self.get_appwindows(PickWindow):
+                        if len(args) > 2:
+                            try:
+                                pickargs = [int(a) for a in args[2:]]
+                            except ValueError:
+                                print "arguments must be integer"
+                                return
+                        else:
+                            pickargs = []
+                        w.autopick_dc(*pickargs)
                 else:
                     print "Command not recognized"
 

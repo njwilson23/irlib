@@ -112,12 +112,12 @@ class Radargram(AppWindow):
 
                 if event.button == 1:
 
-                    self.remove_annotation("crosshair")
-                    self.remove_annotation("clicktext")
-                    #if "crosshair" in self.annotations:
-                    #    for line in self.annotations["crosshair"]:
-                    #        line.remove()
-                    #    self.annotations["clicktext"].remove()
+                    #self.remove_annotation("crosshair")
+                    #self.remove_annotation("clicktext")
+                    if "crosshair" in self.annotations:
+                        for line in self.annotations["crosshair"]:
+                            line.remove()
+                        self.annotations["clicktext"].remove()
 
                     xr = self.ax.get_xlim()
                     yr = self.ax.get_ylim()
@@ -374,10 +374,19 @@ class PickWindow(AppWindow):
         """ Replace internal state with a new radar line, discarding all
         digitizing and feature information and redrawing. """
         self.rate = L.metadata.sample_rate[0]
-        self.L = L
+        self.L = irlib.PickableGather(L)
         self.data = L.data
+        self.time = np.arange(L.data.shape[0]) * self.rate
+
+        self.bed_points = np.nan * np.zeros(self.data.shape[1])
+        self.dc_points = np.nan * np.zeros(self.data.shape[1])
+        self.bed_pick_reg = [None for i in range(self.ntraces)]
+        self.dc_pick_reg = [None for i in range(self.ntraces)]
+
+        self.points = self.bed_points
+
+        self.trace0 = 0
         self.annotations = {}
-        self.activetrace = None
         self.update()
         return
 
@@ -511,26 +520,6 @@ class PickWindow(AppWindow):
 
         return self.ax.lines
 
-    def _newline(self, L):
-        """ Replace internal state with a new radar line, discarding all
-        digitizing and feature information and redrawing. """
-        self.rate = L.metadata.sample_rate[0]
-        self.L = L
-        self.data = L.data
-        self.time = np.arange(L.data.shape[0]) * self.rate
-
-        self.bed_points = np.nan * np.zeros(self.data.shape[1])
-        self.dc_points = np.nan * np.zeros(self.data.shape[1])
-        self.bed_pick_reg = [None for i in range(self.ntraces)]
-        self.dc_pick_reg = [None for i in range(self.ntraces)]
-
-        self.points = self.bed_points
-
-        self.trace0 = 0
-        self.annotations = {}
-        self.update()
-        return
-
     def _get_pick_fnm(self):
         """ Autogenerate a filename for pickfiles. """
         fnm = os.path.join('picking', '{0}_line{1}.csv'.format(
@@ -603,6 +592,26 @@ class PickWindow(AppWindow):
         """ Connect a Radargram instance so that the PickWindow can modify it. """
         self.rg = rg
         self.update()
+        return
+
+    def autopick_dc(self, t0=10, tf=150):
+        self.L.PickDC(sbracket=(t0, tf))
+        self.dc_points = self.L.dc_picks
+        if self.mode == "dc":
+            self.points = self.dc_points
+        self.update()
+        if self.rg is not None:
+            self.rg.update()
+        return
+
+    def autopick_bed(self, t0=150, tf=1e4, lbnd=None, rbnd=None):
+        self.L.PickBed(sbracket=(t0, tf), bounds=(lbnd, rbnd), phase=1)
+        self.bed_points = self.L.bed_picks
+        if self.mode == "bed":
+            self.points = self.bed_points
+        self.update()
+        if self.rg is not None:
+            self.rg.update()
         return
 
     def save_picks(self, fnm=None):
