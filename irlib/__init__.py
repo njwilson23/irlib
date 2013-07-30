@@ -3,7 +3,7 @@ import survey
 from survey import Survey
 
 import gather
-from gather import CommonOffsetGather, CommonMidpointGather, Gather
+from gather import CommonOffsetGather, CommonMidpointGather, Gather, PickableGather
 from gather import LineGatherError
 
 import recordlist

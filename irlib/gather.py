@@ -34,7 +34,7 @@ except ImportError:
     sys.stderr.write("Warning: pywavelet module not loaded\n")
 
 
-class Gather:
+class Gather(object):
     """ Gathers (radar lines) are collections of radar traces (soundings). This
     is the base class for CommonOffsetGather and CommonMidpointGather classes,
     which should be chosen instead when directly creating an object.
@@ -1459,11 +1459,18 @@ class PickableGather(Gather):
     """ Subclass of gather adding attributes and methods relevant to event
     picking. """
 
-    def __init__(self, arr, infile=None, line=None, metadata=None, retain=None, dc=0):
+    def __init__(self, data, infile=None, line=None, metadata=None, retain=None, dc=0):
 
-        super(PickableGather, self).__init__(arr, infile=infile, line=line,
-                                             metadata=metadata, retain=retain,
-                                             dc=dc)
+        if isinstance(data, Gather):
+            super(PickableGather, self).__init__(data.data, infile=data.infile,
+                                                 line=data.line, metadata=data.metadata,
+                                                 retain=data.retain,
+                                                 dc=data.datacapture)
+
+        else:
+            super(PickableGather, self).__init__(data, infile=infile, line=line,
+                                                 metadata=metadata, retain=retain,
+                                                 dc=dc)
 
         self.bed_picks = 999 * np.ones(self.nx)
         self.bed_phase = 999 * np.ones(self.nx)
