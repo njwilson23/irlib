@@ -291,6 +291,12 @@ class Console(object):
                         plt.close(w.fig)
                         self.remove_appwindow(w)
                         del w
+                elif args[1] == "save":
+                    for w in self.get_appwindows(PickWindow):
+                        w.save_picks()
+                elif args[1] == "load":
+                    for w in self.get_appwindows(PickWindow):
+                        w.load_picks()
                 else:
                     print "Command not recognized"
 
