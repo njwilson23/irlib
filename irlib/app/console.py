@@ -146,8 +146,8 @@ class Console(object):
         elif args[0] == 'open':                 # OPEN
             try:
                 lineno = int(args[1])
-            except IndexError:
-                print "Must supply at least a line number"
+            except (IndexError, ValueError):
+                print "Must supply an integer line number"
                 return
 
             try:
