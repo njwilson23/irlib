@@ -183,7 +183,9 @@ class Console(object):
                     for rg in self.get_appwindows(Radargram):
                         rg.data = self.line.data
                         rg.repaint()
-                        rg.update()
+                    for pw in self.get_appwindows(PickWindow):
+                        pw.data = self.line.data
+                        pw.update()
                 except command_parser.CommandSearchError as e:
                     print e.message
 
@@ -192,6 +194,9 @@ class Console(object):
             for rg in self.get_appwindows(Radargram):
                 rg.data = self.line.data
                 rg.repaint()
+            for pw in self.get_appwindows(PickWindow):
+                pw.data = self.line.data
+                pw.update()
 
         #elif args[0] == 'dnew':                 # DNEW
         #    if len(args) == 1:

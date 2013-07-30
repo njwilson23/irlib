@@ -88,7 +88,6 @@ class Radargram(AppWindow):
         self.data = L.data
         self.annotations = {}
         self.repaint()
-        self.update()
         return
 
     def _onclick(self, event):
@@ -140,7 +139,6 @@ class Radargram(AppWindow):
 
                 elif event.button == 2:
                     self.repaint()
-                    self.update()
 
                 else:
                     print ("\n\teasting: {0:.1f}\tnorthing: {1:.1f}"
@@ -214,7 +212,7 @@ class Radargram(AppWindow):
         else:
             return False
 
-    def repaint(self, lum_scale=None):
+    def repaint(self, lum_scale=None, **kwargs):
         """ Redraw the radargram raster """
         if lum_scale is None:
             lum_scale = self.lum_scale
@@ -228,9 +226,10 @@ class Radargram(AppWindow):
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*self.rate*1e-9)
         self.fig.canvas.draw()
+        self.update(**kwargs)
         return
 
-    def update(self, cmap='gray', c=1.68e8, repaint=False, lum_scale=None):
+    def update(self):
         """ Display a radargram on axes. Paints in background, and
         all subsequent calls update lines. Passing repaint as True
         forces the background to be redrawn (for example, after a
