@@ -1472,10 +1472,10 @@ class PickableGather(Gather):
                                                  metadata=metadata, retain=retain,
                                                  dc=dc)
 
-        self.bed_picks = 999 * np.ones(self.nx)
-        self.bed_phase = 999 * np.ones(self.nx)
-        self.dc_picks = 999 * np.ones(self.nx)
-        self.dc_phase = 999 * np.ones(self.nx)
+        self.bed_picks = np.nan * np.ones(self.nx)
+        self.bed_phase = np.nan * np.ones(self.nx)
+        self.dc_picks = np.nan * np.ones(self.nx)
+        self.dc_phase = np.nan * np.ones(self.nx)
 
     def LoadPicks(self, infile):
         """ Load bed picks from a text file. Employs a FileHandler. """
@@ -1553,8 +1553,7 @@ class PickableGather(Gather):
 
         # Apply function over all traces
         try:
-            picks = map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)
-            picks = np.where(np.isnan(picks), 999, picks)
+            picks = np.array(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T))
             self.bed_picks[istart:iend] = picks + sbracket[0]
             self.bed_phase[istart:iend] = 1
         except:
@@ -1596,7 +1595,7 @@ class PickableGather(Gather):
                 le_bool = np.diff(A[ihalfpwr-prewin:ihalfpwr]) < dmax
                 return le_bool.nonzero()[0][-1] + ihalfpwr - prewin
             except:
-                return 999
+                return np.nan
 
         # Apply function over all traces
         try:
@@ -1685,10 +1684,10 @@ class PickableGather(Gather):
         these attribute (such as most preprocessing routines).
         """
         super(PickableGather, self).Reset()
-        self.bed_picks = 999 * np.ones(self.data.shape[1])
-        self.bed_phase = 999 * np.ones(self.data.shape[1])
-        self.dc_picks = 999 * np.ones(self.data.shape[1])
-        self.dc_phase = 999 * np.ones(self.data.shape[1])
+        self.bed_picks = np.nan * np.ones(self.data.shape[1])
+        self.bed_phase = np.nan * np.ones(self.data.shape[1])
+        self.dc_picks = np.nan * np.ones(self.data.shape[1])
+        self.dc_phase = np.nan * np.ones(self.data.shape[1])
         return
 
 
