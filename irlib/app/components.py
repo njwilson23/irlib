@@ -19,6 +19,7 @@ class AppWindow(object):
 
     def __init__(self, winsize):
         self.fig = plt.figure(figsize=winsize)
+        self.fig.canvas.toolbar.destroy()
         self.ax = self.fig.add_subplot(1,1,1)
 
         # Turn off default shortcuts
@@ -112,19 +113,20 @@ class Radargram(AppWindow):
 
                 if event.button == 1:
 
-                    #self.remove_annotation("crosshair")
-                    #self.remove_annotation("clicktext")
-                    if "crosshair" in self.annotations:
-                        for line in self.annotations["crosshair"]:
-                            line.remove()
-                        self.annotations["clicktext"].remove()
+                    #self.remove_annotation("x-hair")
+                    #self.remove_annotation("x-hair-text")
+                    if "x-hair" in self.annotations:
+                        anns = self.annotations.get("x-hair", []) + \
+                               self.annotations.get("x-hair-text", [])
+                        for item in anns:
+                            item.remove()
 
                     xr = self.ax.get_xlim()
                     yr = self.ax.get_ylim()
                     lines = []
                     lines.extend(self.ax.plot(xr, (y, y), ":k"))
                     lines.extend(self.ax.plot((x, x), yr, ":k"))
-                    self.annotations["crosshair"] = lines
+                    self.annotations["x-hair"] = lines
 
                     s = "samp {samp}\ntime {time} ns".format(samp=y,
                                         time=round(y*self.rate*1e-9,2))
@@ -133,7 +135,7 @@ class Radargram(AppWindow):
                     va = "top" if (y < self.L.data.shape[0]//2) else "bottom"
 
                     txt = self.ax.text(x, y, s, size=9, ha=ha, va=va)
-                    self.annotations["clicktext"] = txt
+                    self.annotations["x-hair-text"] = [txt]
 
                     self.fig.canvas.draw()
 
@@ -246,7 +248,7 @@ class Radargram(AppWindow):
         # Draw annotations
         for annotation in self.annotations:
             for item in self.annotations[annotation]:
-                self.ax.add_line(item)
+                self.ax.add_artist(item)
 
         ## Draw previous features
         #if len(self.features) > 0:
