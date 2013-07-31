@@ -61,7 +61,8 @@ class Console(object):
         if fromcache:
             cachename = self.survey.GetLineCacheName(lineno, dcno)
             loaded, line = irlib.misc.TryCache(cachename)
-        if loaded == False:
+            self.line = line
+        if loaded is False:
             line = self.survey.ExtractLine(lineno, datacapture=dcno)
             if line.nx >= 2:
                 try:
@@ -94,8 +95,17 @@ class Console(object):
         else:
             return reduce(lambda a,b: a+b, [self.get_appwindows(a) for a in t])
 
+    def add_appwindow(self, ref):
+        """ Add a window to be managed by the Console. """
+        self.appwindows.append(ref)
+        if isinstance(ref, PickWindow):
+            rgs = self.get_appwindows(Radargram)
+            if len(rgs) > 0:
+                ref.connect_radargram(rgs[0])
+        return
+
     def remove_appwindow(self, ref):
-        """ Remove a window from the window list. """
+        """ Remove a window from Console management. """
         for i, win in enumerate(self.appwindows):
             if win is ref:
                 break
