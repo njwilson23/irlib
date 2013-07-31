@@ -75,6 +75,8 @@ class Radargram(AppWindow):
     lum_scale = 0.25
     cmap = plt.cm.binary
 
+    bbox = [None, None, None, None]
+
     def __init__(self, L):
         super(Radargram, self).__init__((10, 4))
         self._newline(L)
@@ -129,12 +131,12 @@ class Radargram(AppWindow):
                     self.annotations["x-hair"] = lines
 
                     s = "samp {samp}\ntime {time} ns".format(samp=y,
-                                        time=round(y*self.rate*1e-9,2))
+                                        time=round(y/self.rate*1e9,2))
 
                     ha = "left" if (x < self.L.data.shape[1]//2) else "right"
                     va = "top" if (y < self.L.data.shape[0]//2) else "bottom"
 
-                    txt = self.ax.text(x, y, s, size=9, ha=ha, va=va)
+                    txt = self.ax.text(x, y, s, size=10, ha=ha, va=va)
                     self.annotations["x-hair-text"] = [txt]
 
                     self.fig.canvas.draw()
@@ -225,8 +227,9 @@ class Radargram(AppWindow):
 
         self.ax.cla()
         self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
-        locs = self.ax.get_yticks()
-        self.ax.set_yticklabels(locs*self.rate*1e-9)
+        locs = np.arange(0, self.ax.get_ylim()[0], 50)
+        self.ax.set_yticks(locs)
+        self.ax.set_yticklabels(locs / self.rate * 1e9)
         self.fig.canvas.draw()
         self.update(**kwargs)
         return
@@ -267,11 +270,15 @@ class Radargram(AppWindow):
             self.ax.set_xlim([0, self.data.shape[1]-1])
         else:
             self.ax.set_xlim([-0.5, 0.5])
-        self.ax.set_ylim([self.data.shape[0]-1, 0])
+
+        ybnds = self.bbox[2:]
+        data_ybnds = [self.data.shape[0]-1, 0]
+        self.ax.set_ylim([yb if (yb is not None) else db for (yb, db)
+                                                         in zip(ybnds, data_ybnds)])
 
         # Decorate and draw
         self.ax.set_ylabel("Time (ns)")
-        self.ax.set_xlabel("Location number")
+        self.ax.set_xlabel("Trace number")
         if self.digitize_mode:
             self.ax.set_title("Line {0} [feature {1}]".format(self.line, self.fid))
         else:
@@ -381,7 +388,7 @@ class PickWindow(AppWindow):
         self.rate = L.metadata.sample_rate[0]
         self.L = irlib.PickableGather(L)
         self.data = L.data
-        self.time = np.arange(L.data.shape[0]) * self.rate
+        self.time = np.arange(L.data.shape[0]) / self.rate
 
         self.bed_points = np.nan * np.zeros(self.data.shape[1])
         self.dc_points = np.nan * np.zeros(self.data.shape[1])
@@ -670,5 +677,6 @@ class MapWindow(AppWindow):
         self.ax.set_xlabel("Eastings (m)")
         self.ax.set_ylabel("Northings (m)")
         self.ax.plot(self.x, self.y, ".k")
+        self.ax.axis("equal")
         self.fig.canvas.draw()
 

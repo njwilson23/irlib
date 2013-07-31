@@ -266,6 +266,22 @@ class Console(object):
             except IndexError:
                 print "gain: " + str(1.0 / self.get_appwindows(Radargram)[0].lum_scale)
 
+        elif args[0] == 'ylim':                 # YLIM
+            rate_ns = self.line.rate * 1e9
+            if len(args) == 1:
+                rg = self.get_appwindows(Radargram)[0]
+                ylim_ns = [a*rate_ns for a in rg.ax.get_ylim()][::-1]
+                print "Vertical range: {0} - {1} ns".format(*ylim_ns)
+            elif len(args) == 3:
+                try:
+                    for rg in self.get_appwindows(Radargram):
+                        rg.bbox[2:] = [float(a)*rate_ns for a in args[1:]][::-1]
+                        rg.repaint()
+                except ValueError:
+                    print "Could not understand {0}".format(args[1:])
+            else:
+                print "'ylim' must be followed by times in nanoseconds"
+
         elif args[0] == 'map':                  # MAP
             if len(args) < 2:
                 if len(self.get_appwindows(MapWindow)) < 1:
@@ -343,7 +359,8 @@ class Console(object):
                 info                print line metadata
                 ls                  list lines in survey
                 open [line#]        open a different line
-                gain [#]            adjust display contrast
+                gain [#]            adjust radargram display contrast
+                ylim [t0 tf]        adjust vertical radargram range in nanoseconds
 
                 filter *name*       apply a filter (see below)
                 nofilter            remove all filters
