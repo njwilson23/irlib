@@ -145,6 +145,9 @@ class FileHandler:
 
     def Write(self):
         """ Write to file. """
+        savedir = os.path.split(self.fnm)[0]
+        if not os.path.isdir(savedir):
+            os.makedirs(savedir)
         with open(self.fnm, 'w') as f:
             f.write('"FID","dc","bed","trav_time"\n')
             data = zip(self.dcvals, self.bedvals, self.traveltimes)
