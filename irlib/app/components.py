@@ -429,7 +429,7 @@ class PickWindow(AppWindow):
 
             if event.button == 1:
                 # Now put a point there
-                yi = round(-event.ydata / self.rate)
+                yi = round(-event.ydata * self.rate)
                 self._drawpick(trace, yi, activetrace)
 
                 # Save the picked point
@@ -526,9 +526,8 @@ class PickWindow(AppWindow):
             pr = self.dc_pick_reg
             sty = "or"
 
-        pr[activetrace] = \
-            self.ax.plot(trace[yi] + self._shiftx(activetrace),
-                         -self.time[yi], sty, alpha=0.4)
+        pr[activetrace] = self.ax.plot(trace[yi] + self._shiftx(activetrace),
+                                       -self.time[yi], sty, alpha=0.4)
 
         return self.ax.lines
 
