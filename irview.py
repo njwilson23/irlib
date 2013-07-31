@@ -413,7 +413,7 @@ def HandleCommand(s, S, IW, L):
             line = args[1]
         except IndexError:
             print "Must supply at least a line number"
-            return L, IW
+            return IW, L
 
         try:
             datacapture = int(args[2])
