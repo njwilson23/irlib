@@ -263,7 +263,10 @@ class Radargram(AppWindow):
         #    text_ = map(labelfeature, self.features.keys(), self.features.values())
 
         # Force tight bounding
-        self.ax.set_xlim([0, self.data.shape[1]-1])
+        if self.data.shape[1] > 1:
+            self.ax.set_xlim([0, self.data.shape[1]-1])
+        else:
+            self.ax.set_xlim([-0.5, 0.5])
         self.ax.set_ylim([self.data.shape[0]-1, 0])
 
         # Decorate and draw

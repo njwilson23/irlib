@@ -155,6 +155,8 @@ class Survey:
             sys.stderr.write("lineno out of range ({0} not in {1}:{2})\n"
                     .format(lineno, 0, len(self.GetLines)))
         self._openh5()
+        if len(self.f[line].keys()) == 0:
+            raise EmptyLineError('empty line')
         try:
             dclist = [self.f[line][loc].keys() for loc in self.f[line].keys()]
         except Exception as e:
@@ -340,3 +342,9 @@ class Survey:
                                         fout[line])
         return
 
+
+class EmptyLineError(Exception):
+    def __init__(self, message="No message"):
+        self.message = message
+    def __str__(self):
+        return self.message

@@ -38,6 +38,7 @@ class Console(object):
 
         lineno = int(optdict.get('-L', 0))
 
+        self.survey = irlib.Survey(self.infile)
         self.open_line(lineno)
         self.appwindows.append(Radargram(self.line))
 
@@ -55,22 +56,28 @@ class Console(object):
 
     def open_line(self, lineno, dcno=0, fromcache=True):
         """ Open a line from a survey """
-        self.survey = irlib.Survey(self.infile)
+        #self.survey = irlib.Survey(self.infile)
         loaded = False
         if fromcache:
             cachename = self.survey.GetLineCacheName(lineno, dcno)
             loaded, line = irlib.misc.TryCache(cachename)
         if loaded == False:
             line = self.survey.ExtractLine(lineno, datacapture=dcno)
-            try:
-                line.RemoveBadLocations()
-                line.FixStaticGPS()
-                line.RemoveBlankTraces()
-                line.SmoothenGPS()
-                line.RemoveStationary(threshold=3.0)
-            except irlib.LineGatherError:
-                pass
-        self.line = line
+            if line.nx >= 2:
+                try:
+                    line.RemoveBadLocations()
+                    line.FixStaticGPS()
+                    line.RemoveBlankTraces()
+                    line.SmoothenGPS()
+                    line.RemoveStationary(threshold=3.0)
+                    self.line = line
+                except irlib.LineGatherError:
+                    pass
+            elif line.nx == 1:
+                self.line = line
+            else:
+                print "line {0}:{0} contains no data".format(lineno, dcno)
+                self.line = None
         return
 
     def get_command(self):
@@ -172,6 +179,9 @@ class Console(object):
                 else:
                     print ("Line {0} channel {1} does "
                            "not exist".format(lineno, dcno))
+            except irlib.EmptyLineError:
+                print ("Line {0} channel {1} could not be opened because it "
+                       "contains no data".format(lineno, dcno))
             except:
                 traceback.print_exc()
 

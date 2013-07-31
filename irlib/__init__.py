@@ -1,6 +1,6 @@
 # General package libs
 import survey
-from survey import Survey
+from survey import Survey, EmptyLineError
 
 import gather
 from gather import CommonOffsetGather, CommonMidpointGather, Gather, PickableGather
