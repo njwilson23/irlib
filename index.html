@@ -122,6 +122,22 @@ installed, with the <code>numpydoc</code> extension. The extensions can be insta
 <p>If LaTeX is available, the documentation can be compiled into a PDF. Type</p>
 
 <pre><code>make latexpdf
+
+<h2 id="changes">Changes:</h2>
+<p><strong>Version 0.4-dev</strong></p>
+<p><em>irlib</em> 0.4 represents significant refactoring and cleaning of both the library and app design. Breaking changes in the final version will be kept to a minimum, bit the development period may be a bit turbulent. Consider trying the <em>stable-0.3</em> branch if problems crop up.</p>
+<p>Implemented ~~~~~~~~~~~</p>
+<pre><code>- remove deprecated `CutSingle`, `CutRegion` methods
+- refactor pickable gathers into separate subclasses
+- refactor CLI filter commands into filter classes to allow introspection
+- map window
+- refactor icepick, irview, icerate into a single codebase, kept in
+  `irlib/app/` (partial)
+- build *icepick2* based on the refactored `app` codebase (partial)</code></pre>
+<p>Coming ~~~~~~</p>
+<pre><code>- composable line gathers and surveys by overloading arithmetic operators
+- HDF file write
+- project config file</code></pre>
 </code></pre>
 
 <h2>License:</h2>
