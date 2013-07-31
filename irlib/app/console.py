@@ -141,6 +141,7 @@ class Console(object):
                 if cursor > 70:
                     print
                     print "  ",
+                    cursor = 2
             print
 
         elif args[0] == 'open':                 # OPEN
