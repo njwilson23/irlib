@@ -1,5 +1,6 @@
-""" Define a Console instance, which is the central app controller as of irlib
-v0.4. """
+""" The Console class is the controller for irlib-based apps. Windows can be
+attached and detached from the Console, which handles user input and passes
+directives to its windows. """
 
 import sys
 import getopt
@@ -12,12 +13,20 @@ import traceback
 import pdb
 
 class Console(object):
+    """ App-controller with a user input readline loop. """
 
     survey = None
     line = None
     appwindows = []
 
     def __init__(self, progname, bannertext=""):
+        """ Initiate a new Console instance.
+
+        Parameters
+        ----------
+        progname : Name of the application [string]
+        bannertext : optional lines to display when application starts [string]
+        """
 
         self.progname = progname
 
@@ -51,6 +60,7 @@ class Console(object):
         return
 
     def print_syntax(self):
+        """ Print start-up syntax for the forgetful. """
         print "\t {0} -f file_name [-L line_number]".format(self.progname)
         return
 
@@ -113,6 +123,9 @@ class Console(object):
         return
 
     def handle_command(self, cmd):
+        """ Parse and handle user input. This will be deprecated int he future
+        for a more modular approach that allows commands to be added and
+        removed dynamically. """
         # List args. Handle empty input.
         args = cmd.split(' ')
 

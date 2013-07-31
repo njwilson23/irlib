@@ -18,6 +18,10 @@ class AppWindow(object):
     """
 
     def __init__(self, winsize):
+        """Parameters
+        ----------
+        winsize : size of the window, in inches
+        """
         self.fig = plt.figure(figsize=winsize)
         self.fig.canvas.toolbar.destroy()
         self.ax = self.fig.add_subplot(1,1,1)
@@ -78,6 +82,10 @@ class Radargram(AppWindow):
     bbox = [None, None, None, None]
 
     def __init__(self, L):
+        """Parameters
+        ----------
+        L : Gather instance containing the radar data to be displayed
+        """
         super(Radargram, self).__init__((10, 4))
         self._newline(L)
         self.fig.tight_layout()
@@ -287,6 +295,7 @@ class Radargram(AppWindow):
         return
 
     def get_digitizer_filename(self):
+        """ Return an automatically-generated filename for digitized features. """
         fnm = os.path.join("englacial",
             os.path.basename(self.L.infile).split(".")[0] + "_line" + str(self.L.line) + ".txt")
         return fnm
@@ -376,6 +385,11 @@ class PickWindow(AppWindow):
     rg = None
 
     def __init__(self, L, ntraces=8):
+        """Parameters
+        ----------
+        L : Gather instance containing the radar data to be displayed
+        ntraces : number of consecutive traces to display at once
+        """
         super(PickWindow, self).__init__((10, 8))
         self.ax.set_autoscale_on(False)
         self.ntraces = ntraces
@@ -606,6 +620,15 @@ class PickWindow(AppWindow):
         return
 
     def autopick_dc(self, t0=10, tf=150):
+        """ Attempt to pick the first break of the direct-coupling wave.
+        Optional constraints on start and end time can be passed to improve
+        results.
+
+        Parameters
+        ----------
+        t0 : start time, in samples
+        tf : end time, in samples
+        """
         self.L.PickDC(sbracket=(t0, tf))
         self.dc_points = self.L.dc_picks
         if self.mode == "dc":
@@ -616,6 +639,15 @@ class PickWindow(AppWindow):
         return
 
     def autopick_bed(self, t0=150, tf=1e4, lbnd=None, rbnd=None):
+        """ Attempt to pick the first break of the direct-coupling wave.
+        Optional constraints on start and end time can be passed to improve
+        results.
+
+        Parameters
+        ----------
+        t0 : start time, in samples
+        tf : end time, in samples
+        """
         self.L.PickBed(sbracket=(t0, tf), bounds=(lbnd, rbnd), phase=1)
         self.bed_points = self.L.bed_picks
         if self.mode == "bed":
@@ -673,6 +705,7 @@ class MapWindow(AppWindow):
         return
 
     def update(self):
+        """ Redraw the map. """
         self.ax.set_xlabel("Eastings (m)")
         self.ax.set_ylabel("Northings (m)")
         self.ax.plot(self.x, self.y, ".k")
