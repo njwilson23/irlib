@@ -303,7 +303,7 @@ class Console(object):
 
         elif args[0] == 'pick':                 # PICK
             if len(args) < 2:
-                if len(self.get_appwindows(MapWindow)) < 1:
+                if len(self.get_appwindows(PickWindow)) < 1:
                     print "Picking window: off"
                 else:
                     print "Picking window: on"
