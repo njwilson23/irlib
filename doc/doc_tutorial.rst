@@ -1,6 +1,11 @@
 Tutorial
 ========
 
+**This tutorial is for an older version of irlib. The same workflow still
+applies, with the difference being that picking is performed in IcePick2. I have
+adjusted the text where needed, but some inconsistencies may have been
+overlooked.**
+
 I am going to use the radar data collected in Spring 2012 to create a bed map
 for Glacier 3 ("East Glacier"). I'll document everything I do here, so that
 this can serve as a step-by-step tutorial on on using the radar interpretation
@@ -149,17 +154,19 @@ To get started, run
 
 ::
 
-    icepick -f data/gl3_radar_utm.h5
+    icepick2 -f data/gl3_radar_utm.h5
+
+and then type ``pick on`` in the console.
 
 The way this works is that the window that opens shows a grey-scale *radargram*
-in the top panel, with the eight individual traces in the bottom panel. The
-location that the traces are from is shown by the vertical yellow lines in the
-radargram. Assuming there are more than eight traces (normally the case), the
-display can be panned across the radargram with the **h** and **l** (ell) keys.
-In my case with the 2012 radar data from Glacier 3, the first line only
-contains a single trace, so panning doesn't do anything.
+in the one panel, with eight individual traces in the other panel. The location
+that the traces are from is shown by the vertical yellow lines in the Radargram.
+Assuming there are more than eight traces (normally the case), the display can
+be panned across the Radargram with the **h** and **l** (ell) keys. In my case
+with the 2012 radar data from Glacier 3, the first line only contains a single
+trace, so panning doesn't do anything.
 
-The terminal in which ``icepick`` was launched now accepts icepick-specific
+The terminal in which ``icepick2`` was launched now accepts icepick-specific
 commands. Typing
 
 ::
@@ -232,11 +239,11 @@ Some common filter names are:
 
 -  ``dewow``: applies a "dewowing" highpass filter
 -  ``lowpass``: applies a generic frequency lowpass filter
--  ``lowpass_ma``: applies a generic time-domain lowpass filter
+-  ``lowpass_td``: applies a generic time-domain lowpass filter
 -  ``gc``: applies a linear gain control
 -  ``agc``: applied a nonlinear automatic gain control (usually more fun than
    useful)
--  ``fkmig``: performs F-K (Stolt) migration, and takes a sample number as an
+-  ``migfk``: performs F-K (Stolt) migration, and takes a sample number as an
    optional argument indicating time zero (the airwave)
 
 Furthermore,
@@ -247,6 +254,8 @@ Furthermore,
 -  Typing ``nf`` undoes all filter effects (except for those that happened
    during cache-generation or automatically when loading the line), and
    restores the original data.
+
+**Deprecated** - use ``irlib.components.filters instead``
 
 There are lots of other filters. All filters are defined in the file
 ``filter_defs.py``, which is in the place where ``irlib`` is installed.
@@ -274,28 +283,23 @@ airwave travels directly from the transmitting antennas to the receiving
 antennas at the speed of light (:math:`\approx 3\times10^8\text{ m\,s}^{-1}`,
 so the emission time can be calculated by knowing the airwave arrival time.
 
-To switch to direct-coupling mode, type
+To switch to direct-coupling mode, type press the middle mouse button (button 2)
+on the PickWindow, and a label should appear in picking window indicating the
+mode change. All picks made in ``dc`` mode will have a red dot rather than blue.
 
-::
-
-    mode dc
-
-and a label should appear in picking window indicating the mode change. All
-picks made in ``dc`` mode will have a red dot rather than blue.
-
-To change back to bed mode, type ``mode bed``.
+To change back to bed mode, press the middle mouse button again.
 
 Automated picking
 ~~~~~~~~~~~~~~~~~
 
 To save time, picking can be done automatically. For example, to automatically
-pick the airwave across the whole radar line, use the ``autodc`` command. If me
+pick the airwave across the whole radar line, use the ``pick dc`` command. If me
 know that the airwave is between samples 75 and 125 (right vertical axis on the
 radargram), then we can give this as a hint by typing
 
 ::
 
-    autodc 75 125
+    pick dc 75 125
 
 *icepick* then uses a set of heuristics to try and figure out where the airwave
 is in each trace, subject to the vertical constraints.
@@ -305,10 +309,10 @@ is in each trace, subject to the vertical constraints.
    increasing the range arguments.
 
 Automatically picking the airwave usually works pretty well. Automatically
-picking the bed reflection is more hit-and-miss. The command ``autobed`` works
+picking the bed reflection is more hit-and-miss. The command ``pick bed`` works
 pretty much the same way as above, and usually does a decent job when the
 radargram is very clear. Even when the radargram is more complicated, I usually
-give ``autobed`` a shot, and then go through making the (many) necessary
+give ``pick bed`` a shot, and then go through making the (many) necessary
 corrections.
 
 Pick rating

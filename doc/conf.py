@@ -41,7 +41,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'radar_tools'
+project = u'icepick and irlib (radar_tools)'
 copyright = u'2013, Nat Wilson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -165,7 +165,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'radar_toolsdoc'
+htmlhelp_basename = 'irlibdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -197,7 +197,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'radar_tools.tex', u'radar\\_tools Documentation',
+  ('index', 'irlib.tex', u'IcePick and irlib Documentation',
    u'Nat Wilson', 'manual'),
 ]
 
@@ -227,7 +227,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'radar_tools', u'radar_tools Documentation',
+    ('index', 'irlib', u'IcePick and irlib Documentation',
      [u'Nat Wilson'], 1)
 ]
 
@@ -241,9 +241,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'radar_tools', u'radar_tools Documentation',
-   u'Nat Wilson', 'radar_tools', 'One line description of project.',
-   'Miscellaneous'),
+  ('index', 'irlib', u'IcePick and irlib Documentation',
+   u'Nat Wilson', 'irlib', 'Program and Python API for ice-penetrating radar',
+   'Scientific'),
 ]
 
 # Documents to append as an appendix to all manuals.

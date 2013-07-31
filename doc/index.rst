@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentation for radar_tools
-=============================
+Documentation for IcePick and irlib (radar_tools)
+=================================================
 
 .. toctree::
     :depth: 3
@@ -110,8 +110,6 @@ Environment Variables*.
 
 
 .. include:: doc_utilities.rst
-
-.. include:: doc_irview.rst
 
 .. include:: doc_icepick.rst
 

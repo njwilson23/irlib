@@ -111,7 +111,8 @@ Implemented
     - refactor CLI filter commands into filter classes to allow introspection
     - map window
     - refactor icepick, irview, icerate into a single codebase, kept in
-      `irlib/app/` (partially done)
+      `irlib/app/` (partial)
+    - build *icepick2* based on the refactored `app` codebase (partial)
 
 To do
 ~~~~~
