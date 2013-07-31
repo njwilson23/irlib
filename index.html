@@ -1,37 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Radar tools : Python package and command-line and GUI tools for interpretting ground/ice-penetrating radar datasets" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Radar tools by njwilson23</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Radar tools</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Radar tools</h1>
+        <p>Python package and tools for interpretting ice-penetrating radar datasets</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/njwilson23/radar_tools">View on GitHub</a>
+        <p class="view"><a href="https://github.com/njwilson23/irlib">View the Project on GitHub <small>njwilson23/irlib</small></a></p>
 
-          <h1 id="project_title">Radar tools</h1>
-          <h2 id="project_tagline">Python package and command-line and GUI tools for interpretting ground/ice-penetrating radar datasets</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/njwilson23/radar_tools/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/njwilson23/radar_tools/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>radar_tools</h1>
+        <ul>
+          <li><a href="https://github.com/njwilson23/irlib/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/njwilson23/irlib/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/njwilson23/irlib">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="radar_tools" class="anchor" href="#radar_tools"><span class="octicon octicon-link"></span></a>radar_tools</h1>
 
 <p><em>radar_tools</em> is a set of libraries and scripts useful for visualizing and
 processing data collected from ice-penetrating radar. The tools have been
@@ -44,7 +42,7 @@ efficient and simple way to apply established methodologies for analysing radar
 data. Pre-written filters and processing routines are called by typing
 keywords.</p>
 
-<p><img src="http://njwilson23.github.com/radar_tools/images/repo_image.png" alt=""></p>
+<p><img src="http://njwilson23.github.com/irlib/images/repo_image.png" alt=""></p>
 
 <p>The second way is to use the <code>irlib</code> API directly. This makes it possible to
 programmatically analyze radar data from the Python programming language. New
@@ -55,16 +53,17 @@ using <em>radar_tools</em>. Right now, it's possible to read CReSIS lines, which
 the filters in <code>irlib</code> available. An example of a helper function to load
 CReSIS *.mat files is in <code>itools.py</code></p>
 
-<h2>Graphical tools:</h2>
+<h2>
+<a name="graphical-tools" class="anchor" href="#graphical-tools"><span class="octicon octicon-link"></span></a>Graphical tools:</h2>
 
 <ul>
-<li><strong>irview</strong>: General purpose viewer for radar lines that doubles as a tool for
-mark englacial regions</li>
-<li><strong>icepick</strong>: Pick reflection arrivals from a radar line, either manually or
-withmple pattern recognition</li>
-<li><strong>icerate</strong>: Rate reflection quality using <strong>icepick</strong> output</li>
-<li><strong>IcePick2</strong>: Development version of an application that combines the three above</li>
-</ul><h2>Command-line tools:</h2>
+<li><p><strong>irview</strong>: General purpose viewer for radar lines that doubles as a tool for
+marking englacial regions</p></li>
+<li><p><strong>icepick</strong>: Pick reflection arrivals from a radar line, either manually or
+with simple pattern recognition</p></li>
+<li><p><strong>icerate</strong>: Rate reflection quality using <strong>icepick</strong> output</p></li>
+</ul><h2>
+<a name="command-line-tools" class="anchor" href="#command-line-tools"><span class="octicon octicon-link"></span></a>Command-line tools:</h2>
 
 <ul>
 <li>
@@ -83,29 +82,32 @@ a hand-held GPS</li>
 <strong>irtrace</strong>: Plot a radar trace acquired at a single location</li>
 <li>
 <strong>irline</strong>: Plot a radar section along a line of locations</li>
-</ul><h2>Dependencies:</h2>
+</ul><h2>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies:</h2>
 
 <p><em>radar_tools</em> should run anywhere Python and the required dependencies work. In
 the past, I've managed to get it working under Windows, OS X, and Linux.</p>
 
 <ol>
-<li><a href="http://www.python.org"><em>Python</em></a> 2.6+ (&lt;3.x): dynamic interpretted
-programming language suited for scientific computing</li>
-<li><a href="http://www.scipy.org"><em>Numpy</em></a> numerical array classes for Python</li>
-<li><a href="http://www.scipy.org"><em>Scipy</em></a> science-oriented libraries for Python</li>
-<li><a href="http://www.matplotlib.org"><em>matplotlib</em></a> plotting for Python</li>
-<li><a href="https://github.com/h5py/h5py"><em>h5py</em></a>: HDF5 interface for Python</li>
+<li><p><a href="http://www.python.org"><em>Python</em></a> 2.6+ (&lt;3.x): dynamic interpretted
+programming language suited for scientific computing</p></li>
+<li><p><a href="http://www.scipy.org"><em>Numpy</em></a> numerical array classes for Python</p></li>
+<li><p><a href="http://www.scipy.org"><em>Scipy</em></a> science-oriented libraries for Python</p></li>
+<li><p><a href="http://www.matplotlib.org"><em>matplotlib</em></a> plotting for Python</p></li>
+<li><p><a href="https://github.com/h5py/h5py"><em>h5py</em></a> HDF5 interface for Python</p></li>
 </ol><p>One way to get the first four dependencies above in one package is to install
 the <a href="http://www.enthought.com/">Enthought Python Distribution</a>.</p>
 
-<h2>Additional useful packages and tools:</h2>
+<h2>
+<a name="additional-useful-packages-and-tools" class="anchor" href="#additional-useful-packages-and-tools"><span class="octicon octicon-link"></span></a>Additional useful packages and tools:</h2>
 
 <ol>
-<li><a href="cython.org"><em>Cython</em></a> for generating accelerated filters (cython.org)</li>
-<li><em>pywavelet</em> wrapper for wavelet algorithms (*Torrence and Compo, 1998*)
-(included in <code>external/pywavelet-0.1</code>)</li>
-<li><a href="code.google.com/p/pyproj"><em>pyproj</em></a> <em>libproj</em> bindings</li>
-</ol><h2>Documentation:</h2>
+<li><p><a href="cython.org"><em>Cython</em></a> for generating accelerated filters (cython.org)</p></li>
+<li><p><em>pywavelet</em> wrapper for wavelet algorithms (*Torrence and Compo, 1998*)
+(included in <code>external/pywavelet-0.1</code>)</p></li>
+<li><p><a href="code.google.com/p/pyproj"><em>pyproj</em></a> <em>libproj</em> bindings</p></li>
+</ol><h2>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation:</h2>
 
 <p>In addition to the basic information here, documentation can be found in <code>doc</code>.
 In order to build the documentation, <a href="http://sphinx-doc.org/">Sphinx</a> must be
@@ -124,39 +126,38 @@ installed, with the <code>numpydoc</code> extension. The extensions can be insta
 <pre><code>make latexpdf
 </code></pre>
 
-<h2 id="changes">Changes:</h2>
-<p><strong>Version 0.4-dev</strong></p>
-<p><em>irlib</em> 0.4 represents significant refactoring and cleaning of both the library and app design. Breaking changes in the final version will be kept to a minimum, bit the development period may be a bit turbulent. Consider trying the <em>stable-0.3</em> branch if problems crop up.</p>
-<p>Implemented ~~~~~~~~~~~</p>
-<pre><code>- remove deprecated `CutSingle`, `CutRegion` methods
-- refactor pickable gathers into separate subclasses
-- refactor CLI filter commands into filter classes to allow introspection
-- map window
-- refactor icepick, irview, icerate into a single codebase, kept in
-  `irlib/app/` (partial)
-- build *icepick2* based on the refactored `app` codebase (partial)</code></pre>
-<p>Coming ~~~~~~</p>
-<pre><code>- composable line gathers and surveys by overloading arithmetic operators
-- HDF file write
-- project config file</code></pre>
+<h2>
+<a name="changes-in-irlib-version-04-dev" class="anchor" href="#changes-in-irlib-version-04-dev"><span class="octicon octicon-link"></span></a>Changes in irlib version 0.4-dev</h2>
 
-<h2>License:</h2>
+<p><em>irlib</em> 0.4 represents significant refactoring and cleaning of both the library
+and app design. Breaking changes in the final version will be kept to a minimum,
+bit the development period may be a bit turbulent. Use the <em>stable-0.3</em> branch in
+the meantime.</p>
+
+<ul>
+<li>remove deprecated <code>CutSingle</code>, <code>CutRegion</code> methods (done)</li>
+<li>refactor pickable gathers into separate subclasses (done)</li>
+<li>refactor CLI filter commands into filter classes to allow introspection (done)</li>
+<li>map window (done)</li>
+<li>refactor icepick, irview, icerate into a single codebase, kept in
+<code>irlib/app/</code> (partial)</li>
+<li>build <em>icepick2</em> based on the refactored <code>app</code> codebase (partial)</li>
+<li>composable line gathers and surveys by overloading arithmetic operators (not started)</li>
+<li>HDF file write (not started)</li>
+<li>project config file (not started)</li>
+</ul><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License:</h2>
 
 <p><em>radar_tools</em> is provided "as is," without any warranty. Some parts of
 <em>radar_tools</em> are affected by different licensing terms. See <code>license.txt</code> for
 detailed information.</p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Radar tools maintained by <a href="https://github.com/njwilson23">njwilson23</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/njwilson23">njwilson23</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
