@@ -138,13 +138,19 @@ class Radargram(AppWindow):
                     lines.extend(self.ax.plot((x, x), yr, ":k"))
                     self.annotations["x-hair"] = lines
 
-                    s = "samp {samp}\ntime {time} ns".format(samp=y,
+
+                    s = "{fid}\nsamp {samp}\ntime {time} ns".format(
+                                        fid=self.L.fids[x],
+                                        samp=y,
                                         time=round(y/self.rate*1e9,2))
 
                     ha = "left" if (x < self.L.data.shape[1]//2) else "right"
                     va = "top" if (y < self.L.data.shape[0]//2) else "bottom"
+                    xoff = 1 if ha == "left" else -1
+                    yoff = 2 if va == "top" else -2
 
-                    txt = self.ax.text(x, y, s, size=10, ha=ha, va=va)
+                    txt = self.ax.text(x+xoff, y+yoff, s, size=10, color="b",
+                                       weight="bold", ha=ha, va=va)
                     self.annotations["x-hair-text"] = [txt]
 
                     self.fig.canvas.draw()
