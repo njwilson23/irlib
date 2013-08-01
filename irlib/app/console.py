@@ -3,8 +3,10 @@ attached and detached from the Console, which handles user input and passes
 directives to its windows. """
 
 import sys
+import os
 import getopt
 import readline
+import atexit
 import matplotlib.pyplot as plt
 import irlib
 import command_parser
@@ -18,6 +20,7 @@ class Console(object):
     survey = None
     line = None
     appwindows = []
+    readline_hist = ".history"
 
     def __init__(self, progname, bannertext=""):
         """ Initiate a new Console instance.
@@ -50,6 +53,13 @@ class Console(object):
         self.survey = irlib.Survey(self.infile)
         self.open_line(lineno)
         self.appwindows.append(Radargram(self.line))
+
+        # Setup readline
+        try:
+            readline.read_history_file(self.readline_hist)
+        except IOError:
+            pass
+        atexit.register(readline.write_history_file, self.readline_hist)
 
         # Begin main loop
         print bannertext
