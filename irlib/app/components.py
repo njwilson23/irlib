@@ -568,20 +568,21 @@ class PickWindow(AppWindow):
         for i in range(self.ntraces):
             trno = self.trace0 + i
 
-            # Plot the trace
-            trace = self.data[:,trno]
-            trace = trace / max(abs(trace)) * self.spacing / 3.0
-            self.ax.plot(trace + self._shiftx(i), -self.time, '-k')
+            if trno < self.data.shape[1]:
+                # Plot the trace
+                trace = self.data[:,trno]
+                trace = trace / max(abs(trace)) * self.spacing / 3.0
+                self.ax.plot(trace + self._shiftx(i), -self.time, '-k')
 
-            # Plot any existing picks
-            oldmode = self.mode
-            if not np.isnan(self.bed_points[trno]):
-                self.mode = 'bed'
-                self._drawpick(trace, self.bed_points[trno], i)
-            if not np.isnan(self.dc_points[trno]):
-                self.mode = 'dc'
-                self._drawpick(trace, self.dc_points[trno], i)
-            self.mode = oldmode
+                # Plot any existing picks
+                oldmode = self.mode
+                if not np.isnan(self.bed_points[trno]):
+                    self.mode = 'bed'
+                    self._drawpick(trace, self.bed_points[trno], i)
+                if not np.isnan(self.dc_points[trno]):
+                    self.mode = 'dc'
+                    self._drawpick(trace, self.dc_points[trno], i)
+                self.mode = oldmode
 
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*-1e9)
