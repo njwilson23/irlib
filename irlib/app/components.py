@@ -147,10 +147,11 @@ class Radargram(AppWindow):
                     ha = "left" if (x < self.L.data.shape[1]//2) else "right"
                     va = "top" if (y < self.L.data.shape[0]//2) else "bottom"
                     xoff = 1 if ha == "left" else -1
-                    yoff = 2 if va == "top" else -2
+                    yoff = 10 if va == "top" else -10
+                    txtbbox = dict(facecolor='k', alpha=0.2, pad=3)
 
-                    txt = self.ax.text(x+xoff, y+yoff, s, size=10, color="b",
-                                       weight="bold", ha=ha, va=va)
+                    txt = self.ax.text(x+xoff, y+yoff, s, size=10, color="w",
+                                       weight="bold", ha=ha, va=va, bbox=txtbbox)
                     self.annotations["x-hair-text"] = [txt]
 
                     self.fig.canvas.draw()
