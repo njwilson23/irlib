@@ -538,7 +538,7 @@ class PickWindow(AppWindow):
     def _drawpick(self, trace, yi, activetrace):
         """ Draw a pick mark on the given trace at yi, and update the
         registry. """
-        trace = trace / trace.max() * self.spacing / 3.0
+        trace = trace / abs(trace).max() * self.spacing / 3.0
 
         if self.mode == 'bed':
             pr = self.bed_pick_reg
@@ -572,7 +572,7 @@ class PickWindow(AppWindow):
             if trno < self.data.shape[1]:
                 # Plot the trace
                 trace = self.data[:,trno]
-                trace = trace / max(abs(trace)) * self.spacing / 3.0
+                trace = trace / abs(trace).max() * self.spacing / 3.0
                 self.ax.plot(trace + self._shiftx(i), -self.time, '-k')
 
                 # Plot any existing picks
