@@ -496,6 +496,7 @@ class PickWindow(AppWindow):
                 self.points[self.activetrace + self.trace0] = self.yi
 
             self.fig.canvas.draw()
+            self.update_radargram()
 
         if event.key == 'h':
             # Try moving to the left
@@ -590,7 +591,15 @@ class PickWindow(AppWindow):
         self.ax.set_title("Mode: {0}".format(self.mode))
 
         self.fig.canvas.draw()
+        try:
+            self.update_radargram()
+        except ConnectionError:
+            pass
 
+        return
+
+    def update_radargram(self):
+        """ Send picking annotations to a connected Radargram. """
         if self.rg is not None:
             for name in ("picklim0", "picklim1", "bedpick", "dcpick"):
                 self.rg.remove_annotation(name)
@@ -608,7 +617,8 @@ class PickWindow(AppWindow):
                 self.rg.ax.plot(self.dc_points, "-r", alpha=0.7)
 
             self.rg.fig.canvas.draw()
-
+        else:
+            raise ConnectionError("No Radargram instance attached")
         return
 
     def change_mode(self, mode):
@@ -636,6 +646,7 @@ class PickWindow(AppWindow):
         t0 : start time, in samples
         tf : end time, in samples
         """
+        self.L.data = self.data
         self.L.PickDC(sbracket=(t0, tf))
         self.dc_points = self.L.dc_picks
         if self.mode == "dc":
@@ -655,6 +666,7 @@ class PickWindow(AppWindow):
         t0 : start time, in samples
         tf : end time, in samples
         """
+        self.L.data = self.data
         self.L.PickBed(sbracket=(t0, tf), bounds=(lbnd, rbnd), phase=1)
         self.bed_points = self.L.bed_picks
         if self.mode == "bed":
@@ -718,4 +730,10 @@ class MapWindow(AppWindow):
         self.ax.plot(self.x, self.y, ".k")
         self.ax.axis("equal")
         self.fig.canvas.draw()
+
+class ConnectionError(Exception):
+    def __init__(self, message="No message"):
+        self.message = message
+    def __str__(self):
+        return self.message
 
