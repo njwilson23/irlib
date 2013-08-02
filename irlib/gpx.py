@@ -16,6 +16,9 @@ Route = collections.namedtuple("Route", ["vertices", "data", "properties"])
 
 ns = "{http://www.topografix.com/GPX/1/1}"
 
+def strip_namespace(s):
+    return s[s.index("}")+1:]
+
 class GPX(object):
     """ Represents a GPX documents, with waypoints, tracks, and routes as
     attributes. """
@@ -88,13 +91,15 @@ class GPX(object):
             properties = {}
 
             for node in trkseg.find(ns+"trkpt"):
-                data[node.tag] = []
+                tag = strip_namespace(node.tag)
+                data[tag] = []
 
             for trkpt in trkseg.findall(ns+"trkpt"):
                 vertices.append((trkpt.attrib["lon"], trkpt.attrib["lat"]))
                 for node in trkpt:
-                    if node.tag in data:
-                        data[node.tag].append(node.text)
+                    tag = strip_namespace(node.tag)
+                    if tag in data:
+                        data[tag].append(node.text)
                     else:
                         raise InconsistentFieldError("child node {0} is not "
                                         "used consistently".format(node.tag))
@@ -108,7 +113,7 @@ class GPX(object):
             segment = Trkseg(vertices, data, properties)
             segments.append(segment)
 
-        track = Track([segments], name)
+        track = Track(segments, name)
         self.tracks[name] = track
         return
 

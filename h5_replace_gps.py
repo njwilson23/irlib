@@ -11,230 +11,198 @@ import getopt
 import sys
 import shutil
 import re
-sys.path.append("/home/njw23/python")
-import pdb
 
 def print_syntax():
     print """
     SYNTAX: h5_replace_gps -h HDF_FILE -g GPX_FILE -o OUTFILE [OPTIONS]
 
+    This tool replaces the existing geographical data in a ice radar HDF
+    database with data taken from a GPX file, e.g. obtained from a handheld or
+    external GPS unit.
+
     Required:
+
         -h s    (s) is an HDF dataset for which GPS timestamps exist
-        -g s    (s) is a GPS interchange file downloaded from a hand-held GPS
+
+        -g s    (s) is a GPS interchange (GPX)
+
         -o s    (s) is the name of the output; if this file exists, it will be
                 overwritten
 
-    Valid options:
+        --tz n  (n) is the hour offset of the GPR computer from UTC
+
+    Optional:
+
         -l n    Work only on line (n); default works on all lines
+
         -t n    Set the max time delta permissible for matching locations
                 to (n) seconds; default is 15 seconds
-        -i n    Interpolate GPS times to (n) second interval; default is,
-                no interpolation
-                Interpolation is done without projection under the
-                assumption that over small distances the difference between
-                a small circle and a great circle is negligible.
-                For reasons mysterious, interpolation is very CPU-intensive.
+
+        -n      Replace coordinates in HDF with no appropriate GPX counterpart
+                with 'NaN'. By default, the original coordinates are retained.
     """
     sys.exit(0)
 
-def get_time_lon_lat(xml, savetimestamp):
-    """ Return a tuple with time, lon, and lat for a location. """
-    dd,mm,yy = savetimestamp.split("_")[0].split("/")
-    m = re.search(r'<Name>GPS_timestamp_UTC</Name>\r\n<Val>[0-9]+.[0-9]+</Val>', xml)
-    try:
-        ts = re.search('[0-9]+.[0-9]+', m.group()).group()
-        t = datetime.datetime(int(yy), int(mm), int(dd), int(ts[0:2]), int(ts[2:4]), int(ts[4:6]))
-    except ValueError:      # There's a bad loc
-        t = None
-    except AttributeError:  # re.search returned None
-        t = None
+def get_time(gps_timestamp, pctime, tzoffset):
+    """ Figure out the time and date from the HDF XML. 
+    
+    This is trickier than it sounds, because the IceRadar records the PC time
+    as well as the UTC hour, but not the UTC date. The correct UTC date is
+    first calculated based on the time zone offset (*tzoffset*), and then the
+    correct UTC time is substituted in.
 
-    m = re.search(r'<Name>Long_ W</Name>\r\n<Val>[0-9]+.[0-9]+</Val>', xml)
-    if m is not None:
-        lon = dm2dec(re.search('[0-9]+.[0-9]+', m.group()).group())
-        if lon is not None:
-            lon = -lon
-    else:
-        lon = None
-
-    m = re.search(r'<Name>Lat_N</Name>\r\n<Val>[0-9]+.[0-9]+</Val>', xml)
-    if m is not None:
-        lat = dm2dec(re.search('[0-9]+.[0-9]+', m.group()).group())
-    else:
-        lat = None
-
-    return (t, lon, lat)
-
-def dm2dec(dmstr):
-    """ Convert the degree - decimal minute codes in radar data
-    to a decimal degree coordinate. dmstr is expected to a string.
+    Returns a datetime.datetime object.
     """
-    if dmstr == '': return
-    try:
-        return round(float(dmstr.split('.')[0][:-2])
-        +   float(dmstr[-7:]) / 60., 6)
-    except ValueError:
-        return None
+    mm,dd,yy = pctime.split("_")[0].split("/")
+    ts = gps_timestamp
+    utcdate = datetime.datetime(int(yy), int(mm), int(dd)) \
+            - datetime.timedelta(0, 3600*tzoffset)
+    return datetime.datetime(utcdate.year, utcdate.month, utcdate.day,
+                             int(ts[0:2]), int(ts[2:4]), int(ts[4:6]))
 
 def dec2dm(dec_flt):
     """ Convert a decimal degree coordinate to a degree decimal minute.
-    Make the coordinate positive. Return a string.
-    """
+    Make the coordinate positive. Return a string. """
     deg = int(abs(dec_flt) // 1)
     mm = round(abs(dec_flt) % 1 * 60.0, 4)
     return str(deg) + str(int(mm//1)).rjust(2, '0') + "." + str(mm%1)[2:]
 
-def gpx_str2datetime(s):
-    """ Take a GPX timestamp and return a datetime.datetime() object. """
+def gpxtime2dt(s):
+    """ Take a GPX timestamp and return a datetime.datetime object. """
     hh, mn, ss = s.split('T')[1].strip('Z').split(':')
-    yy, mm, dd = s.split('T')[0].split('-')
-    return datetime.datetime(int(yy), int(mm), int(dd), int(hh), int(mn), int(round(float(ss))))
+    YY, MM, DD = s.split('T')[0].split('-')
+    return datetime.datetime(int(YY), int(MM), int(DD), int(hh), int(mn), int(ss))
 
-def sortby(A, B):
-    """ Sort items in list A using items in B as a sorting key. """
-    C = zip(B, A)
-    C.sort()
-    return [i[1] for i in C]
+def dateseconds(dt):
+    """ Return a date in seconds from a datetime. """
+    try:
+        return (datetime.datetime(1990, 1, 1) - dt).seconds
+    except TypeError:
+        return np.nan
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:o:l:t:')
+optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:o:l:t:n', ['tz='])
 optdict = dict(optlist)
 
 try:
     hdf_file = optdict["-h"]
     gpx_file = optdict["-g"]
     outfile = optdict["-o"]
-    # Delay loading modules so it responds faster to bad arguments
-    import numpy as np
-    import irlib
-    import h5py
-    from geo_tools.vector.gpxparser import GPXParser
+    tzoffset = int(optdict["--tz"])
 except KeyError:
     print_syntax()
 
-if "-l" in optdict.keys():
-    lineno = optdict["-l"]
-else:
-    lineno = None
+import numpy as np
+import h5py
+import irlib.gpx
 
-if "-t" in optdict.keys():
-    max_dt = datetime.timedelta(0, int(optdict["-t"]))
-else:
-    max_dt = datetime.timedelta(0, 15)      # 15 seconds default
+lineno = optdict.get("l", None)
+max_dt = int(optdict.get("-t", 15))     # 15 second default
+insert_nans = ("-n" in optdict)
 
-if "-i" in optdict.keys():
-    interp_dt = int(optdict["-i"])
-    import numpy as np
-else:
-    interp_dt = None
+print ("Replacing coordinates in {infile} (UTC {tz:+d})\n"
+        "\twith those from {gpx_file}\n"
+        "\twhere the time delta is < {max_dt} seconds\n"
+        "\tand saving as {outfile}".format(infile=hdf_file, tz=tzoffset,
+        gpx_file=gpx_file, max_dt=max_dt, outfile=outfile))
 
-print "Replacing coordinates in {infile}\n".format(infile=hdf_file) + \
-      "with those from {gpx_file}\n".format(gpx_file=gpx_file) + \
-      "where the difference is less than {max_dt}\n".format(max_dt=max_dt) + \
-      "and saving as {outfile}".format(outfile=outfile)
+# Read in the GPX file
+gpxtimes = []
+gpxlons = []
+gpxlats = []
+gpxeles = []
+
+trackfile = irlib.gpx.GPX(gpx_file)
+for trk in trackfile.tracks.values():
+    for trkseg in trk.segments:
+        for xy, z, t in zip(trkseg.vertices, trkseg.data['ele'], trkseg.data['time']):
+            gpxtimes.append(gpxtime2dt(t))
+            gpxlons.append(float(xy[0]))
+            gpxlats.append(float(xy[1]))
+            gpxeles.append(float(z))
 
 # Copy the HDF to the new file location, and then modify in-place
 shutil.copyfile(hdf_file, outfile)
 
-# Load GPX file
-gpx = GPXParser(gpx_file)
-
-# Load hdf file
+# Load HDF file
 hdf = h5py.File(outfile, "r+")
 
-# Read in the GPX file
-gpx_times = []
-gpx_lons = []
-gpx_lats = []
-for name in gpx.getnames():
-    t = gpx.tracks[name].keys()
-    _ = [gpx_times.append(gpx_str2datetime(i)) for i in t]
-    _ = [gpx_lons.append(gpx.tracks[name][i]['lon']) for i in t]
-    _ = [gpx_lats.append(gpx.tracks[name][i]['lat']) for i in t]
-
-if interp_dt is not None:
-    # Find the min and max times, and set interpolation points between them
-    gpx_times = map(lambda t: time.mktime(t.timetuple()), gpx_times)
-    min_t = min(gpx_times)
-    max_t = max(gpx_times)
-    gpx_lons = sortby(gpx_lons, gpx_times)
-    gpx_lats = sortby(gpx_lats, gpx_times)
-    gpx_times.sort()
-    gpx_times = np.array(gpx_times)
-    interp_t = np.arange(min_t, max_t, interp_dt)
-    all_t = np.hstack([interp_t, gpx_times])
-    gpx_lons = np.interp(all_t, gpx_times, gpx_lons)
-    gpx_lats = np.interp(all_t, gpx_times, gpx_lats)
-    gpx_times = np.array(map(lambda ts: datetime.datetime.fromtimestamp(ts), all_t))
-
-else:
-    gpx_times = np.array(gpx_times)
-
-# For each location in the hdf file, read the timestamp, and figure out
-# whether there's an appropriate position in GPX
 if lineno is None:
     lines = hdf.keys()
 else:
     lines = ["line_"+lineno]
 
-nans = 0
-replaces = 0
-DT_rec = []
-
+# Read out all acquisition times in the HDF file
+hdfaddrs = []
+hdftimes = []
 for line in lines:
+    for loc in hdf[line]:
+        for dc in hdf[line][loc]:
 
-    for loc in hdf[line].keys():
 
-        dataset = hdf[line][loc]["datacapture_0/echogram_0"]
-        xml = dataset.attrs['GPS Cluster- MetaData_xml']
-        savetimestamp = dataset.attrs['PCSavetimestamp']
+            dataset = hdf[line][loc][dc]["echogram_0"]
+            hdfaddrs.append(dataset)
 
-        # Read the timestamp, lon, and lat from xml
-        hdf_t, hdf_lon, hdf_lat = get_time_lon_lat(xml, savetimestamp)
+            try:
 
-        if None not in (hdf_t, hdf_lon, hdf_lat):
-            # Find the nearest observation in the GPX data
-            dt = gpx_times - hdf_t
-            nearest_i = np.nonzero(abs(dt)==abs(dt).min())[0][0]
-            dt_i = abs(dt).min()
-            DT_rec.append(dt_i)
+                gpscluster = dataset.attrs['GPS Cluster- MetaData_xml']
+                m = re.search(r'<Name>GPS_timestamp_UTC</Name>\r\n<Val>[0-9]{6}</Val>',
+                              gpscluster)
+                gpstimestamp = re.search('[0-9]{6}', m.group()).group()
+                hdftimes.append(get_time(gpstimestamp,
+                                         dataset.attrs["PCSavetimestamp"],
+                                         tzoffset))
 
-            if dt_i < max_dt:
-                # Insert the GPX coordinates
-                gpx_lon = gpx_lons[nearest_i]
-                gpx_lat = gpx_lats[nearest_i]
-                aa = float(dec2dm(gpx_lon))
-                bb = float(dec2dm(gpx_lat))
-                if (aa < 13900) or (aa > 14000) or (bb < 6000) or (bb > 6100):
-                    print gpx_lon, gpx_lat, aa, bb
-                xml = re.sub(
-                    r'<Name>Long_ W</Name>\r\n<Val>([0-9][0-9]+\.[0-9]+?)</Val>',
-                    r'<Name>Long_ W</Name>\r\n<Val>{0}</Val>'.format(dec2dm(gpx_lon)),
-                    xml)
-                xml = re.sub(
-                    r'<Name>Lat_N</Name>\r\n<Val>([0-9][0-9]+\.[0-9]+?)</Val>',
-                    r'<Name>Lat_N</Name>\r\n<Val>{0}</Val>'.format(dec2dm(gpx_lat)),
-                    xml)
-                replaces += 1
+            except (ValueError, AttributeError):
+                hdftimes.append(np.nan)
 
-            else:
-                # Insert NaN
-                xml = re.sub(
-                    r'<Name>Long_ W</Name>\r\n<Val>([0-9][0-9]+\.[0-9]+?)</Val>',
-                    r'<Name>Long_ W</Name>\r\n<Val>{0}</Val>'.format("NaN"),
-                    xml)
-                xml = re.sub(
-                    r'<Name>Lat_N</Name>\r\n<Val>([0-9][0-9]+\.[0-9]+?)</Val>',
-                    r'<Name>Lat_N</Name>\r\n<Val>{0}</Val>'.format("NaN"),
-                    xml)
-                nans += 1
+# Interpolate the GPX positions
+hdfseconds = np.array([dateseconds(a) for a in hdftimes])
+gpxseconds = np.array([dateseconds(a) for a in gpxtimes])
+interp_lons = np.interp(hdfseconds, gpxseconds, gpxlons)
+interp_lats = np.interp(hdfseconds, gpxseconds, gpxlats)
+interp_eles = np.interp(hdfseconds, gpxseconds, gpxeles)
 
-        dataset.attrs.modify('GPS Cluster- MetaData_xml', xml)
+# Create a mask indicating where to use the interpolants
+dts = np.array([np.min(np.abs(t-gpxseconds)) for t in hdfseconds])
+dt_mask = dts < max_dt
+
+
+# Replace the GPS data where the mask is true
+for i, dataset in enumerate(hdfaddrs):
+
+    if insert_nans or dt_mask[i]:
+        xml = dataset.attrs["GPS Cluster- MetaData_xml"]
+
+        if dt_mask[i]:
+            xml = re.sub(r"<Name>Long_ W</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Long_ W</Name>\r\n<Val>{0}</Val>"
+                         .format(dec2dm(interp_lons[i])), xml)
+
+            xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Lat_N</Name>\r\n<Val>{0}</Val>"
+                         .format(dec2dm(interp_lats[i])), xml)
+            
+            xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Alt_asl_m</Name>\r\n<Val>{0}</Val>"
+                         .format(interp_eles[i]), xml)
+
+        elif insert_nans:
+            xml = re.sub(r"<Name>Long_ W</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Long_ W</Name>\r\n<Val>NaN</Val>", xml)
+
+            xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Lat_N</Name>\r\n<Val>NaN</Val>", xml)
+            
+            xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
+                         r"<Name>Alt_asl_m</Name>\r\n<Val>NaN</Val>", xml)
+
+        dataset.attrs.modify("GPS Cluster- MetaData_xml", xml)
+
+    else:
+        pass
 
 hdf.close()
-print "{0} matches found out of {1} points".format(replaces, replaces+nans)
-DT_rec = [i.seconds for i in DT_rec]
-print "Mean offset: {0} sec".format(float(sum(DT_rec)) / float(len(DT_rec)))
-DT_rec.sort()
-print "Median offset: {0} sec".format(DT_rec[len(DT_rec)//2])
 
+print "Mean/median time deltas:"
+print "\t{0} / {1}".format(np.mean(dts), np.median(dts))
 
