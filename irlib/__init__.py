@@ -19,9 +19,10 @@ from filter_defs import ApplyFilter
 # Accessory modules
 import brp
 import polarity
+import gpx
 import misc
 import itools
 
-__all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'itools',
-           'brp', 'polarity']
+__all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'gpx',
+           'itools', 'brp', 'polarity']
 
