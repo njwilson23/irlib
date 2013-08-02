@@ -1,12 +1,9 @@
 #! /usr/bin/python
 #
-#   Replace onboard GPS coordinates on a line with Magellan data
-#
-#   Should be adapted to work when some onboard GPS data are good
-#   Use '-f' flag to control overwriting
+#   Replace onboard GPS coordinates with data from a GPX file
 #
 
-import datetime, time
+import datetime
 import getopt
 import sys
 import shutil
@@ -44,8 +41,8 @@ def print_syntax():
     sys.exit(0)
 
 def get_time(gps_timestamp, pctime, tzoffset):
-    """ Figure out the time and date from the HDF XML. 
-    
+    """ Figure out the time and date from the HDF XML.
+
     This is trickier than it sounds, because the IceRadar records the PC time
     as well as the UTC hour, but not the UTC date. The correct UTC date is
     first calculated based on the time zone offset (*tzoffset*), and then the
@@ -99,11 +96,16 @@ lineno = optdict.get("l", None)
 max_dt = int(optdict.get("-t", 15))     # 15 second default
 insert_nans = ("-n" in optdict)
 
-print ("Replacing coordinates in {infile} (UTC {tz:+d})\n"
-        "\twith those from {gpx_file}\n"
-        "\twhere the time delta is < {max_dt} seconds\n"
-        "\tand saving as {outfile}".format(infile=hdf_file, tz=tzoffset,
-        gpx_file=gpx_file, max_dt=max_dt, outfile=outfile))
+print "Performing coordinate replacement"
+print
+print ("\t======== PARAMETERS =========\n"
+       "\tSRC dataset:      {infile}\n"
+       "\tDST dataset:      {outfile}\n"
+       "\tGPX file:         {gpx_file}\n\n"
+       "\tMAX timedelta:    {max_dt} sec\n"
+       "\tTZ offset:        {tz:+} hr\n"
+       "\tINSERT NaNs:      {insert_nans}\n".format(infile=hdf_file, tz=tzoffset,
+        gpx_file=gpx_file, max_dt=max_dt, outfile=outfile, insert_nans=insert_nans))
 
 # Read in the GPX file
 gpxtimes = []
@@ -158,6 +160,15 @@ for line in lines:
 # Interpolate the GPX positions
 hdfseconds = np.array([dateseconds(a) for a in hdftimes])
 gpxseconds = np.array([dateseconds(a) for a in gpxtimes])
+
+def sortby(a, b):
+    return [a_ for (b_, a_) in sorted(zip(b,a))]
+
+gpxlons = sortby(gpxlons, gpxseconds)
+gpxlats = sortby(gpxlats, gpxseconds)
+gpxeles = sortby(gpxeles, gpxseconds)
+gpxseconds.sort()
+
 interp_lons = np.interp(hdfseconds, gpxseconds, gpxlons)
 interp_lats = np.interp(hdfseconds, gpxseconds, gpxlats)
 interp_eles = np.interp(hdfseconds, gpxseconds, gpxeles)
@@ -166,8 +177,8 @@ interp_eles = np.interp(hdfseconds, gpxseconds, gpxeles)
 dts = np.array([np.min(np.abs(t-gpxseconds)) for t in hdfseconds])
 dt_mask = dts < max_dt
 
-
 # Replace the GPS data where the mask is true
+irep = 0
 for i, dataset in enumerate(hdfaddrs):
 
     if insert_nans or dt_mask[i]:
@@ -181,10 +192,12 @@ for i, dataset in enumerate(hdfaddrs):
             xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
                          r"<Name>Lat_N</Name>\r\n<Val>{0}</Val>"
                          .format(dec2dm(interp_lats[i])), xml)
-            
+
             xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
                          r"<Name>Alt_asl_m</Name>\r\n<Val>{0}</Val>"
                          .format(interp_eles[i]), xml)
+
+            irep += 1
 
         elif insert_nans:
             xml = re.sub(r"<Name>Long_ W</Name>\r\n<Val>[0-9.]+?</Val>",
@@ -192,7 +205,7 @@ for i, dataset in enumerate(hdfaddrs):
 
             xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
                          r"<Name>Lat_N</Name>\r\n<Val>NaN</Val>", xml)
-            
+
             xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
                          r"<Name>Alt_asl_m</Name>\r\n<Val>NaN</Val>", xml)
 
@@ -203,6 +216,10 @@ for i, dataset in enumerate(hdfaddrs):
 
 hdf.close()
 
-print "Mean/median time deltas:"
-print "\t{0} / {1}".format(np.mean(dts), np.median(dts))
+print ("\t========== RESULTS ==========\n"
+       "\tTOTAL traces:     {ntraces}\n"
+       "\tMODIFIED traces:  {irep}\n"
+       "\tMEAN timedelta:   {mn:.2f} sec\n"
+       "\tMEDIAN timedelta: {md:g} sec".format(irep=irep, ntraces=i+1,
+       mn=np.mean(dts[np.isnan(dts) == False]), md=np.median(dts)))
 
