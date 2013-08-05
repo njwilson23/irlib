@@ -257,6 +257,7 @@ class Radargram(AppWindow):
         """
         n = self.data.shape[0]
         self.ax.lines = []
+        self.ax.texts = []
 
         # Draw nodes
         drawxy = lambda xy: self.ax.plot(xy[0], xy[1], 'or', markersize=5.0,
