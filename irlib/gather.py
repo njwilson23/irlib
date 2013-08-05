@@ -258,6 +258,19 @@ class Gather(object):
             "_line" + str(self.line) + ".txt"
         return fnm
 
+    def PprintHistory(self):
+        """ Return a printable string summarizing the filter history. """
+        s_out = ""
+        for operation in self.history:
+            if hasattr(operation, "__iter__"):
+                s_out += "\t" + operation[0] + " [ "
+                for option in operation[1:]:
+                    s_out += str(option) + ", "
+                s_out += " ] \n"
+            else:
+                s_out += "\t" + operation + " [ ] \n"
+        return s_out
+
     def LoadTopography(self, topofnm=None, smooth=True):
         """ Load topography along the Gather's transect. If a *topofnm* is
         provided, then the `metadata` attribute must be valid and must contain

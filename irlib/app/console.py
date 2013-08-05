@@ -219,8 +219,8 @@ class Console(object):
                 traceback.print_exc()
 
         elif args[0] in ('filter', 'f'):        # FILTER
-            if len(args) == 0:
-                print StrFilterHistory(self.line)
+            if len(args) < 2:
+                print self.line.PprintHistory()
             else:
                 try:
                     command_parser.apply_filter(args[1:], self.line)
