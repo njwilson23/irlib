@@ -115,12 +115,12 @@ gpxeles = []
 
 trackfile = irlib.gpx.GPX(gpx_file)
 for trk in trackfile.tracks.values():
-    for trkseg in trk.segments:
-        for xy, z, t in zip(trkseg.vertices, trkseg.data['ele'], trkseg.data['time']):
-            gpxtimes.append(gpxtime2dt(t))
-            gpxlons.append(float(xy[0]))
-            gpxlats.append(float(xy[1]))
-            gpxeles.append(float(z))
+    for trkseg in trk.trksegs:
+        for pt in trkseg.trkpts:
+            gpxtimes.append(gpxtime2dt(pt.properties["time"]))
+            gpxlons.append(float(pt.lonlat[0]))
+            gpxlats.append(float(pt.lonlat[1]))
+            gpxeles.append(float(pt.properties["ele"]))
 
 # Copy the HDF to the new file location, and then modify in-place
 shutil.copyfile(hdf_file, outfile)
