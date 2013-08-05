@@ -3,9 +3,9 @@
 #   Replace onboard GPS coordinates with data from a GPX file
 #
 
-import datetime
-import getopt
 import sys
+import getopt
+import datetime
 import shutil
 import re
 
@@ -40,7 +40,7 @@ def print_syntax():
     """
     sys.exit(0)
 
-def get_time(gps_timestamp, pctime, tzoffset):
+def get_time(gps_timestamp, pcdatetime, tzoffset):
     """ Figure out the time and date from the HDF XML.
 
     This is trickier than it sounds, because the IceRadar records the PC time
@@ -50,10 +50,15 @@ def get_time(gps_timestamp, pctime, tzoffset):
 
     Returns a datetime.datetime object.
     """
-    mm,dd,yy = pctime.split("_")[0].split("/")
-    ts = gps_timestamp
-    utcdate = datetime.datetime(int(yy), int(mm), int(dd)) \
+    pcdate, pctime = pcdatetime.split("_")
+    mm,dd,yy = pcdate.split("/")
+    hms, ampm = pctime.split()
+    h,m,s = hms.split(":")
+    utcdate = datetime.datetime(int(yy), int(mm), int(dd), int(h), int(m), int(s)) \
             - datetime.timedelta(0, 3600*tzoffset)
+    if ampm.lower() == "pm" and int(h) < 12:
+        utcdate += datetime.timedelta(0, 3600*12)
+    ts = gps_timestamp
     return datetime.datetime(utcdate.year, utcdate.month, utcdate.day,
                              int(ts[0:2]), int(ts[2:4]), int(ts[4:6]))
 
@@ -73,7 +78,7 @@ def gpxtime2dt(s):
 def dateseconds(dt):
     """ Return a date in seconds from a datetime. """
     try:
-        return (datetime.datetime(1990, 1, 1) - dt).seconds
+        return (dt - datetime.datetime(1990, 1, 1)).total_seconds()
     except TypeError:
         return np.nan
 
