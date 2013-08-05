@@ -3,12 +3,13 @@
 import sys
 import os
 import irlib
-from irlib.misc import TryCache
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-import traceback
+from irlib.misc import TryCache
 
 plt.ion()
+matplotlib.rcParams["toolbar"] = "none"
 
 class AppWindow(object):
     """ This is the generic application window class, and contains an axes
@@ -23,7 +24,6 @@ class AppWindow(object):
         winsize : size of the window, in inches
         """
         self.fig = plt.figure(figsize=winsize)
-        self.fig.canvas.toolbar.destroy()
         self.ax = self.fig.add_subplot(1,1,1)
 
         # Turn off default shortcuts
@@ -336,7 +336,6 @@ class Radargram(AppWindow):
                         y = float(slist[3])
                         pnt_list.append((x, y))
                     except:
-                        traceback.print_exc()
                         sys.stdout.write("Failed to read record:\n\t{0}".format(s))
 
             if len(pnt_list) == 0:
@@ -713,6 +712,7 @@ class MapWindow(AppWindow):
     def __init__(self, L):
         super(MapWindow, self).__init__((4, 4))
         self._newline(L)
+        self.ax.tight_layout()
         return
 
     def _newline(self, L):
