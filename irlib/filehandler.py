@@ -26,10 +26,13 @@ class FileHandler:
         else:
             self.prevlines = None
             self.nrecs = None
-            self.fids = fids
-            self.dcvals = None
-            self.bedvals = None
-            self.traveltimes = None
+            if fids is not None:
+                self.fids = fids
+            else:
+                self.fids = []
+            self.dcvals = [np.nan for a in self.fids]
+            self.bedvals = [np.nan for a in self.fids]
+            self.traveltimes = [np.nan for a in self.fids]
 
     def _linloc2fid(self, lin, loc):
         """ Based on a path, return a unique FID for database
