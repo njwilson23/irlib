@@ -119,7 +119,7 @@ gpxlats = []
 gpxeles = []
 
 trackfile = irlib.gpx.GPX(gpx_file)
-for trk in trackfile.tracks.values():
+for trk in trackfile.tracks:
     for trkseg in trk.trksegs:
         for pt in trkseg.trkpts:
             gpxtimes.append(gpxtime2dt(pt.properties["time"]))
