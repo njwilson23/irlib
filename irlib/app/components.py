@@ -74,7 +74,6 @@ class Radargram(AppWindow):
     active_coords = []
     annotations = {}
     #features = {}
-    digitize_mode = False
 
     lum_scale = 0.25
     cmap = plt.cm.binary
@@ -87,6 +86,7 @@ class Radargram(AppWindow):
         L : Gather instance containing the radar data to be displayed
         """
         super(Radargram, self).__init__((10, 4))
+        self.digitize_mode = False
         self._newline(L)
         self.fig.tight_layout()
         return
@@ -386,9 +386,6 @@ class PickWindow(AppWindow):
 
     annotations = {}
     spacing = 0.1
-    trace0 = 0
-    mode = "bed"
-    activetrace = None
     rg = None
 
     def __init__(self, L, ntraces=8):
@@ -399,6 +396,9 @@ class PickWindow(AppWindow):
         """
         super(PickWindow, self).__init__((10, 8))
         self.ax.set_autoscale_on(False)
+        self.trace0 = 0
+        self.activetrace = None
+        self.mode = "bed"
         self.ntraces = ntraces
         self._newline(L)
         return
