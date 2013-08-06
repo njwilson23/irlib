@@ -131,21 +131,20 @@ installed, with the <code>numpydoc</code> extension. The extensions can be insta
 and application design. Breaking changes in the final version will be kept to a
 minimum, however the <em>stable-0.3</em> branch is available if necessary.</p>
 
-<p>Changes</p>
-
-<pre><code>- remove deprecated methods
-- refactor pickable gathers into separate subclasses
-- map window
-- refactor icepick, irview, icerate into a single codebase, kept in `irlib/app/` (all except icerate)
-- build *icepick2* based on the refactored `app` codebase
-- modular command system, one of the benefits of which is that additional custom filters can be added easily at runtime and on a project-basis
-- rewrite h5_replace_gps to be more robust, handle timezones, and work over multiple days
-- some bug fixes and polishing
-
-To do
-</code></pre>
+<p><strong>Implemented and upcoming</strong></p>
 
 <ul>
+<li>remove deprecated <code>CutSingle</code>, <code>CutRegion</code> methods (done)</li>
+<li>refactor pickable gathers into separate subclasses (done)</li>
+<li>map window (done)</li>
+<li>refactor icepick, irview, icerate into a single codebase, kept in
+<code>irlib/app/</code> (all except icerate)</li>
+<li>build <em>icepick2</em> based on the refactored <code>app</code> codebase (done)</li>
+<li>modular command system, one of the benefits of which is that additional
+custom filters can be added easily at runtime and on a project-basis (done)</li>
+<li>rewrite h5_replace_gps to be more robust, handle timezones, and work over
+multiple days (done)</li>
+<li>some bug fixes and polishing (in progress)</li>
 <li>project config file</li>
 <li>composable line gathers and surveys by overloading arithmetic operators?</li>
 <li>HDF file write?</li>
