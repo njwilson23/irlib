@@ -50,7 +50,11 @@ class Console(object):
 
         lineno = int(optdict.get('-L', 0))
 
-        self.survey = irlib.Survey(self.infile)
+        try:
+            self.survey = irlib.Survey(self.infile)
+        except IOError as e:
+            print e
+            return
         self.open_line(lineno)
         self.appwindows.append(Radargram(self.line))
 
@@ -178,7 +182,7 @@ class Console(object):
                 else:
                     print " {0} ".format(lineno),
                 cursor += (2 + len(str(lineno)))
-                if cursor > 70:
+                if cursor > 60:
                     print
                     print "  ",
                     cursor = 2
