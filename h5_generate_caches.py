@@ -42,8 +42,8 @@ be_quiet = True if '-q' in optdict else False
 verbose = True if '-e' in optdict else False
 
 smoothen_gps = False
-remove_nans = False
 interpolate_nans = False
+remove_nans = False
 if '-s' in optdict:
     smoothen_gps = True
 elif '--interpolate_nans' in optdict:
@@ -62,6 +62,9 @@ try:
 except IndexError:
     print_syntax()
     sys.exit()
+
+if not os.path.isdir(cache_dir):
+    os.makedirs(cache_dir)
 
 S = Survey(survey_fnm)
 
