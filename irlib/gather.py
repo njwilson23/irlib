@@ -378,8 +378,8 @@ class Gather(object):
             np.hstack([np.ones(win//2)*northings0[0], northings0,
             np.ones(win//2)*northings0[-1]]),
             np.ones(win) / float(win), mode='valid')
-        self.metadata.eastings = eastings1.tolist()
-        self.metadata.northings = northings1.tolist()
+        self.metadata.eastings = eastings.tolist()
+        self.metadata.northings = northings.tolist()
         self.history.append(('SmoothenGPS', win))
         return
 
