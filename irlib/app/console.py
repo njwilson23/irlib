@@ -44,9 +44,11 @@ class Console(object):
         try:
             self.infile = optdict['-f']
         except KeyError:
-            print "A survey filename must be supplied:"
-            self.print_syntax()
-            sys.exit(0)
+            if len(args) > 0:
+                self.infile = args[0]
+            else:
+                self.print_syntax()
+                sys.exit(0)
 
         lineno = int(optdict.get('-L', 0))
 
