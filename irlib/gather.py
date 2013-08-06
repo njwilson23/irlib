@@ -473,7 +473,7 @@ class Gather(object):
         for i in range(self.data.shape[1]):
             if self.data[:,i].mean() != 0:
                 A = (self.data[:,i] * (t)**npow * np.exp(nexp*t))
-                B = A/abs(A) * abs(A) ** gamma + bias
+                B = np.sign(A) * abs(A) ** gamma + bias
                 B[np.isnan(B)] = 0.
 
                 # Scale to preserve average amplitude
