@@ -38,7 +38,7 @@ class PickOn(PickCommand):
 class PickOff(PickCommand):
 
     cmd = "off"
-    helpstr = "\tClose PickWindow and stope picking.\n"
+    helpstr = "\tClose PickWindow and stop picking.\n"
 
     def apply(self, app, args):
         for w in app.get_appwindows(PickWindow):
