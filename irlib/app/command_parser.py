@@ -12,9 +12,17 @@
 
 import traceback
 
-def apply_command(registry, inputs, app):
-    """ Attempt to find a Command matching an input_string, and apply. Raises
-    KeyError otherwise. """
+def apply_command(registry, inputs, stateobj):
+
+    """ Attempt to apply a command, raising a KeyError if a suitable command cannot be found.
+
+    Parameters
+    ----------
+    registry:   dictionary of commands and their associated Command classes
+    inputs:     list containing first the command string, and then any arguments
+    stateobj:   the stateful object that may be modified by the command
+                e.g. a Console or Gather instance
+    """
     if len(inputs) > 1:
         cmd = inputs[0]
         args = inputs[1:]
@@ -25,12 +33,6 @@ def apply_command(registry, inputs, app):
     if cmd in registry:
 
         cmdclass = registry[cmd]()
-        if cmdclass._type == "Filter":
-            stateobj = app.line
-        else:
-            stateobj = app
-
-        print args
 
         try:
             cmdclass.apply(stateobj, args)

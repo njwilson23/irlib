@@ -135,14 +135,15 @@ class ApplyFilter(Command):
             print app.line.PprintHistory()
         else:
             try:
-                cp.apply_command(args, app.line)
+                # args are the inputs -> 'filter'
+                cp.apply_command(app.command_registry, args, app.line)
                 for rg in app.get_appwindows(Radargram):
                     rg.data = app.line.data
                     rg.repaint()
                 for pw in app.get_appwindows(PickWindow):
                     pw.data = app.line.data
                     pw.update()
-            except command_parser.CommandSearchError as e:
+            except cp.CommandSearchError as e:
                 print e.message
 
 class ApplyFilterAlt(ApplyFilter):
@@ -256,7 +257,7 @@ class HelpPrinter(Command):
                     print "\t\t{0}".format(name)
 
         else:
-            print cp.help_command(app.command_registry, args[1])
+            print cp.help_command(app.command_registry, args[0])
         return
 
 
