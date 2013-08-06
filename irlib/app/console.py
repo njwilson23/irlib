@@ -77,12 +77,11 @@ class Console(object):
 
     def print_syntax(self):
         """ Print start-up syntax for the forgetful. """
-        print "\t {0} -f file_name [-L line_number]".format(self.progname)
+        print "\tUSAGE: {0} <HDF_survey> [-L line_number]".format(self.progname)
         return
 
     def open_line(self, lineno, dcno=0, fromcache=True):
         """ Open a line from a survey """
-        #self.survey = irlib.Survey(self.infile)
         loaded = False
         if fromcache:
             cachename = self.survey.GetLineCacheName(lineno, dcno)
@@ -93,9 +92,9 @@ class Console(object):
             if line.nx >= 2:
                 try:
                     line.RemoveBadLocations()
+                    line.RemoveGPSNaNs()
                     line.FixStaticGPS()
                     line.RemoveBlankTraces()
-                    line.SmoothenGPS()
                     line.RemoveStationary(threshold=3.0)
                     self.line = line
                 except irlib.LineGatherError:

@@ -484,13 +484,13 @@ class PickWindow(AppWindow):
 
             trace = self.data[:,self.trace0 + self.activetrace]
 
-            if event.key == 'j':
+            if event.key in ('j', 'down'):
                 self._clearlastpick()
                 self.yi += 1
                 self._drawpick(trace, self.yi, self.activetrace)
                 self.points[self.activetrace + self.trace0] = self.yi
 
-            elif event.key == 'k':
+            elif event.key in ('k', 'up'):
                 self._clearlastpick()
                 self.yi -= 1
                 self._drawpick(trace, self.yi, self.activetrace)
@@ -499,7 +499,7 @@ class PickWindow(AppWindow):
             self.fig.canvas.draw()
             self.update_radargram()
 
-        if event.key == 'h':
+        if event.key in ('h', 'left'):
             # Try moving to the left
             if self.trace0 > 0:
                 self.trace0 -= self.ntraces
@@ -507,7 +507,7 @@ class PickWindow(AppWindow):
                 self._clear_registers()
                 self.update()
 
-        elif event.key == 'l':
+        elif event.key in ('l', 'right'):
             # Try moving to the right
             if self.trace0 < self.data.shape[1] - self.ntraces:
                 self.trace0 += self.ntraces
