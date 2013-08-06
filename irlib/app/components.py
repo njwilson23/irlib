@@ -712,7 +712,7 @@ class MapWindow(AppWindow):
     def __init__(self, L):
         super(MapWindow, self).__init__((4, 4))
         self._newline(L)
-        self.ax.tight_layout()
+        self.fig.tight_layout()
         return
 
     def _newline(self, L):
