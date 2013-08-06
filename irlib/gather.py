@@ -329,8 +329,16 @@ class Gather(object):
             print "topography does not exist"
         return
 
-    def SmoothenGPS(self, win=5):
-        """ Run a moving average over the GPS northings and eastings. """
+    def RemoveGPSNaNs(self):
+        """ Remove traces with missing coordinate information. """
+        kill_list = [i for i in range(self.nx)
+                        if (np.isnan(self.metadata.eastings[i])
+                            or np.isnan(self.metadata.northings[i]))]
+        self.RemoveTraces(kill_list)
+        return
+
+    def InterpolateGPSNaNs(self):
+        """ Interpolate positions over holes in the coordinates. """
         def interpolate_nans(V):
             Vreal = np.nonzero(np.isnan(V) == False)[0]
             Vnan = np.nonzero(np.isnan(V))[0]
@@ -339,26 +347,40 @@ class Gather(object):
         try:
             eastings0 = np.array(self.metadata.eastings)
             northings0 = np.array(self.metadata.northings)
-            # iInterpolate over NaNs, unless the entire array is NaN
-            n_valid_eastings = len(np.nonzero(np.isnan(eastings0)==False)[0])
-            n_valid_northings = len(np.nonzero(np.isnan(northings0)==False)[0])
-            if (n_valid_eastings > 0) and (n_valid_northings > 0):
-                eastings0 = interpolate_nans(eastings0)
-                northings0 = interpolate_nans(northings0)
-            # Pad and then convolve with boxcar
-            eastings1 = np.convolve(
-                np.hstack([np.ones(win//2)*eastings0[0], eastings0,
-                np.ones(win//2)*eastings0[-1]]),
-                np.ones(win) / float(win), mode='valid')
-            northings1 = np.convolve(
-                np.hstack([np.ones(win//2)*northings0[0], northings0,
-                np.ones(win//2)*northings0[-1]]),
-                np.ones(win) / float(win), mode='valid')
-            self.metadata.eastings = eastings1.tolist()
-            self.metadata.northings = northings1.tolist()
-            self.history.append(('smooth_gps'))
         except AttributeError:
-            print "UTM coordinates do not exist"
+            raise ValueError("No valid UTM coordinates")
+
+        # Interpolate over NaNs, unless the entire array is NaN
+        n_valid_eastings = len(np.nonzero(np.isnan(eastings0)==False)[0])
+        n_valid_northings = len(np.nonzero(np.isnan(northings0)==False)[0])
+        if (n_valid_eastings > 0) and (n_valid_northings > 0):
+            self.metadata.eastings = list(interpolate_nans(eastings0))
+            self.metadata.northings = list(interpolate_nans(northings0))
+            self.history.append(('InterpolateGPSNaNs'))
+        else:
+            raise ValueError("No valid UTM coordinates")
+        return
+
+    def SmoothenGPS(self, win=5):
+        """ Run a moving average over the GPS northings and eastings. """
+
+        self.InterpolateGPSNaNs()
+
+        eastings0 = np.array(self.metadata.eastings)
+        northings0 = np.array(self.metadata.northings)
+
+        # Pad and then convolve with boxcar
+        eastings = np.convolve(
+            np.hstack([np.ones(win//2)*eastings0[0], eastings0,
+            np.ones(win//2)*eastings0[-1]]),
+            np.ones(win) / float(win), mode='valid')
+        northings = np.convolve(
+            np.hstack([np.ones(win//2)*northings0[0], northings0,
+            np.ones(win//2)*northings0[-1]]),
+            np.ones(win) / float(win), mode='valid')
+        self.metadata.eastings = eastings1.tolist()
+        self.metadata.northings = northings1.tolist()
+        self.history.append(('SmoothenGPS', win))
         return
 
     def DoMoveAvg(self, width, kind='blackman', mode='lowpass'):
