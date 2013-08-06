@@ -30,8 +30,9 @@ except ImportError:
 
 try:
     import pywavelet
+    PYWAVELET = True
 except ImportError:
-    sys.stderr.write("Warning: pywavelet module not loaded\n")
+    PYWAVELET = False
 
 
 class Gather(object):
@@ -681,6 +682,10 @@ class Gather(object):
         period : fourier periods of the scales used
         coi : e-folding factor used for cone-of-influence
         """
+        if not PYWAVELET:
+            sys.stderr.write("pywavelet module required for wavelet transform\n")
+            return (None, None, None, None)
+
         y = self.data[:,trno].copy()
         dt = self.rate
         mother = 0              # Mother wavelet (0==Morlet, 1==Paul, 2==DOG)
@@ -695,11 +700,8 @@ class Gather(object):
         jtot = 125               # Total number of scales
         npad = 2**np.ceil(np.log(len(y)) / np.log(2)).astype(int)
                                 # Total number of points including padding
-        try:
-            wva, scales, periods, coi \
+        wva, scales, periods, coi \
                 = pywavelet.pywavelet(y, dt, mother, param, s0, dj, jtot, npad)
-        except NameError:
-            sys.stderr.write("pywavelet module required for wavelet transform\n")
         return wva, scales, periods, coi
 
 
