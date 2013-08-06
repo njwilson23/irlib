@@ -2,6 +2,7 @@
 """ Benchmark program for irlib app framework """
 
 import irlib.app.filters
+import irlib.app.pickcommands
 from irlib.app.console import Console
 from irlib.app.components import Radargram
 
@@ -10,6 +11,7 @@ Type 'help' for assistance with available commands."""
 
 console = Console("icepick2", bannertext=bannertext)
 console.register(irlib.app.filters)
+console.register(irlib.app.pickcommands)
 console.start()
 
 #from irlib.app.components import PickWindow

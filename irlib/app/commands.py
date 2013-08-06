@@ -32,7 +32,8 @@ class PrintInfo(Command):
 
     info
 
-    Print information about the currently open survey and radar line. """
+    Print information about the currently open survey and radar line.
+    """
 
     def apply(self, app, args):
         print app.survey.datafile
@@ -55,7 +56,7 @@ class PrintInfo(Command):
 class ListLines(Command):
 
     cmd = "ls"
-    helpstr = "List available lines."
+    helpstr = "\tList available lines.\n"
 
     def apply(self, app, args):
         cursor = 2
@@ -82,7 +83,8 @@ class OpenLine(Command):
     open <lineno> [dcno=0]
 
     Attempts to open the line with number *lineno* and the channel with number
-    *dcno* (default 0)."""
+    *dcno* (default 0).
+    """
 
     def apply(self, app, args):
         try:
@@ -128,7 +130,8 @@ class ApplyFilter(Command):
     Applies a filter to the data. For a list of filters, type "help". For help
     on individual filters, type "help <filtername>".
 
-    Can be abbreviated as "f"."""
+    Can be abbreviated as "f".
+    """
 
     def apply(self, app, args):
         if len(args) == 0:
@@ -143,8 +146,8 @@ class ApplyFilter(Command):
                 for pw in app.get_appwindows(PickWindow):
                     pw.data = app.line.data
                     pw.update()
-            except cp.CommandSearchError as e:
-                print e.message
+            except KeyError:
+                print "No filter type '{0}' exists".format(args[0])
 
 class ApplyFilterAlt(ApplyFilter):
     cmd = "f"
@@ -152,7 +155,7 @@ class ApplyFilterAlt(ApplyFilter):
 class NoFilter(Command):
 
     cmd = "nofilter"
-    helpstr = "Remove filters, restoring the radar data to it's original state."
+    helpstr = "\tRemove filters, restoring the radar data to it's original state.\n"
 
     def apply(self, app, args):
         app.line.Reset()
@@ -193,7 +196,8 @@ class YLimAdjuster(Command):
     ylim [value]
 
     Modify the vertical limits in all applicable windows. If no argument is
-    supplied, the current limits are returned."""
+    supplied, the current limits are returned.
+    """
 
     def apply(self, app, args):
         rate_ns = app.line.rate * 1e9
@@ -215,7 +219,7 @@ class YLimAdjuster(Command):
 class Debug(Command):
 
     cmd = "debug"
-    helpstr = "If this is useful to you, you already know what it does."
+    helpstr = "\tIf this is useful to you, you already know what it does.\n"
 
     def apply(self, app, args):
         import pdb
@@ -225,7 +229,7 @@ class Debug(Command):
 class HelpPrinter(Command):
 
     cmd = "help"
-    helpstr = "Let's be serious..."
+    helpstr = "\tLet's be serious...\n"
 
     def apply(self, app, args):
         if len(args) == 0:
