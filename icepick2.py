@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 """ Benchmark program for irlib app framework """
 
+import irlib.app.filters
 from irlib.app.console import Console
 from irlib.app.components import Radargram
 
@@ -8,6 +9,8 @@ bannertext = """IcePick v0.4-dev
 Type 'help' for assistance with available commands."""
 
 console = Console("icepick2", bannertext=bannertext)
+console.register(irlib.app.filters)
+console.start()
 
 #from irlib.app.components import PickWindow
 #pw = PickWindow(console.line)

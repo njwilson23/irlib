@@ -1,6 +1,8 @@
 """ Define a Command class for interactive apps. """
 
 import sys
+import command_parser as cp
+from .components import Radargram, MapWindow, PickWindow
 
 class Command(object):
 
@@ -66,7 +68,7 @@ class ListLines(Command):
             else:
                 print " {0} ".format(lineno),
             cursor += (2 + len(str(lineno)))
-            if cursor > 60:
+            if cursor > 50:
                 print
                 print "  ",
                 cursor = 2
@@ -84,17 +86,17 @@ class OpenLine(Command):
 
     def apply(self, app, args):
         try:
-            lineno = int(args[1])
+            lineno = int(args[0])
         except (IndexError, ValueError):
             print "Must supply an integer line number"
             return
 
         try:
-            dcno = int(args[2])
+            dcno = int(args[1])
         except IndexError:
             dcno = 0
         except ValueError:
-            print "Bad channel number: {0}".format(args[2])
+            print "Bad channel number: {0}".format(args[1])
             return
 
         try:
@@ -129,11 +131,11 @@ class ApplyFilter(Command):
     Can be abbreviated as "f"."""
 
     def apply(self, app, args):
-        if len(args) == 1:
+        if len(args) == 0:
             print app.line.PprintHistory()
         else:
             try:
-                command_parser.apply_filter(args[1:], app.line)
+                cp.apply_command(args, app.line)
                 for rg in app.get_appwindows(Radargram):
                     rg.data = app.line.data
                     rg.repaint()
@@ -176,11 +178,11 @@ class GainAdjuster(Command):
 
     def apply(self, app, args):
         try:
-            gain = float(args[1])
+            gain = float(args[0])
             for rg in app.get_appwindows(Radargram):
                 rg.repaint(lum_scale=1.0/gain)
         except IndexError:
-            print "gain: " + str(1.0 / app.get_appwindows(Radargram)[0].lum_scale)
+            print "\tgain: {0}".format(1.0 / app.get_appwindows(Radargram)[0].lum_scale)
 
 class YLimAdjuster(Command):
 
@@ -225,7 +227,7 @@ class HelpPrinter(Command):
     helpstr = "Let's be serious..."
 
     def apply(self, app, args):
-        if len(args) == 1:
+        if len(args) == 0:
             print """\tBasic application commands:
 
             info                print line metadata
@@ -248,11 +250,13 @@ class HelpPrinter(Command):
 
             for ct in filter(lambda a: a is not "Command", commandtypes):
                 print"\n\tAvailable {0} commands\n".format(ct)
-                for name in (a for a in app.command_registry if a._type == ct):
+                for name in (k for k, v in app.command_registry.items()
+                                        if v._type == ct
+                                            and not k.startswith("_")):
                     print "\t\t{0}".format(name)
 
         else:
-            print command_parser.help_filter(args[1])
+            print cp.help_command(app.command_registry, args[1])
         return
 
 

@@ -4,7 +4,7 @@ from commands import Command
 
 def handle_no_args():
     # intended to be used as a decorator - if there are no arguments, then print filter history as exit
-
+    pass
 
 class FilterCommand(Command):
     """ A FilterCommand is implemented as a class with a command-line signature and
