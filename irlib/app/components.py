@@ -682,8 +682,8 @@ class PickWindow(AppWindow):
         if fnm is None:
             fnm = self._get_pick_fnm()
         fh = irlib.FileHandler(fnm, self.L.line, fids=self.L.fids)
-        fh.AddBedPicks(self.bed_points)
-        fh.AddDCPicks(self.dc_points)
+        fh.AddBedPicks(self.L.fids, self.bed_points)
+        fh.AddDCPicks(self.L.fids, self.dc_points)
         fh.ComputeTravelTimes()
         fh.Write()
         return
@@ -698,6 +698,7 @@ class PickWindow(AppWindow):
             dc_points, bed_points = fh.GetEventValsByFID(self.L.fids)
             self.dc_points = dc_points
             self.bed_points = bed_points
+            self.change_mode(self.mode)
             self.update()
             if self.rg is not None:
                 self.rg.update()

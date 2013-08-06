@@ -45,6 +45,15 @@ class FileHandler:
             sys.stderr.write('SaveFile: failed at linloc\n')
             return None
 
+    def sort(self):
+        """ Sort bedvals and dcvals by FID in-place. """
+        def sortby(a, b):
+            return [a_ for (b_, a_) in sorted(zip(b,a))]
+        self.bedvals = sortby(self.bedvals, [int(a) for a in self.fids])
+        self.dcvals = sortby(self.dcvals, [int(a) for a in self.fids])
+        self.fids.sort(key=lambda a: int(a))
+        return
+
     def Parse(self, recs):
         """ Read pick file records, and split into fields. """
         self.fids = []
@@ -108,25 +117,27 @@ class FileHandler:
         dcvals_interpolated = np.interp(all_locs, locs, self.dcvals)
         return dcvals_interpolated, bedvals_interpolated
 
-    def AddBedPicks(self, vec):
-        # SHOULD BE FIXED TO CHECK IF FIDS ARE THE SAME
-        if self.nrecs is None:
-            self.nrecs = len(vec)
-            self.dcvals = [999 for i in range(self.nrecs)]
-        if len(vec) == self.nrecs:
-            self.bedvals = list(vec)
-        else:
-            raise FileHandlerError('SaveFile: data lengths inconsistent (bed)\n')
+    def AddBedPicks(self, fids, vals):
+        """ Add reflection picks at locations given by FIDs """
+        for fid, val in zip(fids, vals):
+            if fid in self.fids:
+                self.bedvals[self.fids.index(fid)] = val
+            else:
+                self.fids.append(fid)
+                self.bedvals.append(val)
+        self.sort()
+        return
 
-    def AddDCPicks(self, vec):
-        # SHOULD BE FIXED TO CHECK IF FIDS ARE THE SAME
-        if self.nrecs is None:
-            self.nrecs = len(vec)
-            self.bedvals = [999 for i in range(self.nrecs)]
-        if len(vec) == self.nrecs:
-            self.dcvals = list(vec)
-        else:
-            raise FileHandlerError('SaveFile: data lengths inconsistent (dc)\n')
+    def AddDCPicks(self, fids, vals):
+        """ Add direct wave picks at locations given by FIDs """
+        for fid, val in zip(fids, vals):
+            if fid in self.fids:
+                self.dcvals[self.fids.index(fid)] = val
+            else:
+                self.fids.append(fid)
+                self.dcvals.append(val)
+        self.sort()
+        return
 
     def ComputeTravelTimes(self):
         """ Where possible, subtract dc times from bed times. """
@@ -164,7 +175,7 @@ class FileHandler:
                     fid=fid, dcval=row[0], bedval=row[1], tt=row[2]))
 
 
-def searchbylist(key, keylist, vallist, notfound=999):
+def searchbylist(key, keylist, vallist, notfound=np.nan):
     """ Search a `keylist` for a `key`, and return the corresponding value from
     `vallist`. If `key` is not in `keylist`, return `notfound`.
     """
