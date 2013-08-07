@@ -8,10 +8,13 @@ compatibility. """
 
 import os
 import sys
+import datetime
+import math
+import copy
+import cPickle
+import numpy as np
 import scipy.signal as sig
 import scipy.spatial as spatial
-import numpy as np
-import math, copy, cPickle
 import traceback
 
 import irlib.aaigrid as aai
@@ -51,8 +54,8 @@ class Gather(object):
     metadata be provided in the form of a `RecordList` instance.
     """
 
-    def __init__(self, arr, infile=None, line=None, metadata=None, retain=None,
-        dc=0):
+    def __init__(self, arr, infile=None, line=None, metadata=None,
+        retain=None, dc=0):
         """ Instantiate a new Gather.
 
         Parameters
@@ -86,42 +89,15 @@ class Gather(object):
         else:
             self.retain = retain
 
-        # Initialize FID list and pick data
-        gen_fid = lambda i: (str(self.line).rjust(4,'0')
-                            + str(i).rjust(4,'0') + 8*'0')
-        self.fids = [gen_fid(i) for i in range(self.nx)]
+        self.fids = self.metadata.fids
         self.fids_copy = copy.copy(self.fids)
-        self.history = [('init')]
+        self.history = [('created', datetime.datetime.now())]
         return
 
     def __repr__(self):
         return ("Gather instance from {fnm} at line {line}, "
                 "channel {chan}".format(fnm=os.path.split(self.infile)[1],
                                        line=self.line, chan=self.datacapture))
-
-    def _path2fid(self, path, linloc_only = False):
-        """ Based on a path, return a unique FID for database
-        relations. """
-        path = path.lstrip('/').lstrip('\\')
-        try:
-            # Line number
-            lin = int(path.split('/',1)[0].split('_',1)[1])
-            # Location number
-            loc = int(path.split('/',2)[1].split('_',1)[1])
-            if not linloc_only:
-                # Datacapture number
-                dc = int(path.split('/',3)[2].split('_',1)[1])
-                # Echogram number
-                eg = int(path.split('/',3)[2].split('_',1)[1])
-            else:
-                dc = 0
-                eg = 0
-            fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
-                + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-        except:
-            traceback.print_exc()
-            fid = None
-        return fid
 
     def _getkernel(self, width, kind):
         """ Generate a lowpass convolution kernel. """

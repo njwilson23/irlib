@@ -23,30 +23,16 @@ class FileHandler:
                     self.Parse(self.prevrecs)
             except:
                 traceback.print_exc()
+        elif fids is None:
+            raise ParseError("Filehandler must either recieve an existing file "
+                             "or a list of FIDs")
         else:
             self.prevlines = None
             self.nrecs = None
-            if fids is not None:
-                self.fids = fids
-            else:
-                self.fids = []
+            self.fids = fids
             self.dcvals = [np.nan for a in self.fids]
             self.bedvals = [np.nan for a in self.fids]
             self.traveltimes = [np.nan for a in self.fids]
-
-    def _linloc2fid(self, lin, loc):
-        """ Based on a path, return a unique FID for database
-        relations. """
-        try:
-            dc = 0
-            eg = 0
-            fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
-                + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-            return fid
-        except:
-            traceback.print_exc()
-            sys.stderr.write('SaveFile: failed at linloc\n')
-            return None
 
     def sort(self):
         """ Sort bedvals and dcvals by FID in-place. """
@@ -170,10 +156,7 @@ class FileHandler:
                 sys.stderr.write("Warning: guessing FIDS in FileHandler.Write()\n")
 
             for i,row in enumerate(data):
-                if self.fids is not None:
-                    fid = self.fids[i]
-                else:
-                    fid = self._linloc2fid(self.line, i)
+                fid = self.fids[i]
                 f.write('{fid},{dcval},{bedval},{tt}\n'.format(
                     fid=fid, dcval=row[0], bedval=row[1], tt=row[2]))
 

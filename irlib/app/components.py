@@ -176,14 +176,6 @@ class Radargram(AppWindow):
         elif event.key == 'E':
             self.end_feature()
 
-    def _linloc2fid(self, loc, dc=0):
-        """ Based on a line and location, return a unique FID for
-        database relations. """
-        eg = 0
-        fid = str(self.L.line).rjust(4,'0') + str(loc).rjust(4,'0') \
-            + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-        return fid
-
     #def add_feature(self, s):
     #    if self.digitize_mode:
     #        self.end_feature()

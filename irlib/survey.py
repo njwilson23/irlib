@@ -106,30 +106,6 @@ class Survey:
             self._closeh5()
         return datasets
 
-    def _path2fid(self, path, linloc_only = False):
-        """ Based on a path, return a unique FID for database
-        relations. """
-        try:
-            # Index from [1:] to cut out any '/' that might be present
-            # Line number
-            lin = int(path[1:].split('/',1)[0].split('_',1)[1])
-            # Location number
-            loc = int(path[1:].split('/',2)[1].split('_',1)[1])
-            if not linloc_only:
-                # Datacapture number
-                dc = int(path[1:].split('/',3)[2].split('_',1)[1])
-                # Echogram number
-                eg = int(path[1:].split('/',3)[2].split('_',1)[1])
-            else:
-                dc = 0
-                eg = 0
-            fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
-                + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-            return fid
-        except Exception as e:
-            sys.stderr.write('survey: failed at path2fid')
-            raise e
-
     def GetLines(self):
         """ Return a list of the lines contained within the survey. """
         self._openh5()
@@ -264,13 +240,14 @@ class Survey:
             # Grab XML metadata
             metadata = RecordList(self.datafile)
             for trace in datasets:
-                full_path = path + '/' + trace
+                fullpath = path + '/' + trace
                 try:
-                    metadata.AddDataset(self.f[path][trace],
-                                        fid=self._path2fid(full_path))
+                    metadata.AddDataset(self.f[path][trace], HDFpath2fid(fullpath))
                 except ParseError as e:
                     sys.stderr.write(e.message + '\n')
                     metadata.CropRecords()
+                except ValueError:
+                    sys.etderr.write("Malformed path: {0}\n".format(fullpath))
 
             # Create a single numpy array of data
             # Sometimes the number of samples changes within a line. When this
@@ -343,6 +320,15 @@ class Survey:
                             self.f.copy('{0}/{1}'.format(line, location),
                                         fout[line])
         return
+
+
+def HDFpath2fid(path):
+    """ Based on an HDF path, return a unique FID for table
+    relations. """
+    lin, loc, dc, ec = [int(a.rsplit("_",1)[1]) for a in path[1:].split("/")]
+    fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
+        + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
+    return fid
 
 
 class EmptyLineError(Exception):

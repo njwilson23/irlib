@@ -81,7 +81,7 @@ class RecordList:
         #    # *dmstr* is not a string or string-like
         #    return
 
-    def AddDataset(self, dataset, fid='9'*16):
+    def AddDataset(self, dataset, fid):
         """ Add metadata from a new dataset to the RecordList instance. Updates
         the RecordList internal lists with data parsed from the radar xml.
 

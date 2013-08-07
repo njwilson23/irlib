@@ -13,27 +13,22 @@ import h5py
 def path2fid(path, linloc_only = False):
     """ Based on a path, return a unique FID for database
     relations. """
-    try:
-        # Index from [1:] to cut out any '/' that might be present
-        # Line number
-        lin = int(path[1:].split('/',1)[0].split('_',1)[1])
-        # Location number
-        loc = int(path[1:].split('/',2)[1].split('_',1)[1])
-        if not linloc_only:
-            # Datacapture number
-            dc = int(path[1:].split('/',3)[2].split('_',1)[1])
-            # Echogram number
-            eg = int(path[1:].split('/',3)[2].split('_',1)[1])
-        else:
-            dc = 0
-            eg = 0
-        fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
-            + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
-        return fid
-    except:
-        traceback.print_exc()
-        sys.stderr.write('survey: failed at path2fid')
-        return None
+    # Index from [1:] to cut out any '/' that might be present
+    # Line number
+    lin = int(path[1:].split('/',1)[0].split('_',1)[1])
+    # Location number
+    loc = int(path[1:].split('/',2)[1].split('_',1)[1])
+    if not linloc_only:
+        # Datacapture number
+        dc = int(path[1:].split('/',3)[2].split('_',1)[1])
+        # Echogram number
+        eg = int(path[1:].split('/',3)[2].split('_',1)[1])
+    else:
+        dc = 0
+        eg = 0
+    fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
+        + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
+    return fid
 
 def LoadCoords(line, filename, L):
     """ Load the coordinates from filename. """
