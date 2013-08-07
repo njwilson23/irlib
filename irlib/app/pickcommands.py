@@ -61,7 +61,7 @@ class PickSave(PickCommandBase):
         for w in app.get_appwindows(PickWindow):
             w.save_picks()
 
-class PickSave(PickCommandBase):
+class PickLoad(PickCommandBase):
 
     cmd = "load"
     helpstr = "\tLoad picks from 'picking/'"
@@ -83,9 +83,9 @@ class PickBedAuto(PickCommandBase):
 
     def apply(self, app, args):
         for w in app.get_appwindows(PickWindow):
-            if len(args) > 2:
+            if len(args) > 0:
                 try:
-                    pickargs = [int(a) for a in args[2:]]
+                    pickargs = [int(a) for a in args]
                 except ValueError:
                     print "arguments must be integer"
                     return
@@ -106,9 +106,9 @@ class PickDCAuto(PickCommandBase):
 
     def apply(self, app, args):
         for w in app.get_appwindows(PickWindow):
-            if len(args) > 2:
+            if len(args) > 0:
                 try:
-                    pickargs = [int(a) for a in args[2:]]
+                    pickargs = [int(a) for a in args]
                 except ValueError:
                     print "arguments must be integer"
                     return
