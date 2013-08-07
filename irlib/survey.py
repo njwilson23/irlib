@@ -264,8 +264,6 @@ class Survey:
                                  "empty\n".format(path))
                 return
 
-        except Exception as e:
-            raise e
         finally:
             self._closeh5()
 
@@ -327,7 +325,7 @@ def HDFpath2fid(path):
     relations. """
     lin, loc, dc, ec = [int(a.rsplit("_",1)[1]) for a in path[1:].split("/")]
     fid = str(lin).rjust(4,'0') + str(loc).rjust(4,'0') \
-        + str(dc).rjust(4,'0') + str(eg).rjust(4,'0')
+        + str(dc).rjust(4,'0') + str(ec).rjust(4,'0')
     return fid
 
 

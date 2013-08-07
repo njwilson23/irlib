@@ -24,8 +24,9 @@ class FileHandler:
             except:
                 traceback.print_exc()
         elif fids is None:
-            raise ParseError("Filehandler must either recieve an existing file "
-                             "or a list of FIDs")
+            raise IOError("Filehandler must either recieve an existing file "
+                          "or a list of FIDs\n"
+                          "  {0} is not a valid file".format(fnm))
         else:
             self.prevlines = None
             self.nrecs = None
