@@ -58,7 +58,7 @@ class Console(object):
             self.survey = irlib.Survey(self.infile)
         except IOError as e:
             print e
-            return
+            raise e
         self.open_line(lineno)
         self.appwindows.append(Radargram(self.line))
 
