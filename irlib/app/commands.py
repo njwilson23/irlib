@@ -6,7 +6,7 @@ from .components import Radargram, MapWindow, PickWindow
 
 class Command(object):
 
-    _type = "Command"
+    _type = "General"
     cmd = "__commandclass"
     helpstr = "This is a base class for Commands. It doesn't do anything."
 
@@ -121,6 +121,7 @@ class OpenLine(Command):
             traceback.print_exc()
 
 class ApplyFilter(Command):
+    """ This is a "General" command that dispatched to "Filter" commands. """
 
     cmd = "filter"
     helpstr = """Apply Filter
@@ -139,7 +140,7 @@ class ApplyFilter(Command):
         else:
             try:
                 # args are the inputs -> 'filter'
-                cp.apply_command(app.command_registry, args, app.line)
+                cp.apply_command(app.command_registry, args, app.line, "Filter")
                 for rg in app.get_appwindows(Radargram):
                     rg.data = app.line.data
                     rg.repaint()
@@ -253,7 +254,7 @@ class HelpPrinter(Command):
 
             commandtypes = set([a._type for a in app.command_registry.values()])
 
-            for ct in filter(lambda a: a is not "Command", commandtypes):
+            for ct in filter(lambda a: a is not "General", commandtypes):
                 print"\n\tAvailable {0} commands\n".format(ct)
                 for name in (k for k, v in app.command_registry.items()
                                         if v._type == ct

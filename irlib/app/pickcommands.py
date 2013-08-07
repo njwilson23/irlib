@@ -4,9 +4,10 @@ import commands
 import command_parser as cp
 from .components import Radargram, PickWindow
 
-class PickCommand(commands.Command):
+class PickCall(commands.Command):
+    """ This is a "General" type command that dispatches to "Pick" type commands.
+    """
 
-    _type = "Pick"
     cmd = "pick"
     helpstr = """Manage event picking
 
@@ -19,12 +20,17 @@ class PickCommand(commands.Command):
         if len(args) == 0:
             print "Type 'help' or 'help pick' for instructions."
         try:
-            cp.apply_command(app.command_registry, args, app)
+            cp.apply_command(app.command_registry, args, app, "Pick")
         except KeyError:
             print "No picking command '{0}' exists".format(args[0])
         return
 
-class PickOn(PickCommand):
+class PickCommandBase(commands.Command):
+    _type = "Pick"
+    cmd = None
+    helpstr = ""
+
+class PickOn(PickCommandBase):
 
     cmd = "on"
     helpstr = "\tOpen a PickWindow.\n"
@@ -35,7 +41,7 @@ class PickOn(PickCommand):
         app.appwindows.append(w)
         return
 
-class PickOff(PickCommand):
+class PickOff(PickCommandBase):
 
     cmd = "off"
     helpstr = "\tClose PickWindow and stop picking.\n"
@@ -46,7 +52,7 @@ class PickOff(PickCommand):
             app.remove_appwindow(w)
             del w
 
-class PickSave(PickCommand):
+class PickSave(PickCommandBase):
 
     cmd = "save"
     helpstr = "\tSave picks to 'picking/'"
@@ -55,7 +61,7 @@ class PickSave(PickCommand):
         for w in app.get_appwindows(PickWindow):
             w.save_picks()
 
-class PickSave(PickCommand):
+class PickSave(PickCommandBase):
 
     cmd = "load"
     helpstr = "\tLoad picks from 'picking/'"
@@ -64,7 +70,7 @@ class PickSave(PickCommand):
         for w in app.get_appwindows(PickWindow):
             w.load_picks()
 
-class PickBedAuto(PickCommand):
+class PickBedAuto(PickCommandBase):
 
     cmd = "bed"
     helpstr = """"Attempt to automatically pick the bed reflection
@@ -87,7 +93,7 @@ class PickBedAuto(PickCommand):
                 pickargs = []
             w.autopick_bed(*pickargs)
 
-class PickDCAuto(PickCommand):
+class PickDCAuto(PickCommandBase):
 
     cmd = "dc"
     helpstr = """"Attempt to automatically pick the direct wave

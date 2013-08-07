@@ -4,9 +4,11 @@ import commands
 import command_parser as cp
 from .components import MapWindow
 
-class MapCommand(commands.Command):
+class MapCall(commands.Command):
+    """ This is a "General" type command that dispatches to "Map" type commands.
+    """
 
-    _type = "Map"
+    _type = "General"
     cmd = "map"
     helpstr = """Manage map window
 
@@ -19,12 +21,17 @@ class MapCommand(commands.Command):
         if len(args) == 0:
             print "Type 'help' or 'help map' for instructions."
         try:
-            cp.apply_command(app.command_registry, args, app)
+            cp.apply_command(app.command_registry, args, app, "Map")
         except KeyError:
             print "No mapping command '{0}' exists".format(args[0])
         return
 
-class MapOn(MapCommand):
+class MapCommandBase(commands.Command):
+    _type = "Map"
+    cmd = None
+    helpstr = ""
+
+class MapOn(MapCommandBase):
 
     cmd = "on"
     helpstr = "\tOpen a map.\n"
@@ -34,7 +41,7 @@ class MapOn(MapCommand):
         app.appwindows.append(w)
         return
 
-class MapOff(MapCommand):
+class MapOff(MapCommandBase):
 
     cmd = "off"
     helpstr = "\tClose map.\n"

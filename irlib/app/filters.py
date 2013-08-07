@@ -6,7 +6,7 @@ def handle_no_args():
     # intended to be used as a decorator - if there are no arguments, then print filter history as exit
     pass
 
-class FilterCommand(Command):
+class FilterCommandBase(Command):
     """ A FilterCommand is implemented as a class with a command-line signature and
     an *apply* method that takes an appropriate Gather object as an argument.
     """
@@ -23,7 +23,7 @@ class FilterCommand(Command):
         """ Overload this method to perform operations on Gather object *G*. """
         raise Exception("apply() is undefined in FilterCommand baseclass")
 
-class LinearGainControl(FilterCommand):
+class LinearGainControl(FilterCommandBase):
     cmd = "gc"
     helpstr = """Linear gain control
 
@@ -40,7 +40,7 @@ class LinearGainControl(FilterCommand):
         G.DoTimeGainControl(npow=npow)
         return
 
-class AutoGainControl(FilterCommand):
+class AutoGainControl(FilterCommandBase):
     cmd = "agc"
     helpstr = """Automatic gain control
 
@@ -54,13 +54,13 @@ class AutoGainControl(FilterCommand):
         G.DoAutoGainControl(5e-8)
         return
 
-class ReflectionPower(FilterCommand):
+class ReflectionPower(FilterCommandBase):
     cmd = "power"
     def apply(self, G, args):
         G.data = G.data**2
         return
 
-class Lowpass_FD(FilterCommand):
+class Lowpass_FD(FilterCommandBase):
     cmd = "lowpass"
     helpstr = """Frequency-domain lowpass
 
@@ -80,7 +80,7 @@ class Lowpass_FD(FilterCommand):
         G. DoWindowedSinc(cutoff=co, bandwidth=bw, mode="lowpass")
         return
 
-class Highpass_FD(FilterCommand):
+class Highpass_FD(FilterCommandBase):
     cmd = "highpass"
     helpstr = """Frequency-domain highpass
 
@@ -100,7 +100,7 @@ class Highpass_FD(FilterCommand):
         G.DoWindowedSinc(cutoff=co, bandwidth=bw, mode='highpass')
         return
 
-class Lowpass_TD(FilterCommand):
+class Lowpass_TD(FilterCommandBase):
     cmd = "lowpass_td"
     helpstr = """Time-domain lowpass
 
@@ -118,7 +118,7 @@ class Lowpass_TD(FilterCommand):
         G. DoMoveAvg(ns, kind="blackman", mode="lowpass")
         return
 
-class Highpass_TD(FilterCommand):
+class Highpass_TD(FilterCommandBase):
     cmd = "highpass_td"
     helpstr = """Time-domain highpass
 
@@ -137,7 +137,7 @@ class Highpass_TD(FilterCommand):
         G.DoMoveAvg(ns, kind="blackman", mode='highpass')
         return
 
-class Dewow(FilterCommand):
+class Dewow(FilterCommandBase):
     cmd = "dewow"
     helpstr = """Dewow
 
@@ -148,7 +148,7 @@ class Dewow(FilterCommand):
         G.Dewow()
         return
 
-class RemoveRinging(FilterCommand):
+class RemoveRinging(FilterCommandBase):
     helpstr = """De-ringing filter
 
     ringing
@@ -160,7 +160,7 @@ class RemoveRinging(FilterCommand):
         G.RemoveRinging()
         return
 
-class MigrateFK(FilterCommand):
+class MigrateFK(FilterCommandBase):
     cmd = "migfk"
     helpstr = """Frequency-wavenumber migration
 

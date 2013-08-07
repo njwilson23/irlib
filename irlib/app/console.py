@@ -84,15 +84,13 @@ class Console(object):
             self.handle_command(cmd)
         return
 
-    def register(self, module, verbose=False):
+    def register(self, module):
         """ Load commands from a module a register them for use. """
         for item in module.__dict__.values():
             if isinstance(item, type) and commands.Command in item.mro():
-                if verbose:
-                    print "registered",item
-                self.command_registry[item.cmd] = item
-            elif verbose:
-                print "\t\t\t\tdid not register", item
+                if item.cmd not in self.command_registry:
+                    self.command_registry[item.cmd] = {}
+                self.command_registry[item.cmd][item._type] = item
         return
 
     def print_syntax(self):
@@ -175,7 +173,8 @@ class Console(object):
                 break
 
         try:
-            command_parser.apply_command(self.command_registry, args, self)
+            command_parser.apply_command(self.command_registry, args, self,
+                                         "General")
         except KeyError:
             print "No command '{0}' exists".format(args[0])
         return

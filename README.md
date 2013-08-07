@@ -100,25 +100,18 @@ Changes in irlib version 0.4-dev
 and application design. Breaking changes in the final version will be kept to a
 minimum, however the *stable-0.3* branch is available if necessary.
 
-Implemented
-~~~~~~~~~~~
-
 - remove deprecated `CutSingle`, `CutRegion` methods
 - refactor pickable gathers into separate subclasses
 - map window
-- refactor icepick, irview, icerate into a single codebase, kept in
-  `irlib/app/` (all except icerate)
+- refactor icepick, irview, icerate into a single codebase, kept in `irlib/app/`
+  (all except icerate)
 - build *icepick2* based on the refactored `app` codebase
-- modular command system, one of the benefits of which is that additional
-  custom filters can be added easily at runtime and on a project-basis
+- modular command system, one of the benefits of which is that additional custom
+  filters can be added easily at runtime and on a project-basis
 - rewrite h5_replace_gps to be more robust, handle timezones, and work over
   multiple days
 - some bug fixes and polishing
-
-To do
-~~~~~
-
-- project config file
+- project config file (not complete)
 - composable line gathers and surveys by overloading arithmetic operators?
 - HDF file write?
 - PulseEkko data reader?

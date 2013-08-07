@@ -12,7 +12,7 @@
 
 import traceback
 
-def apply_command(registry, inputs, stateobj):
+def apply_command(registry, inputs, stateobj, cmdtype):
 
     """ Attempt to apply a command, raising a KeyError if a suitable command cannot be found.
 
@@ -30,9 +30,9 @@ def apply_command(registry, inputs, stateobj):
         cmd = inputs[0]
         args = []
 
-    if cmd in registry:
+    if (cmd in registry) and (cmdtype in registry[cmd]):
 
-        cmdclass = registry[cmd]()
+        cmdclass = registry[cmd][cmdtype]()
 
         try:
             cmdclass.apply(stateobj, args)
