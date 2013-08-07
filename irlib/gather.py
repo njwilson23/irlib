@@ -90,7 +90,6 @@ class Gather(object):
             self.retain = retain
 
         self.fids = self.metadata.fids
-        self.fids_copy = copy.copy(self.fids)
         self.history = [('created', datetime.datetime.now())]
         return
 
@@ -759,15 +758,12 @@ class Gather(object):
 
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
-        self.fids_copy = copy.copy(self.fids)
-
         self.history.append(('remove_blank', nsmp, threshold))
         return
 
     def Reverse(self):
         """ Flip gather data. """
         self.data = self.data[:,::-1]
-        self.fids.reverse()
         self.metadata.Reverse()
         try:
             self.topography = self.topography[::-1]
@@ -789,7 +785,7 @@ class Gather(object):
             self.topography = self.topography_copy.copy()
         except AttributeError:
             pass
-        self.fids = copy.copy(self.fids_copy)
+        self.fids = self.metadata.fids
 
         self.history = [('init')]
         return
@@ -806,7 +802,6 @@ class Gather(object):
         if len(keep_list) > 0:
 
             try:
-                self.fids = [self.fids[i] for i in keep_list]
                 self.data = np.vstack([self.data[:,i] for i in keep_list]).T
             except IndexError:
                 print "Inconsistent data lengths in {0}".format(repr(self))
@@ -822,7 +817,6 @@ class Gather(object):
             self.nx = self.data.shape[1]
 
         else:
-            self.fids = []
             self.data = np.array([])
 
             if hasattr(self, 'topography'):
@@ -843,12 +837,6 @@ class Gather(object):
         kill_list.reverse()
         all_locs = range(len(self.metadata.locations))
         keep_list = list(set(all_locs).difference(set(kill_list)))
-
-        try:
-            self.fids = [self.fids[i] for i in keep_list]
-        except IndexError:
-            print "Inconsistent data lengths in {0}".format(repr(self))
-            traceback.print_exc()
 
         if hasattr(self, 'topography'):
             self.topography = np.hstack([self.topography[i] for i in keep_list])
@@ -1123,7 +1111,6 @@ class CommonOffsetGather(Gather):
 
         self.raw_data = self.data.copy()        # I hope I don't regret this
         self.metadata_copy = copy.deepcopy(self.metadata)
-        self.fids_copy = copy.copy(self.fids)
         if len(self.data.shape) >= 2:
             self.nx = self.data.shape[1]
         else:
@@ -1152,7 +1139,6 @@ class CommonOffsetGather(Gather):
 
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
-        self.fids_copy = copy.copy(self.fids)
         self.history.append(('remove_bad_locs', bbox))
         return
 
@@ -1235,7 +1221,6 @@ class CommonOffsetGather(Gather):
         # I won't claim this bit isn't risky
         self.metadata_copy = copy.deepcopy(self.metadata)
         self.raw_data = self.data.copy()
-        self.fids_copy = copy.copy(self.fids)
         self.history.append(('remove_stationary', threshold))
         return
 
