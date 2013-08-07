@@ -3,6 +3,7 @@
 import sys
 import command_parser as cp
 from .components import Radargram, MapWindow, PickWindow
+from irlib import EmptyLineError
 
 class Command(object):
 
@@ -114,7 +115,7 @@ class OpenLine(Command):
             else:
                 print ("Line {0} channel {1} does "
                        "not exist".format(lineno, dcno))
-        except irlib.EmptyLineError:
+        except EmptyLineError:
             print ("Line {0} channel {1} could not be opened because it "
                    "contains no data".format(lineno, dcno))
         except:
@@ -194,9 +195,9 @@ class YLimAdjuster(Command):
     cmd = "ylim"
     helpstr = """Adjust the vertical display limits
 
-    ylim [value]
+    ylim [t0 t1]
 
-    Modify the vertical limits in all applicable windows. If no argument is
+    Print or modify the vertical limits in all applicable windows. If no argument is
     supplied, the current limits are returned.
     """
 
@@ -209,12 +210,15 @@ class YLimAdjuster(Command):
         elif len(args) == 2:
             try:
                 for rg in app.get_appwindows(Radargram):
-                    rg.bbox[2:] = [float(a)*rate_ns for a in args][::-1]
+                    rg.bbox[2:] = [float(a)/rate_ns for a in args][::-1]
                     rg.repaint()
+                for w in app.get_appwindows(PickWindow):
+                    w.ylim = [-float(a)*1e-9 for a in args][::-1]
+                    w.update()
             except ValueError:
                 print "Could not understand '{0}'".format(args)
         else:
-            print "'ylim' must be followed by times in nanoseconds"
+            print "Incorrect expression, type 'help ylim'"
         return
 
 class Debug(Command):

@@ -288,7 +288,7 @@ class Radargram(AppWindow):
         self.ax.set_ylabel("Time (ns)")
         self.ax.set_xlabel("Trace number")
         if self.digitize_mode:
-            self.ax.set_title("Line {0} [feature {1}]".format(self.line, self.fid))
+            self.ax.set_title("Line {0} [feature {1}]".format(self.L.line, self.fid))
         else:
             self.ax.set_title("Line {0} [viewing]".format(self.L.line))
         self.fig.canvas.draw()
@@ -402,6 +402,7 @@ class PickWindow(AppWindow):
         self.L = irlib.PickableGather(L)
         self.data = L.data
         self.time = np.arange(L.data.shape[0]) / self.rate
+        self.ylim = [-self.time[-1], -self.time[0]]
 
         self.bed_points = np.nan * np.zeros(self.data.shape[1])
         self.dc_points = np.nan * np.zeros(self.data.shape[1])
@@ -555,9 +556,10 @@ class PickWindow(AppWindow):
     def update(self):
         """ Redraw axes and data """
         self.ax.lines = []
+        self.ax.cla()
         self.ax.set_xlim(-self.spacing * (self.ntraces+2) / 2,
                           self.spacing * self.ntraces / 2)
-        self.ax.cla()
+        self.ax.set_ylim(self.ylim)
 
         for i in range(self.ntraces):
             trno = self.trace0 + i
@@ -581,7 +583,7 @@ class PickWindow(AppWindow):
         locs = self.ax.get_yticks()
         self.ax.set_yticklabels(locs*-1e9)
 
-        self.ax.set_title("Mode: {0}".format(self.mode))
+        self.ax.set_title("Line {0}, mode: {1}".format(self.L.line, self.mode))
 
         self.fig.canvas.draw()
         try:
@@ -596,7 +598,6 @@ class PickWindow(AppWindow):
         if self.rg is not None:
             for name in ("picklim0", "picklim1", "bedpick", "dcpick"):
                 self.rg.remove_annotation(name)
-            xl = self.rg.ax.get_xlim()
             yl = self.rg.ax.get_ylim()
 
             self.rg.annotations["picklim0"] = \
