@@ -56,6 +56,12 @@ class AutoGainControl(FilterCommandBase):
 
 class ReflectionPower(FilterCommandBase):
     cmd = "power"
+    helpstr = """Reflection power
+
+    power
+
+    Square the trace amplitude.
+    """
     def apply(self, G, args):
         G.data = G.data**2
         return

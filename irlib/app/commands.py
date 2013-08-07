@@ -1,6 +1,7 @@
 """ Define a Command class for interactive apps. """
 
 import sys
+import itertools
 import command_parser as cp
 from .components import Radargram, MapWindow, PickWindow
 from irlib import EmptyLineError
@@ -251,6 +252,7 @@ class Debug(Command):
         return
 
 class HelpPrinter(Command):
+    """ This is pretty gross, but it works. """
 
     cmd = "help"
     helpstr = "\tLet's be serious...\n"
@@ -275,17 +277,30 @@ class HelpPrinter(Command):
             debug
             """
 
-            commandtypes = set([a._type for a in app.command_registry.values()])
+            cmdobjs = [b for b in itertools.chain(*[a.values() for a in app.command_registry.values()])]
+            commandtypes = set([a._type for a in cmdobjs])
 
             for ct in filter(lambda a: a is not "General", commandtypes):
                 print"\n\tAvailable {0} commands\n".format(ct)
-                for name in (k for k, v in app.command_registry.items()
-                                        if v._type == ct
-                                            and not k.startswith("_")):
-                    print "\t\t{0}".format(name)
+                for cmdobj in filter(lambda a: a._type == ct, cmdobjs):
+                    if cmdobj.cmd is not None and not cmdobj.cmd.startswith("_"):
+                        print "\t{0}".format(cmdobj.cmd)
 
         else:
-            print cp.help_command(app.command_registry, args[0])
+            if len(app.command_registry.get(args[-1], [])) > 1:
+                print "The following help topics were found:"
+                multiple_topics = True
+            else:
+                multiple_topics = False
+
+            try:
+                for cmdobj in app.command_registry[args[-1]].values():
+                    if multiple_topics:
+                        print "{0} {1}:".format(cmdobj._type.lower(), cmdobj.cmd)
+                    print cmdobj.helpstr
+            except KeyError:
+                raise KeyError("No command difinition '{0}' found".format(args[-1]))
+
         return
 
 
