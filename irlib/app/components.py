@@ -388,12 +388,33 @@ class PickWindow(AppWindow):
         """
         super(PickWindow, self).__init__((10, 8))
         self.ax.set_autoscale_on(False)
+
+        # Set up scale slider widget
+        self.ax_slider = self.fig.add_axes([0.2, 0.02, 0.4, 0.03])
+        self.trace_scale = 0.4
+        self.slider = matplotlib.widgets.Slider(self.ax_slider, "Amplitude Scale",
+                                                0.1, 2.0,
+                                                valinit=self.trace_scale)
+        self.slider.on_changed(self._set_trace_scale)
+
+        # Set up change mode widget
+        self.ax_mode = self.fig.add_axes([0.8, 0.01, 0.05, 0.06])
+        self.modebuttons = matplotlib.widgets.RadioButtons(self.ax_mode,
+                                                    ["Bed", "DC"], 0)
+        def change_mode(txt):
+            self.change_mode(txt)
+            self.update()
+        self.modebuttons.on_clicked(change_mode)
+
+        self.mode = "bed"
         self.trace0 = 0
         self.activetrace = None
-        self.mode = "bed"
         self.ntraces = ntraces
         self._newline(L)
         return
+
+    #def __del__(self):
+    #    super(PickWindow, self).__del__()
 
     def _newline(self, L):
         """ Replace internal state with a new radar line, discarding all
@@ -428,7 +449,8 @@ class PickWindow(AppWindow):
         else:
 
             # Identify the trace that was aimed for
-            if event.xdata == None: return
+            if event.xdata == None or event.inaxes is not self.ax:
+                return
             activetrace = int(round(event.xdata/self.spacing + self.ntraces/2))
             try:
                 trace = self.data[:,self.trace0 + activetrace]
@@ -458,6 +480,11 @@ class PickWindow(AppWindow):
                 self.points[activetrace + self.trace0] = np.nan
                 self.activetrace = None
 
+        self.update()
+        return
+
+    def _set_trace_scale(self, val):
+        self.trace_scale = val
         self.update()
         return
 
@@ -532,7 +559,7 @@ class PickWindow(AppWindow):
     def _drawpick(self, trace, yi, activetrace):
         """ Draw a pick mark on the given trace at yi, and update the
         registry. """
-        trace = trace / abs(trace).max() * self.spacing / 3.0
+        trace = trace / abs(trace).max() * self.spacing * self.trace_scale
 
         if self.mode == 'bed':
             pr = self.bed_pick_reg
@@ -567,7 +594,7 @@ class PickWindow(AppWindow):
             if trno < self.data.shape[1]:
                 # Plot the trace
                 trace = self.data[:,trno]
-                trace = trace / abs(trace).max() * self.spacing / 3.0
+                trace = trace / abs(trace).max() * self.spacing * self.trace_scale
                 self.ax.plot(trace + self._shiftx(i), -self.time, '-k')
 
                 # Plot any existing picks
@@ -617,10 +644,10 @@ class PickWindow(AppWindow):
 
     def change_mode(self, mode):
         """ Change picking mode between bed and direct coupling. """
-        self.mode = mode
-        if mode == 'bed':
+        self.mode = mode.lower()
+        if mode.lower() == 'bed':
             self.points = self.bed_points
-        elif mode == 'dc':
+        elif mode.lower() == 'dc':
             self.points = self.dc_points
         return
 
