@@ -221,6 +221,25 @@ class YLimAdjuster(Command):
             print "Incorrect expression, type 'help ylim'"
         return
 
+class SaveImage(Command):
+    cmd = "saveimage"
+    helpstr = """Save image
+
+    saveimg <filename>
+
+    Save the current radargram image to a PNG file.
+    """
+
+    def apply(self, app, args):
+        if len(args) > 0:
+            fnm = args[0]
+        else:
+            raise ValueError("Command '{0}' must by followed by a "
+                             "filename".format(self.cmd))
+        rg = app.get_appwindows(Radargram)[0]
+        rg.fig.savefig(fnm, dpi=300)
+        return
+
 class Debug(Command):
 
     cmd = "debug"
