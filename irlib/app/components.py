@@ -236,7 +236,7 @@ class Radargram(AppWindow):
         self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
         locs = np.arange(0, self.ax.get_ylim()[0], 50)
         self.ax.set_yticks(locs)
-        self.ax.set_yticklabels(locs / self.rate * 1e9)
+        self.ax.set_yticklabels(np.round(locs / self.rate * 1e9).astype(int))
         self.fig.canvas.draw()
         self.update(**kwargs)
         return
@@ -581,7 +581,7 @@ class PickWindow(AppWindow):
                 self.mode = oldmode
 
         locs = self.ax.get_yticks()
-        self.ax.set_yticklabels(locs*-1e9)
+        self.ax.set_yticklabels(np.round(locs*-1e9).astype(int))
 
         self.ax.set_title("Line {0}, mode: {1}".format(self.L.line, self.mode))
 
