@@ -100,6 +100,19 @@ class Highpass_FD(FilterCommandBase):
         G.DoWindowedSinc(cutoff=co, bandwidth=bw, mode='highpass')
         return
 
+class Reverse(FilterCommandBase):
+    cmd = "reverse"
+    helpstr = """Reverse
+
+    reverse
+
+    Flip the traces in the radar line such that they are ordered from last to
+    first.
+    """
+    def apply(self, G, args):
+        G.Reverse()
+        return
+
 class Lowpass_TD(FilterCommandBase):
     cmd = "lowpass_td"
     helpstr = """Time-domain lowpass
