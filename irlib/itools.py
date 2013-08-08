@@ -55,7 +55,7 @@ def plotax(ax, L, gain=5, annotate=True, font=None, nan_fill=None,
     ax.set_ylabel('Time (ns)', fontproperties=font)
     ax.set_xlabel('Trace number', fontproperties=font)
     ax.set_xticklabels([int(a) for a in ax.get_xticks()], fontproperties=font)
-    ax.set_ylim(ax.get_ylim()[::-1])
+    ax.set_ylim(sorted(ax.get_ylim(), reverse=True))
     ax.set_yticklabels((ax.get_yticks()*1e9).astype(int), fontproperties=font)
     ax.axis('tight')
 

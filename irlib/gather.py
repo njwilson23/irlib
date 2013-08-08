@@ -260,22 +260,34 @@ class Gather(object):
         smooth : (default `True`) apply a boxcare filter to soften the effects
                  of the DEM's discretization [boolean]
         """
-        if os.path.isfile(topofnm):
+
+        def interpolate_nans(V):
+            Vreal = np.nonzero(np.isnan(V) == False)[0]
+            Vnan = np.nonzero(np.isnan(V))[0]
+            return np.interp(range(len(V)), Vreal, V[Vreal])
+
+        if topofnm is None:
+            self.topography = np.array(self.metadata.alt_asl)
+            self.history.append(('load_topo', "GPS"))
+
+        elif os.path.isfile(topofnm):
             G = aai.AAIGrid(topofnm)
             try:
                 self.topography = np.array(map(lambda x,y: G.sample(x,y)[0],
                         self.metadata.eastings, self.metadata.northings))
             except:
                 traceback.print_exc()
-            if smooth:
-                self.SmoothenTopography()
-            self.topography_copy = self.topography.copy()
             self.history.append(('load_topo', topofnm))
-        elif topofnm is None:
-            self.topography = copy.copy(self.metadata.alt_asl)
-            raise LineGatherError('loading topo from GPS not fully implemented yet')
         else:
             print "{0} is not a file".format(topofnm)
+
+        if self.history[-1][0] == "load_topo":
+            # Fill in NaNs
+            self.topography = interpolate_nans(self.topography)
+            self.topography_copy = self.topography.copy()
+            if smooth:
+                self.SmoothenTopography()
+
         return
 
     def SmoothenTopography(self):
@@ -285,15 +297,8 @@ class Gather(object):
         If `smooth`=True, then apply a boxcar filter to soften the effects of
         the DEM discretization.
         """
-        def interpolate_nans(V):
-            Vreal = np.nonzero(np.isnan(V) == False)[0]
-            Vnan = np.nonzero(np.isnan(V))[0]
-            return np.interp(range(len(V)), Vreal, V[Vreal])
 
         try:
-            # Fill in NaNs
-            self.topography = interpolate_nans(self.topography)
-
             # Pad and then convolve with boxcar
             self.topography = np.convolve(
                 np.hstack([np.ones(5)*self.topography[0], self.topography,
@@ -411,7 +416,7 @@ class Gather(object):
 
         Parameters
         ----------
-        cutoff : cutoff minimum frequency, in Hz
+        cutoff : NOT USED
         """
         # Compute filter width as a function of the cutoff frequency
         width = 41      # SEEMS TO WORK
@@ -577,38 +582,6 @@ class Gather(object):
         for i in range(self.data.shape[1]):
             self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
 
-        self.history.append(('windowed_sinc', cutoff, bandwidth, mode))
-        return
-
-    def DoWindowedSinc_old(self, cutoff, bandwidth=2.e6, mode='lowpass'):
-        """ Implement a windowed sinc frequency-domain filter. This has
-        better performance characteristics than a Chebyschev filter, at
-        the expense of execution speed.
-
-            cutoff: cutoff frequency in Hz
-            bandwidth: transition bandwidth in Hz
-        """
-        if self.rate is not None:
-            rate = self.rate
-        else:
-            rate = 1e-8
-
-        bw = bandwidth * rate
-        fc = cutoff * rate
-        if bw > 0.5 or fc > 0.5:
-            print ("cutoff and bandwidth must be below the Nyquist "
-                   "frequency ({0:e}".format(0.5/rate))
-            return
-        N = int(round(4./bw))
-        if N % 2 == 0:
-            N += 1
-        kernel = sig.firwin(N, 2*fc, window='blackman')
-        if mode == 'highpass':
-            kernel = -kernel
-            kernel[(N-1)/2] += 1.0
-        # Convolve every trace
-        for i in range(self.data.shape[1]):
-            self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
         self.history.append(('windowed_sinc', cutoff, bandwidth, mode))
         return
 
