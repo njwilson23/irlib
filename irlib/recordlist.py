@@ -81,7 +81,7 @@ class RecordList:
         #    # *dmstr* is not a string or string-like
         #    return
 
-    def AddDataset(self, dataset, fid):
+    def AddDataset(self, dataset, fid=None):
         """ Add metadata from a new dataset to the RecordList instance. Updates
         the RecordList internal lists with data parsed from the radar xml.
 
@@ -107,11 +107,14 @@ class RecordList:
 
         # Parse dataset name
         splitname = dataset.name.split('/')
-        self.lines.append(int(splitname[1].split('_')[1]))
-        self.locations.append(int(splitname[2].split('_')[1]))
-        self.datacaptures.append(int(splitname[3].split('_')[1]))
-        self.echograms.append(int(splitname[4].split('_')[1]))
+        line, loc, dc, eg = [int(s.split("_")[1]) for s in splitname[1:5]]
+        self.lines.append(line)
+        self.locations.append(loc)
+        self.datacaptures.append(dc)
+        self.echograms.append(eg)
 
+        if fid is None:
+            fid = "{0:0>4}{1:0>4}{2:0>4}{3:0>4}".format(line, loc, dc, eg)
 
         # Timestamps
         if 'Save timestamp' in dataset.attrs:
