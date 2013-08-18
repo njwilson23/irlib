@@ -82,6 +82,17 @@ def dateseconds(dt):
     except TypeError:
         return np.nan
 
+def substituteXMLval(name, newval, xml):
+    """ Replace the floating point "value" text in one of Blue System's IPR
+    metadata fragments with *newval*.
+    """
+    newxml = re.sub(r'<Name>{0}</Name>[\r]?\n<Val>-?[0-9.]+?</Val>'.format(
+                        name.replace(' ', '\s')),
+                    r'<Name>{0}</Name>\r\n<Val>{1}</Val>'.format(
+                        name, newval),
+                    xml, flags=re.IGNORECASE)
+    return newxml
+
 optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:o:l:t:n', ['tz='])
 optdict = dict(optlist)
 
@@ -190,29 +201,18 @@ for i, dataset in enumerate(hdfaddrs):
         xml = dataset.attrs["GPS Cluster- MetaData_xml"]
 
         if dt_mask[i]:
-            xml = re.sub(r"<Name>Long_ W</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Long_ W</Name>\r\n<Val>{0}</Val>"
-                         .format(dec2dm(interp_lons[i])), xml)
 
-            xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Lat_N</Name>\r\n<Val>{0}</Val>"
-                         .format(dec2dm(interp_lats[i])), xml)
-
-            xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Alt_asl_m</Name>\r\n<Val>{0}</Val>"
-                         .format(interp_eles[i]), xml)
+            xml = substituteXMLval("Long_ W", dec2dm(interp_lons[i]), xml)
+            xml = substituteXMLval("Lat_N", dec2dm(interp_lats[i]), xml)
+            xml = substituteXMLval("Alt_asl_m", str(interp_eles[i]), xml)
 
             irep += 1
 
         elif insert_nans:
-            xml = re.sub(r"<Name>Long_ W</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Long_ W</Name>\r\n<Val>NaN</Val>", xml)
 
-            xml = re.sub(r"<Name>Lat_N</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Lat_N</Name>\r\n<Val>NaN</Val>", xml)
-
-            xml = re.sub(r"<Name>Alt_asl_m</Name>\r\n<Val>[0-9.]+?</Val>",
-                         r"<Name>Alt_asl_m</Name>\r\n<Val>NaN</Val>", xml)
+            xml = substituteXMLval("Long_ W", "NaN", xml)
+            xml = substituteXMLval("Lat_N", "NaN", xml)
+            xml = substituteXMLval("Alt_asl_m", "NaN", xml)
 
         dataset.attrs.modify("GPS Cluster- MetaData_xml", xml)
 
