@@ -16,6 +16,8 @@ except ImportError:
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
+from irlib.pEKKOdriver import read_pulseEKKO
+
 
 font = FontProperties(family='sans-serif', weight='normal', size=11)
 defaultcm = matplotlib.cm.gray
@@ -199,4 +201,11 @@ def read_cresis_mat(matfile):
     R.lons = C['Longitude']
     R.timestamps = C['GPS_time']
     R.sample_rate = 1.0 / np.diff(C['Time'][0]).mean() * np.ones(C['Data'].shape[0])
-    return CommonOffsetGather(C['Data'], line=np.nan, metadata=R)
+    return CommonOffsetGather(C['Data'], line=0, metadata=R)
+
+def read_pEKKO_as_gather(fstem):
+    lmeta, tmeta, darray = read_pulseEKKO(fstem)
+    metadata = RecordList(None)
+    smple_rate = float(lmeta.get("NOMINAL FREQUENCY", np.nan))
+    metadata.sample_rate = [smple_rate for i in range(len(tmeta))]
+    return CommonOffsetGather(darray, line=0, metadata=metadata)

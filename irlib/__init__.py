@@ -1,6 +1,7 @@
 # General package libs
 import survey
 from survey import Survey, EmptyLineError
+import pEKKOdriver
 
 import gather
 from gather import CommonOffsetGather, CommonMidpointGather, Gather, PickableGather

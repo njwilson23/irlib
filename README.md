@@ -15,10 +15,10 @@ The second way is to use the ``irlib`` API directly. This makes it possible to
 programmatically analyze radar data from the Python programming language. New
 filters and processing routines can be implemented using the API.
 
-There is experimental support for reading other types of datasets using
-*Radar Tools*. Right now, it's possible to read CReSIS lines, which makes the
-filters in `irlib` available. An example of a helper function to load CReSIS
-\*.mat files is in ``itools.py``
+There is experimental support for reading other types of datasets using *Radar
+Tools*. Right now, it's possible to read CReSIS and pulseEKKO PRO lines, making
+the filters in `irlib` available. Helper functions to load CReSIS \*.mat files
+and pulseEKKO PRO \*.HD and \*.DT1 files are in ``itools.py``
 
 Graphical tools:
 ----------------
