@@ -17,8 +17,10 @@ import scipy.signal as sig
 import scipy.spatial as spatial
 import traceback
 
-import irlib.aaigrid as aai
-from irlib.filehandler import FileHandler, FileHandlerError
+#import irlib.aaigrid as aai
+#from irlib.filehandler import FileHandler, FileHandlerError
+import aaigrid as aai
+from filehandler import FileHandler, FileHandlerError
 from autovivification import AutoVivification
 
 try:
@@ -68,16 +70,18 @@ class Gather(object):
         """
         self.raw_data = arr.copy()
         self.data = self.raw_data.copy()
-        self.line = int(line)
-        self.datacapture = int(dc)
+        self.line = int(line) if line is not None else None
+        self.datacapture = int(dc) if dc is not None else None
         self.infile = infile
         self.metadata = metadata            # reference to a RecordList
         if self.metadata is not None:
             self.rate = 1./self.metadata.sample_rate[0]
             self.metadata_copy = copy.deepcopy(self.metadata)
+            self.fids = self.metadata.fids
         else:
             self.rate = None
             self.metadata_copy = None
+            self.fids = [str(i).rjust(16, "0") for i in range(self.data.shape[1])]
 
         self.ny = self.data.shape[0]
         self.nx = self.data.shape[1]
@@ -89,7 +93,6 @@ class Gather(object):
         else:
             self.retain = retain
 
-        self.fids = self.metadata.fids
         self.history = [('created', datetime.datetime.now())]
         return
 
@@ -954,7 +957,7 @@ class CommonOffsetGather(Gather):
             # metadata that are not in practise expected to be too restrictive
             if False in (eastings > -7e6):    # No straddling more than 1 UTM zone
                 raise LineGatherError("unallowable eastings in metadata")
-            if False in (northings > 0):    # No equatorial straddling
+            if False in (northings >= 0):    # No equatorial straddling
                 raise LineGatherError("northings must be non-negative")
             if False in (eastings < 7e6):  # No straddling more than 1 UTM zone
                 raise LineGatherError("unallowable eastings in metadata")

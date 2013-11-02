@@ -12,9 +12,12 @@ import cPickle
 import h5py
 import numpy as np
 
-from irlib.gather import CommonOffsetGather
-from irlib.recordlist import RecordList, ParseError
-from irlib.autovivification import AutoVivification
+#from irlib.gather import CommonOffsetGather
+#from irlib.recordlist import RecordList, ParseError
+#from irlib.autovivification import AutoVivification
+from .gather import CommonOffsetGather
+from .recordlist import RecordList, ParseError
+from .autovivification import AutoVivification
 
 class Survey:
     """ Surveys can be broken down into **Gathers** and *traces*. To create a

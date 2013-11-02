@@ -16,7 +16,8 @@ except ImportError:
 from gather import Gather, CommonOffsetGather, LineGatherError
 from recordlist import RecordList
 
-from irlib.pEKKOdriver import read_pulseEKKO
+#from irlib.pEKKOdriver import read_pulseEKKO
+from pEKKOdriver import read_pulseEKKO
 
 
 font = FontProperties(family='sans-serif', weight='normal', size=11)
