@@ -12,9 +12,6 @@ import cPickle
 import h5py
 import numpy as np
 
-#from irlib.gather import CommonOffsetGather
-#from irlib.recordlist import RecordList, ParseError
-#from irlib.autovivification import AutoVivification
 from .gather import CommonOffsetGather
 from .recordlist import RecordList, ParseError
 from .autovivification import AutoVivification
@@ -270,7 +267,7 @@ class Survey:
         finally:
             self._closeh5()
 
-        return CommonOffsetGather(arr, infile=self.datafile, line=line,
+        return gether_type(arr, infile=self.datafile, line=line,
                 metadata=metadata, retain=self.retain['line_{0}'.format(line)],
                 dc=datacapture)
 

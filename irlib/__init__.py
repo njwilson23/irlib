@@ -4,7 +4,8 @@ from survey import Survey, EmptyLineError
 import pEKKOdriver
 
 import gather
-from gather import CommonOffsetGather, CommonMidpointGather, Gather, PickableGather
+from gather import CommonOffsetGather, CommonMidpointGather, Gather
+from gather import PickableGather, PickableCOGather, PickableCMPGather
 from gather import LineGatherError
 
 import recordlist
