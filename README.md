@@ -45,6 +45,14 @@ Command-line tools:
 - **irtrace**: Plot a radar trace acquired at a single location
 - **irline**: Plot a radar section along a line of locations
 
+Installation
+------------
+
+I recommend installing with `pip`. Download or clone this repository, navigate
+to it in a terminal, and type
+
+    pip install .
+
 Dependencies:
 -------------
 
