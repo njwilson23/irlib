@@ -5,6 +5,7 @@ import itertools
 import command_parser as cp
 from .components import Radargram, MapWindow, PickWindow
 from irlib import EmptyLineError
+import traceback
 
 class Command(object):
 
@@ -299,7 +300,7 @@ class HelpPrinter(Command):
                         print "{0} {1}:".format(cmdobj._type.lower(), cmdobj.cmd)
                     print cmdobj.helpstr
             except KeyError:
-                raise KeyError("No command difinition '{0}' found".format(args[-1]))
+                raise KeyError("No command definition '{0}' found".format(args[-1]))
 
         return
 
