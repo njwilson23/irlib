@@ -24,9 +24,9 @@ from filehandler import FileHandler, FileHandlerError
 from autovivification import AutoVivification
 
 try:
-    import agc_cy
+    import agc
 except ImportError:
-    sys.stderr.write("Warning: falling back to non-accellerated AGC\n")
+    sys.stderr.write("Warning: falling back to non-accelerated AGC\n")
 
 try:
     from mig_fk import fkmig

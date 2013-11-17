@@ -1,20 +1,21 @@
-import numpy as np
 import math
 import copy
+import numpy as np
+cimport numpy as np
 
-def DoAutoGainControl(self, float timewin):
+def DoAutoGainControl(gather, float timewin):
     """ Cython version of AGC algorithm.
 
         timewin: time half-window in seconds
         dt: sample interval in seconds
     """
     cdef float dt
-    if self.rate is not None:
-        dt = self.rate
+    if gather.rate is not None:
+        dt = gather.rate
     else:
         dt = 1e-8
 
-    cdef list data = self.data.tolist()
+    cdef list data = gather.data.tolist()
     cdef int iwagc = int(round(timewin/dt))     # Half-window in samples
     cdef int nwin = iwagc*2 + 1
     cdef int i, j
@@ -65,6 +66,6 @@ def DoAutoGainControl(self, float timewin):
                 agctrace[j] = agctrace[j] * scl_const
 
             # Copy array into new line
-            self.data[:,i] = np.array(agctrace)
+            gather.data[:,i] = np.array(agctrace)
 
     return
