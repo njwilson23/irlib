@@ -267,7 +267,7 @@ class Survey:
         finally:
             self._closeh5()
 
-        return gether_type(arr, infile=self.datafile, line=line,
+        return gather_type(arr, infile=self.datafile, line=line,
                 metadata=metadata, retain=self.retain['line_{0}'.format(line)],
                 dc=datacapture)
 
