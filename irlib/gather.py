@@ -1602,8 +1602,6 @@ class PickableGather(Gather):
     def RemoveTraces(self, kill_list):
         """ Remove the traces indicated by indices in kill_list (iterable).
         Remove metadata as well. """
-
-        super(PickableGather, self).RemoveTraces(kill_list)
         kill_list.sort()
         kill_list.reverse()
         keep_list = list(set(range(
@@ -1620,6 +1618,8 @@ class PickableGather(Gather):
             self.bed_phase = np.array([])
             self.dc_picks = np.array([])
             self.dc_phase = np.array([])
+
+        super(PickableGather, self).RemoveTraces(kill_list)
         return
 
     def RemoveMetadata(self, kill_list, update_registers=True):
@@ -1627,7 +1627,6 @@ class PickableGather(Gather):
         kill_list (iterable). This is more granular than the RemoveTraces
         method. """
 
-        super(PickableGather, self).RemoveMetadata(kill_list, update_registers=update_registers)
         kill_list.sort()
         kill_list.reverse()
         all_locs = range(len(self.metadata.locations))
@@ -1638,6 +1637,8 @@ class PickableGather(Gather):
             self.bed_phase = np.hstack([self.bed_phase[i] for i in keep_list])
             self.dc_picks = np.hstack([self.dc_picks[i] for i in keep_list])
             self.dc_phase = np.hstack([self.dc_phase[i] for i in keep_list])
+            super(PickableGather, self).RemoveMetadata(kill_list,
+                    update_registers=update_registers)
         except IndexError:
             print "Inconsistent data lengths in {0}".format(repr(self))
             traceback.print_exc()
@@ -1657,11 +1658,11 @@ class PickableGather(Gather):
         variables. Does not undo the effects of operations that overwrite
         these attribute (such as most preprocessing routines).
         """
-        super(PickableGather, self).Reset()
         self.bed_picks = np.nan * np.ones(self.data.shape[1])
         self.bed_phase = np.nan * np.ones(self.data.shape[1])
         self.dc_picks = np.nan * np.ones(self.data.shape[1])
         self.dc_phase = np.nan * np.ones(self.data.shape[1])
+        super(PickableGather, self).Reset()
         return
 
 
