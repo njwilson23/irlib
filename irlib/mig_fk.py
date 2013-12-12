@@ -126,7 +126,7 @@ def fftrl(s, t, percent=0.0, n=None):
 
     # Do the transformation
     spec = np.fft.fft(s, n=nsamps, axis=0)
-    spec = spec[:n/2+1, :]              # save only positive frequencies
+    spec = spec[:int(n/2)+1, :]              # save only positive frequencies
 
     # Build the frequency vector
     fnyq = 1. / (2 * (t[1] - t[0]))
@@ -258,7 +258,7 @@ def mwhalf(n, percent=10.):
     # Compute the hanning function
     if percent > 100. or percent < 0.:
         raise Exception('Invalid percent in function mwhalf (={0})'.format(percent))
-    m = math.floor(percent * n / 100.)
+    m = int(math.floor(percent * n / 100.))
     h = np.hanning(2*m)
     return np.hstack([np.ones([n-m]), h[m:0:-1]])
 
@@ -297,7 +297,7 @@ def fkmig(D, dt, dx, v, params=None):
 
     # Apply padding
     # tpad
-    nsampnew = 2.0**nextpow2( round((tmax+tpad) / dt + 1.0) )
+    nsampnew = int(2.0**nextpow2( round((tmax+tpad) / dt + 1.0) ))
     tmaxnew = (nsampnew-1)*dt
     tnew = np.arange(t[0], tmaxnew+dt, dt)
     ntpad = nsampnew-nsamp
