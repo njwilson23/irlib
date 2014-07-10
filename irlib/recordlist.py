@@ -34,8 +34,9 @@ class RecordList:
         self.hasUTM = False
         return
 
-    def _xmlGetValF(self, xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
+    @staticmethod
+    def _xmlGetValF(xml, name):
+        """ Look up a value in an XML fragment. Return NaN if not found.
         """
         m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.]+?)</Val>'.format(
                         name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
@@ -44,7 +45,8 @@ class RecordList:
         else:
             return np.nan
 
-    def _xmlGetValI(self, xml, name):
+    @staticmethod
+    def _xmlGetValI(xml, name):
         """ Look up a value in an XML fragment. Return None if not found.
         """
         m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>([0-9.]+?)</Val>'.format(
@@ -54,17 +56,19 @@ class RecordList:
         else:
             return None
 
-    def _xmlGetValS(self, xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
+    @staticmethod
+    def _xmlGetValS(xml, name):
+        """ Look up a value in an XML fragment. Return an empty string if not found.
         """
-        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>([0-9.]+?)</Val>'.format(
+        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.]+?)</Val>'.format(
                         name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
         if m is not None:
             return m.group().split('<Val>')[1].split('</Val>')[0]
         else:
             return ''
 
-    def _dm2dec(self, dmstr):
+    @staticmethod
+    def _dm2dec(dmstr):
         """ Convert the degree - decimal minute codes in radar data
         to a decimal degree coordinate. dmstr is expected to a string.
         """
@@ -73,13 +77,8 @@ class RecordList:
             a,b = dmstr.split(".")
             return round(float(a[:-2]) +
                          float(a[-2:])/60. + float("." + b)/60.,6)
-        except AttributeError:
+        except (AttributeError, ValueError):
             return None
-        except ValueError:
-            return None
-        #except AttributeError:
-        #    # *dmstr* is not a string or string-like
-        #    return
 
     def AddDataset(self, dataset, fid=None):
         """ Add metadata from a new dataset to the RecordList instance. Updates
@@ -182,7 +181,7 @@ class RecordList:
 
         return
 
-    def Write(self, f, flip_lon=True):
+    def Write(self, f, flip_lon=False):
         """ Write out the data stored internally in CSV format to a file
         object f. """
         error = 0
