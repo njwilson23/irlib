@@ -190,7 +190,7 @@ class RecordList:
         if flip_lon:
             # Invert longitudes to be in the right hemisphere
             # Be careful not to accidentally do this more than once!
-            self.lons = [-i if i!=None else None for i in self.lons]
+            self.lons = [-i if i is not None else i for i in self.lons]
 
         header = (
             "FID," +
