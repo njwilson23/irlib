@@ -62,7 +62,7 @@ def LoadCoords(line, filename, L):
 
     return (R.lats, R.lons), (R.eastings, R.northings), fids
 
-def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=True):
+def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=False):
     """ Extract the metadata for each trace in a radar archive.
     Optionally write this data out to a comma-delimited file that can be
     imported into a GIS.

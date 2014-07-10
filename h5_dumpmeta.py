@@ -36,7 +36,7 @@ else:
         stringbuffer = StringIO.StringIO()
 
         try:
-            records = irlib.misc.ExtractAttrs(infile, fout=stringbuffer, flip_lon=True)
+            records = irlib.misc.ExtractAttrs(infile, fout=stringbuffer, flip_lon=False)
         except:
             traceback.print_exc()
             sys.stderr.write("Error reading radar data\n")
