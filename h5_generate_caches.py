@@ -10,7 +10,7 @@ import os, sys, getopt
 import traceback
 
 def print_syntax():
-    print """
+    print("""
     SYNTAX: h5_generate_caches HDF_SURVEY [OPTIONS]
 
         -d [DIR]        cache directory (default: cache/)
@@ -25,7 +25,7 @@ def print_syntax():
         -q              silence standard output
         -e              print failed datacaptures
         --dc=[#]        specify datacapture (default: 0)
-    """
+    """)
 
 optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfq',
                                   ['remove-nans', 'interp-nans', 'dc='])
@@ -54,7 +54,7 @@ elif '--remove-nans' in optdict:
 try:
     dc = int(optdict.get('--dc', 0))
 except ValueError:
-    print "key for --dc must be an integer"
+    print("key for --dc must be an integer")
     sys.exit()
 
 try:
@@ -69,7 +69,7 @@ if not os.path.isdir(cache_dir):
 S = Survey(survey_fnm)
 
 if not be_quiet:
-    print "Working on {0}".format(survey_fnm)
+    print("Working on {0}".format(survey_fnm))
 
 lines = S.GetLines()
 
@@ -80,12 +80,12 @@ for line in lines:
         pass
     else:
         if not be_quiet:
-            print "\tCaching line {0}, datacapture {1}...".format(str(line),
-                                                                  str(dc))
+            print("\tCaching line {0}, datacapture {1}...".format(str(line),
+                                                                  str(dc)))
         try:
             L = S.ExtractLine(line_no, datacapture=dc, verbose=verbose)
         except (AttributeError, IndexError):
-            print "\t\tData invalid"
+            print("\t\tData invalid")
             L = None
         except KeyboardInterrupt:
             sys.exit(0)
@@ -103,7 +103,7 @@ for line in lines:
                     elif remove_nans:
                         L.RemoveGPSNaNs()
                 except ValueError:
-                    print "\t\tNo valid UTM coordinates"
+                    print("\t\tNo valid UTM coordinates")
                 if remove_blanks:
                     L.RemoveBlankTraces()
                 if remove_stationary:

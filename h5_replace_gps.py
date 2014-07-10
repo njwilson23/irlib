@@ -10,7 +10,7 @@ import shutil
 import re
 
 def print_syntax():
-    print """
+    print("""
     SYNTAX: h5_replace_gps -h HDF_FILE -g GPX_FILE -o OUTFILE [OPTIONS]
 
     This tool replaces the existing geographical data in a ice radar HDF
@@ -37,7 +37,7 @@ def print_syntax():
 
         -n      Replace coordinates in HDF with no appropriate GPX counterpart
                 with 'NaN'. By default, the original coordinates are retained.
-    """
+    """)
     sys.exit(0)
 
 def get_time(gps_timestamp, pcdatetime, tzoffset):
@@ -112,16 +112,16 @@ lineno = optdict.get("l", None)
 max_dt = int(optdict.get("-t", 15))     # 15 second default
 insert_nans = ("-n" in optdict)
 
-print "Performing coordinate replacement"
-print
-print ("\t======== PARAMETERS =========\n"
-       "\tSRC dataset:      {infile}\n"
-       "\tDST dataset:      {outfile}\n"
-       "\tGPX file:         {gpx_file}\n\n"
-       "\tMAX timedelta:    {max_dt} sec\n"
-       "\tTZ offset:        {tz:+} hr\n"
-       "\tINSERT NaNs:      {insert_nans}\n".format(infile=hdf_file, tz=tzoffset,
-        gpx_file=gpx_file, max_dt=max_dt, outfile=outfile, insert_nans=insert_nans))
+print("Performing coordinate replacement")
+print()
+print("\t======== PARAMETERS =========\n"
+      "\tSRC dataset:      {infile}\n"
+      "\tDST dataset:      {outfile}\n"
+      "\tGPX file:         {gpx_file}\n\n"
+      "\tMAX timedelta:    {max_dt} sec\n"
+      "\tTZ offset:        {tz:+} hr\n"
+      "\tINSERT NaNs:      {insert_nans}\n".format(infile=hdf_file, tz=tzoffset,
+       gpx_file=gpx_file, max_dt=max_dt, outfile=outfile, insert_nans=insert_nans))
 
 # Read in the GPX file
 gpxtimes = []
@@ -221,10 +221,10 @@ for i, dataset in enumerate(hdfaddrs):
 
 hdf.close()
 
-print ("\t========== RESULTS ==========\n"
-       "\tTOTAL traces:     {ntraces}\n"
-       "\tMODIFIED traces:  {irep}\n"
-       "\tMEAN timedelta:   {mn:.2f} sec\n"
-       "\tMEDIAN timedelta: {md:g} sec".format(irep=irep, ntraces=i+1,
-       mn=np.mean(dts[np.isnan(dts) == False]), md=np.median(dts)))
+print("\t========== RESULTS ==========\n"
+      "\tTOTAL traces:     {ntraces}\n"
+      "\tMODIFIED traces:  {irep}\n"
+      "\tMEAN timedelta:   {mn:.2f} sec\n"
+      "\tMEDIAN timedelta: {md:g} sec".format(irep=irep, ntraces=i+1,
+      mn=np.mean(dts[np.isnan(dts) == False]), md=np.median(dts)))
 

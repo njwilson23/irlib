@@ -25,7 +25,7 @@ def print_syntax():
         o       overwrite
         q       silence standard output
     """
-    print s
+    print(s)
     return
 
 optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbroq')
@@ -86,7 +86,7 @@ for line in lines:
         pass
     else:
         if not be_quiet:
-            print "Reading " + str(line)
+            print("Reading " + str(line))
         try:
             L = S.ExtractLine(line_no)
             if fix_gps:
@@ -100,7 +100,7 @@ for line in lines:
             line_dict[line] = L.data
             metadata_dict[line] = L.metadata
         except AttributeError:
-            print "\tfailed"
+            print("\tfailed")
         except KeyboardInterrupt:
             sys.exit(0)
 

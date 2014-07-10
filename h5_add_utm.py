@@ -27,13 +27,13 @@ def calculate_utm_zone(xll, yll):
     return (zone, hemi)
 
 if len(sys.argv) < 3:
-    print """
+    print("""
     SYNTAX: h5_add_utm INFILE OUTFILE
 
         Replaces geographical coordinates in INFILE with UTM coordinates
         in OUTFILE. Does not perform any datum shift. Projection is calculated
         assuming that the data from neither from western Norway nor Svalbard.
-    """
+    """)
     sys.exit(0)
 else:
     import irlib
@@ -43,24 +43,24 @@ else:
     INFILE = sys.argv[1]
     OUTFILE = sys.argv[2]
 
-print 'operating on {0}'.format(INFILE)
+print('operating on {0}'.format(INFILE))
 
 # Open INFILE as an HDF5 dataset
 if os.path.exists(INFILE):
     fin = h5py.File(INFILE, 'r')
 else:
-    print "No such file: {0}".format(INFILE)
+    print("No such file: {0}".format(INFILE))
     sys.exit(0)
 
 # Get a list of all datasets and grab all metadata
-print "querying input dataset..."
+print("querying input dataset...")
 names = []
 fin.visit(names.append)
 datasets = [name for name in names if (isinstance(fin[name], h5py.Dataset)
                                        and 'picked' not in name)]
 
 metadata = irlib.RecordList(fin)
-print "reading metadata..."
+print("reading metadata...")
 failed = []
 for i, dataset in enumerate(datasets):
     try:
@@ -71,7 +71,7 @@ for i, dataset in enumerate(datasets):
 fin.close()
 for i in failed[::-1]:
     del datasets[i]
-print "\tdone"
+print("\tdone")
 
 # Pull out the geographical data for convenience
 lons = metadata.lons
@@ -92,7 +92,7 @@ else: north = False
 #projector = pyproj.Proj(proj='utm', zone=7, north=True)    # St Elias Range
 #projector = pyproj.Proj(proj='utm', zone=16, north=True)   # Milne Ice Shelf
 projector = pyproj.Proj(proj='utm', zone=zone, north=north) # Auto-determined
-print "Projecting to UTM zone {0}{1}".format(zone, hemi)
+print("Projecting to UTM zone {0}{1}".format(zone, hemi))
 
 for i, (lon, lat) in enumerate(zip(lons, lats)):
     if lon is not None and lat is not None:
@@ -102,9 +102,9 @@ for i, (lon, lat) in enumerate(zip(lons, lats)):
         y = 'NaN'
     eastings.append(x)
     northings.append(y)
-print "\t{0} coordinate pairs projected".format(len([i for i in eastings if i != 'NaN']))
+print("\t{0} coordinate pairs projected".format(len([i for i in eastings if i != 'NaN'])))
 
-print "writing new HDF5..."
+print("writing new HDF5...")
 # Copy INFILE to OUTFILE, and open in read/write mode
 shutil.copyfile(INFILE, OUTFILE)
 fout = h5py.File(OUTFILE, 'r+')
