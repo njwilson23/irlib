@@ -1,9 +1,12 @@
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Build import cythonize
 
-ext_modules = [Extension("irlib.agc", ["irlib/agc.pyx"])]
-ext_modules = cythonize(ext_modules)
+try:
+    from Cython.Build import cythonize
+    ext_modules = [Extension("irlib.agc", ["irlib/agc.pyx"])]
+    ext_modules = cythonize(ext_modules)
+except ImportError:
+    ext_modules = []
 
 setup(
     name = "irlib",
