@@ -86,9 +86,8 @@ eastings = []
 northings = []
 
 xlm, ylm = calculate_centroid(lons, lats)
-zone, hemi = calculate_utm_zone(-xlm, ylm)
-if hemi == 'N': north = True
-else: north = False
+zone, hemi = calculate_utm_zone(xlm, ylm)
+north = (hemi == 'N')
 #projector = pyproj.Proj(proj='utm', zone=7, north=True)    # St Elias Range
 #projector = pyproj.Proj(proj='utm', zone=16, north=True)   # Milne Ice Shelf
 projector = pyproj.Proj(proj='utm', zone=zone, north=north) # Auto-determined
@@ -96,7 +95,7 @@ print("Projecting to UTM zone {0}{1}".format(zone, hemi))
 
 for i, (lon, lat) in enumerate(zip(lons, lats)):
     if lon is not None and lat is not None:
-        x, y = projector(-lon, lat)
+        x, y = projector(lon, lat)
     else:
         x = 'NaN'
         y = 'NaN'
