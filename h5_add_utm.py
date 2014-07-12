@@ -6,6 +6,7 @@
 import sys
 import os
 import shutil
+import getopt
 import traceback
 
 def calculate_centroid(X, Y):
@@ -26,15 +27,22 @@ def calculate_utm_zone(xll, yll):
     zone = int((180 + xll) // 6) + 1
     return (zone, hemi)
 
-if len(sys.argv) < 3:
+opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["swap_lon"])
+optdict = dict(opts)
+
+if len(args) != 2:
     print("""
-    SYNTAX: h5_add_utm INFILE OUTFILE
+    SYNTAX: h5_add_utm --swap_lon INFILE OUTFILE
 
         Replaces geographical coordinates in INFILE with UTM coordinates
         in OUTFILE. Does not perform any datum shift. Projection is calculated
         assuming that the data from neither from western Norway nor Svalbard.
+
+        Longitude data in BSI HDF files ('Long_ W') is unsigned. It is assumed
+        to be in the western hemisphere by default. Passing the --swap_lon key
+        forces longitudes to be interpretted from the eastern hemisphere.
     """)
-    sys.exit(0)
+    sys.exit(1)
 else:
     import irlib
     from irlib.recordlist import ParseError
@@ -50,7 +58,7 @@ if os.path.exists(INFILE):
     fin = h5py.File(INFILE, 'r')
 else:
     print("No such file: {0}".format(INFILE))
-    sys.exit(0)
+    sys.exit(1)
 
 # Get a list of all datasets and grab all metadata
 print("querying input dataset...")
@@ -74,7 +82,11 @@ for i in failed[::-1]:
 print("\tdone")
 
 # Pull out the geographical data for convenience
-lons = metadata.lons
+if "--swap_lon" in optdict:
+    print("swapping sign on longitudes for eastern hemisphere")
+    lons = metadata.lons
+else:
+    lons = [-lon if lon is not None else None for lon in metadata.lons]
 lats = metadata.lats
 num_sat = metadata.num_sat
 fix_qual = metadata.fix_qual
@@ -122,7 +134,8 @@ for i, dataset in enumerate(datasets):
                          '<Name>Northing_m</Name>\r\n<Val>{0}</Val>'
                             .format(northings[i]))
                 .replace('<Name>Zone</Name>\r\n<Val>NaN</Val>',
-                         '<Name>Zone</Name>\r\n<Val>7</Val>')
+                         '<Name>Zone</Name>\r\n<Val>{0}</Val>'
+                            .format(zone))
                 .replace('<Name>GPS Fix Valid (dup)</Name>\r\n<Val></Val>',
                          '<Name>GPS Fix Valid (dup)</Name>\r\n<Val>{0}</Val>'
                             .format(gps_fix_valid[i]))
@@ -154,7 +167,7 @@ for i, dataset in enumerate(datasets):
 </String>
 <String>
 <Name>Zone</Name>
-<Val>7</Val>
+<Val>{zone}</Val>
 </String>
 <String>
 <Name>Satellites (dup)</Name>
@@ -176,7 +189,7 @@ for i, dataset in enumerate(datasets):
 <Name>Flag_2</Name>
 <Val>0</Val>
 </Boolean>
-</Cluster>""".format(x=eastings[i], y=northings[i],
+</Cluster>""".format(x=eastings[i], y=northings[i], zone=zone,
                      fix=gps_fix_valid[i], ok=gps_message_ok[i])
         fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'] = utm_string
     except:
