@@ -7,7 +7,7 @@ import numpy
 import pytest
 
 @pytest.mark.tryfirst()
-def initialize_test_environment():
+def test_initialize_test_environment():
     """ Copy the test data locally """
     if not os.path.isdir("tests/data"):
         os.mkdir("tests/data")
