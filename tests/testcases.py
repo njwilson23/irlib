@@ -32,6 +32,10 @@ def milnefnm():
     return "tests/data/test_milne.h5"
 
 def test_h5_add_utm_argentiere(argenfnm):
+    print(os.cwd())
+    print(os.listdir(os.getcwd()))
+    print(os.listdir("tests/"))
+    print(os.listdir("tests/data/"))
     stem, ext = os.path.splitext(argenfnm)
     utmfnm = stem + "_utm" + ext
     ret = subprocess.call(["h5_add_utm.py", argenfnm, utmfnm, "--swap_lon"])
