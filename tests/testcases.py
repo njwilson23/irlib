@@ -31,6 +31,16 @@ def argenfnm():
 def milnefnm():
     return "tests/data/test_milne.h5"
 
+def test_h5_consolidate(argenfnm, milnefnm):
+    path = [os.path.split(argenfnm)[0]]
+    path.append("test_merged.h5")
+    mergefnm = os.path.join(*path)
+    ret = subprocess.call(["h5_consolidate.py", argenfnm, milnefnm, "-o", mergefnm])
+    assert ret == 0
+    S = irlib.Survey(mergefnm)
+    assert len(S.GetLines()) == 3
+    return
+
 def test_h5_add_utm_argentiere(argenfnm):
     stem, ext = os.path.splitext(argenfnm)
     utmfnm = stem + "_utm" + ext
@@ -109,4 +119,17 @@ def test_h5_add_utm_milne(milnefnm):
     nanidx = numpy.isnan(n)
     assert numpy.allclose(numpy.asarray(L.metadata.northings)[~nanidx], n[~nanidx])
     assert all(z==17 for z in L.metadata.zones)
+
+@pytest.mark.trylast
+def test_h4_generate_caches(milnefnm):
+    stem, ext = os.path.splitext(milnefnm)
+    utmfnm = stem + "_utm" + ext
+    cachedir = os.path.join(stem, "cache")
+    ret = subprocess.call(["h5_generate_caches.py", utmfnm,
+                           "--remove-nans", "-g", "-s", "-b", "-r",
+                           "-d", cachedir])
+    assert ret == 0
+    assert os.path.isdir(cachedir)
+    irds = [fnm for fnm in os.listdir(cachedir) if fnm.endswith(".ird")]
+    assert len(irds) == 2
 

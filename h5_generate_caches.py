@@ -55,13 +55,13 @@ try:
     dc = int(optdict.get('--dc', 0))
 except ValueError:
     print("key for --dc must be an integer")
-    sys.exit()
+    sys.exit(1)
 
 try:
     survey_fnm = fins[0]
 except IndexError:
     print_syntax()
-    sys.exit()
+    sys.exit(1)
 
 if not os.path.isdir(cache_dir):
     os.makedirs(cache_dir)
