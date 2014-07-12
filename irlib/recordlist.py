@@ -181,14 +181,13 @@ class RecordList:
 
         return
 
-    def Write(self, f, flip_lon=False):
+    def Write(self, f, eastern_hemisphere=False):
         """ Write out the data stored internally in CSV format to a file
         object f. """
         error = 0
 
-        if flip_lon:
-            # Invert longitudes to be in the right hemisphere
-            # Be careful not to accidentally do this more than once!
+        if not eastern_hemisphere:
+            # Invert longitudes to be in the western hemisphere
             self.lons = [-i if i is not None else i for i in self.lons]
 
         header = (

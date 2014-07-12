@@ -61,7 +61,7 @@ def LoadCoords(line, filename, L):
 
     return (R.lats, R.lons), (R.eastings, R.northings), fids
 
-def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=False):
+def ExtractAttrs(h5file, outfile=None, fout=None, eastern_hemisphere=False):
     """ Extract the metadata for each trace in a radar archive.
     Optionally write this data out to a comma-delimited file that can be
     imported into a GIS.
@@ -91,11 +91,11 @@ def ExtractAttrs(h5file, outfile=None, fout=None, flip_lon=False):
         if outfile:
             # Export as a CSV, creating a file with name outfile
             with open(outfile, 'w') as fout:
-                records.Write(fout, flip_lon=flip_lon)
+                records.Write(fout, eastern_hemisphere=eastern_hemisphere)
             sys.stderr.write("\t{f} written\n".format(f=os.path.basename(output)))
         elif fout:
             # Export as a CSV, using the provided file object
-            records.Write(fout, flip_lon=flip_lon)
+            records.Write(fout, eastern_hemisphere=eastern_hemisphere)
             sys.stderr.write("\tstream generated\n")
 
     finally:
