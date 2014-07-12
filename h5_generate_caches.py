@@ -13,38 +13,37 @@ def print_syntax():
     print("""
     SYNTAX: h5_generate_caches HDF_SURVEY [OPTIONS]
 
-        -d [DIR]        cache directory (default: cache/)
-        -g              fix static GPS issues
-        --remove-nans   remove traces with NaN coordinates
-        --interp-nans   interpolate over NaN coordinates (overrides --remove-nans)
-        -s              smoothen coordinates (overrides --interp-nans)
-        -n              interpolate over NaN GPS coordinates
-        -b              remove blank traces caused by triggering failure
-        -r              remove stationary traces
-        -f              force regeneration of existing caches
-        -q              silence standard output
-        -e              print failed datacaptures
-        --dc=[#]        specify datacapture (default: 0)
+        -d [DIR]            cache directory (default: cache/)
+        -g                  fix static GPS issues
+        --remove-nans       remove traces with NaN coordinates
+        --interp-nans       interpolate over NaN coordinates (overrides --remove-nans)
+        -s              
+        --smoothen-coords   smoothen coordinates (overrides --interp-nans)
+        -b                  remove blank traces caused by triggering failure
+        -r                  remove stationary traces
+        -f                  force regeneration of existing caches
+        -q                  silence standard output
+        -e                  print failed datacaptures
+        --dc=[#]            specify datacapture (default: 0)
     """)
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfq',
-                                  ['remove-nans', 'interp-nans', 'dc='])
+optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfqe',
+                    ['remove-nans', 'interp-nans', 'smoothen-cords', 'dc='])
 optdict = dict(optlist)
 
 # Parse input switches
 cache_dir = optdict.get('-d', 'cache')
-fix_gps = True if '-g' in optdict else False
-remove_stationary = True if '-r' in optdict else False
-remove_blanks = True if '-b' in optdict else False
-interpolate_nans = True if '--remove-nans' in optdict else False
-force_cache = True if '-f' in optdict else False
-be_quiet = True if '-q' in optdict else False
-verbose = True if '-e' in optdict else False
+fix_gps = '-g' in optdict
+remove_stationary = '-r' in optdict
+remove_blanks = '-b' in optdict
+force_cache = '-f' in optdict
+be_quiet = '-q' in optdict
+verbose = '-e' in optdict
 
 smoothen_gps = False
 interpolate_nans = False
 remove_nans = False
-if '-s' in optdict:
+if '-s' in optdict or '--smoothen-coords' in optdict:
     smoothen_gps = True
 elif '--interpolate_nans' in optdict:
     interpolate_nans = True
