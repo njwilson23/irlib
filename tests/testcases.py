@@ -21,6 +21,7 @@ def initialize_test_environment():
                            "tests/data/test_milne.h5")
     assert os.path.isfile("tests/data/test_argentiere.h5")
     assert os.path.isfile("tests/data/test_milne.h5")
+    assert 0
     return
 
 @pytest.fixture
@@ -32,7 +33,7 @@ def milnefnm():
     return "tests/data/test_milne.h5"
 
 def test_h5_add_utm_argentiere(argenfnm):
-    print(os.cwd())
+    print(os.getcwd())
     print(os.listdir(os.getcwd()))
     print(os.listdir("tests/"))
     print(os.listdir("tests/data/"))
