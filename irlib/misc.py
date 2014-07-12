@@ -4,7 +4,6 @@ module, and which are kept for backwards compatibility.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import os.path, sys, cPickle
 import traceback
 from recordlist import RecordList
@@ -172,6 +171,7 @@ def PlotTrace(D, Dp=None, Dpp=None, Dn=None, Dnn=None, outfile=None, rate=1e-8, 
     are expected to be numpy arrays. If 'outfile' is not None, then
     save image rather than showing.
     """
+    import matplotlib.pyplot as plt
     n = D.size
     T = np.arange(0, n*rate, rate)      # time axis
 
@@ -210,7 +210,7 @@ def PlotTrace(D, Dp=None, Dpp=None, Dn=None, Dnn=None, outfile=None, rate=1e-8, 
 def PlotLine(arr, outfile=None, cmap='gray', title='Radar Line',
             rate=1e-8, c=1.68e8):
     """ Plot an array containing radar data along a line. """
-
+    import matplotlib.pyplot as plt
     n = arr.size
     T = np.arange(0, n*rate, rate)      # time axis
 

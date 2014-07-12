@@ -5,8 +5,6 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import pdb
 
 def calc_toffset(X, T, xoffset=12.0, v=1.68e8):
     """ Perform normal move-out and calculate a diffraction hyperbola.
@@ -44,14 +42,6 @@ def warp_array_linear(A, T, i):
     # Interpolate the warped values and put into W
     for icol in range(A.shape[1]):
         W[:,icol] = np.interp(Y_warp[:,icol], Y[:,icol], A[:,icol])
-
-    #if i==65:
-        #plt.ion()
-        #plt.subplot(1,2,1)
-        #plt.imshow(A, cmap='gray')
-        #plt.subplot(1,2,2)
-        #plt.imshow(W, cmap='gray')
-        #pdb.set_trace()
     return W
 
 def mirror(arr):
@@ -126,6 +116,7 @@ def test1():
 
     print THYP.max(), THYP.min(), THYP.mean()
 
+    plt.figure()
     plt.imshow(THYP)
     plt.axis('tight')
     plt.show()
@@ -143,6 +134,7 @@ def test2():
     T = np.arange(L.data.shape[0]) * 1e-8
     Dmig = mig_kirchoff(D, P, T, xoffset=0.0, xwindow=10.0)
 
+    plt.figure()
     plt.subplot(1,2,1)
     plt.imshow(D, cmap='gray')
     plt.subplot(1,2,2)
@@ -159,6 +151,7 @@ def test3():
     T = np.arange(256) * 1e-8
     Dmig = mig_kirchoff(D, P, T, xoffset=15.0)
 
+    plt.figure()
     plt.subplot(1,2,1)
     plt.imshow(D, cmap='gray')
     plt.subplot(1,2,2)
@@ -188,6 +181,7 @@ def test4():
     T = np.arange(256) * 1e-8
     Dmig = mig_kirchoff(D, P, T, xoffset=15.0)
 
+    plt.figure()
     plt.subplot(1,2,1)
     plt.imshow(D, cmap='gray')
     plt.subplot(1,2,2)
@@ -195,7 +189,11 @@ def test4():
     plt.show()
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    test1()
     test2()
+    test3()
+    test4()
 
 
 

@@ -15,15 +15,15 @@ import filehandler
 from filehandler import FileHandler, FileHandlerError
 
 # Application-specific libs
-import app
-from filter_defs import ApplyFilter
+# import app
+# from filter_defs import ApplyFilter
 
 # Accessory modules
 import brp
 import polarity
 import gpx
 import misc
-import itools
+# import itools
 
 __all__ = ['survey', 'gather', 'recordlist', 'filehandler', 'misc', 'gpx',
            'itools', 'brp', 'polarity']
