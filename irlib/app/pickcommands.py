@@ -116,9 +116,3 @@ class PickDCAuto(PickCommandBase):
                 pickargs = []
             w.autopick_dc(*pickargs)
 
-
-
-
-
-
-
