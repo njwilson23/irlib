@@ -63,8 +63,10 @@ code, pre {
 }
 
 pre {
+  color:#CCC;
   padding:8px 15px;
-  background: #f8f8f8;  
+  margin:10px;
+  background:#111;  
   border-radius:8px;
   border:1px solid #e5e5e5;
   overflow-x: auto;
