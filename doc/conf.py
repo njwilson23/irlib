@@ -26,7 +26,7 @@ import sys, os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage',
-              'sphinx.ext.mathjax', 'numpydoc']
+              'sphinx.ext.autosummary', 'sphinx.ext.mathjax', 'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'icepick and irlib (radar_tools)'
-copyright = u'2013, Nat Wilson'
+copyright = u'2015, Nat Wilson'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
