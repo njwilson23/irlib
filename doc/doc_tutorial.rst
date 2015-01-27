@@ -215,15 +215,7 @@ pick if you've made a mistake. Fine adjustments can be made by pressing the
 Presumably, the bed should be picked on every trace where it can be identified.
 
 Once the picks are satisfactory, type ``save`` to save the timing data to the
-folder ``picking``. If it spits back something like
-
-::
-
-    IOError: [Errno 2] No such file or directory:
-    'picking/gl3_radar_2012_utm_line1.csv',
-
-then you probably forgot to create the ``picking`` folder in `the section on
-set-up <#set-up>`__.
+folder ``picking``.
 
 Filtering
 ~~~~~~~~~
@@ -255,23 +247,15 @@ Furthermore,
    during cache-generation or automatically when loading the line), and
    restores the original data.
 
-**Deprecated** - use ``irlib.components.filters instead``
+**The following is out of data, deprecated - use** ``irlib.components.filters`` **instead**
 
-There are lots of other filters. All filters are defined in the file
+*There are lots of other filters. All filters are defined in the file
 ``filter_defs.py``, which is in the place where ``irlib`` is installed.
-Modifying this file permits custom filters to be defined.
+Modifying this file permits custom filters to be defined.*
 
 A final adjustment is ``gain``, which adjusts the display contrast of the
 radargram. All filters accessed through ``f`` or ``gain`` are reversible, so
 there is no risk of permanently damaging the data by experimenting.
-
-For bed picking, **I strongly recommend performing some kind of waveform
-migration (``fkmig`` is a good option).** Migration attempts to restore
-reflector geometries, and is important wherever bed slopes may be large. The
-gain control filters combat signal attenuation, and are also frequently useful.
-The various bandpass filters are selectively worthwhile, but may introduce
-artefacts in the reflection and direct-coupling wavelets, so some caution is
-required.
 
 Direct coupling
 ~~~~~~~~~~~~~~~
@@ -301,7 +285,7 @@ radargram), then we can give this as a hint by typing
 
     pick dc 75 125
 
-*icepick* then uses a set of heuristics to try and figure out where the airwave
+*icepick2* then uses a set of heuristics to try and figure out where the airwave
 is in each trace, subject to the vertical constraints.
 
 -  There is a minimum vertical range for the algorithm to work. I forget what
