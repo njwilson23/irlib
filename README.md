@@ -66,9 +66,11 @@ programming language suited for scientific computing
 
 2. [*Scipy*](http://www.scipy.org) science-oriented libraries for Python
 
+2. [*h5py*](https://github.com/h5py/h5py): HDF5 interface for Python
+
 2. [*matplotlib*](http://www.matplotlib.org) plotting for Python
 
-2. [*h5py*](https://github.com/h5py/h5py): HDF5 interface for Python
+2. [*pyproj*](code.google.com/p/pyproj) _libproj_ bindings
 
 One way to get the first four dependencies above in one package is to install
 the [Enthought Python Distribution](http://www.enthought.com/).
@@ -80,8 +82,6 @@ Additional useful packages and tools:
 
 2. *pywavelet* wrapper for wavelet algorithms (*Torrence and Compo, 1998*)
 (included in `external/pywavelet-0.1`)
-
-2. [*pyproj*](code.google.com/p/pyproj) _libproj_ bindings
 
 Documentation:
 --------------
@@ -100,6 +100,7 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
 
     make latexpdf
 
+A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).
 
 Changes in irlib version 0.4-dev
 --------------------------------
