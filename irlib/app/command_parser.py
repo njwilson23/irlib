@@ -1,19 +1,7 @@
 
-#import filters
-
-#def get_commands(module):
-#    """ Return the commands in module """
-#    commands = {}
-#    for key in module.__dict__:
-#        val = module.__dict__[key]
-#        if (type(val) is type) and val.__base__ is filters.FilterCommand:
-#            commands[val.cmd] = val
-#    return commands
-
 import traceback
 
 def apply_command(registry, inputs, stateobj, cmdtype):
-
     """ Attempt to apply a command, raising a KeyError if a suitable command cannot be found.
 
     Parameters
