@@ -19,7 +19,6 @@ class FileHandler:
                 with open(fnm) as f:
                     _ = f.readline()            # Bypass the header
                     self.prevrecs = f.readlines()
-                    self.nrecs = len(self.prevrecs)
                     self.Parse(self.prevrecs)
             except:
                 traceback.print_exc()
@@ -29,11 +28,14 @@ class FileHandler:
                           "  {0} is not a valid file".format(fnm))
         else:
             self.prevlines = None
-            self.nrecs = None
             self.fids = fids
             self.dcvals = [np.nan for a in self.fids]
             self.bedvals = [np.nan for a in self.fids]
             self.traveltimes = [np.nan for a in self.fids]
+
+    @property
+    def nrecs(self):
+        return len(self.fids)
 
     def sort(self):
         """ Sort bedvals and dcvals by FID in-place. """
@@ -60,14 +62,14 @@ class FileHandler:
 
     def GetEventVals(self):
         """ Return the airwave and bed reflection values (lists). """
-        if self.nrecs is None:
+        if self.nrecs == 0:
             raise FileHandlerError('Event file does not exist: {0}'.format(self.fnm))
         return self.dcvals, self.bedvals
 
     def GetEventValsByFID(self, fids):
         """ Return the airwave and bed reflection picks for a list of FIDs.
         """
-        if self.nrecs is None:
+        if self.nrecs == 0:
             raise FileHandlerError('Event file does not exist: {0}'.format(self.fnm))
         dcvals, bedvals = [], []
         if hasattr(fids, '__iter__'):
@@ -133,7 +135,7 @@ class FileHandler:
         """ Where possible, subtract dc times from bed times. """
         try:
 
-            if self.nrecs is None:
+            if self.nrecs == 0:
                 return
 
             self.traveltimes = [999 for i in range(self.nrecs)]
