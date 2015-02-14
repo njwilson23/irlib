@@ -62,6 +62,7 @@ class RatingWindow:
                             #'button_press_event', self._onclick)
         self.cid_key = self.fig1.canvas.mpl_connect( \
                             'key_press_event', self._onkeypress)
+        #self.fig1.canvas.mpl_connect('close_event', self._onclose)
 
         self.ShowRadargram()
         self.ShowTraces()
@@ -75,6 +76,12 @@ class RatingWindow:
     def _onclick(self, event):
         """ Event handler for mouse clicks."""
         pass
+
+    # Causes my terminal to act buggy after closing - text doesn't appear
+    #def _onclose(self, event):
+    #    print("exit\n")
+    #    Autosave(L, R)
+    #    sys.exit(0)
 
     def _rate(self, rating):
         """ Assign a rating to a specific event pick. """
@@ -239,6 +246,7 @@ def OpenLine(infile, line, pickfile, fromcache=True):
 
 def Autosave(L, R):
     """ Do an autosave to avoid 'oh shit' moments. """
+    print("Temporary backup saved to rating/autosave.txt")
     if os.path.isfile('rating/autosave.txt'):
         os.remove('rating/autosave.txt')
     SaveRatings('rating/autosave.txt', R, L)
@@ -323,30 +331,32 @@ def HandleCommand(s, infile, R, L, S):
             traceback.print_exc()
 
     elif args[0] == 'open':                 # OPEN
-        try:
-            line = args[1]
-        except:
-            print "Bad arguments"
+        if len(args) < 2:
+            print "Not enough arguments"
+        line = args[1]
 
-        try:
-            if 'line_{0}'.format(line) in S.GetLines():
-                print "Opening line {0}".format(line)
+        if 'line_{0}'.format(line) in S.GetLines():
+            print "Opening line {0}".format(line)
 
-                R.fig1.clf()
-                #plt.close()
-                del R
-
-                pickfile = 'picking/' + \
-                    os.path.basename(infile).split('.')[0] + \
-                    "_line" + str(line) + ".csv"
-                print infile
-                R,L,S = OpenLine(infile, line, pickfile)
+            if len(args) >= 3:
+                pickfile = args[2]
             else:
-                print "Line {0} does not exist".format(line)
-        except SystemExit:
-            pass
-        except:
-            traceback.print_exc()
+                pickfile = None
+            
+            if pickfile and not os.path.exists(pickfile):
+                print("Pick file {0} does not exist".format(pickfile))
+                pickfile = None
+
+            if pickfile is None:
+                pickfile = get_pickfnm(infile, line)
+
+            print(pickfile)
+
+            R.fig1.clf()
+            del R
+            R,L,S = OpenLine(infile, line, pickfile)
+        else:
+            print "Line {0} does not exist".format(line)
 
     elif args[0] in ('filter', 'f'):        # FILTER
         try:
@@ -411,16 +421,20 @@ def HandleCommand(s, infile, R, L, S):
 
     return R, L
 
+def get_pickfnm(infile, line):
+    return os.path.join("picking",
+            os.path.basename(infile).split(".")[0]
+                + "_line" + str(line) + ".csv")
 
 # Cold start interface
 def main():
 
     def print_syntax():
-        print "\t icerate -f file_name [-L line_number]"
+        print "\t icerate -f file_name [-L line_number] [--pick pick_filename]"
         return
 
     try:
-        optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:')
+        optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:', ['pick='])
     except getopt.GetoptError:
         print "Error collecting arguments - check syntax."
         print_syntax()
@@ -428,17 +442,14 @@ def main():
     optdict = dict(optlist)
 
     try:
-        infile = optdict['-f']
-    except KeyError:
+        infile = optdict.get("-f", args[0])
+    except IndexError:
         print "A survey filename must be supplied:"
         print_syntax()
         sys.exit(0)
 
     line = int(optdict.get('-L', 0))
-
-    pickfile = 'picking/' + \
-        os.path.basename(infile).split('.')[0] + \
-        "_line" + str(line) + ".csv"
+    pickfile = optdict.get('--pick', get_pickfnm(infile, line))
     R,L,S = OpenLine(infile, line, pickfile)
 
     if not os.path.isdir('rating'):
