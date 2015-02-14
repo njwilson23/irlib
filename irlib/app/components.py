@@ -88,6 +88,7 @@ class Radargram(AppWindow):
         super(Radargram, self).__init__((10, 4))
         self.digitize_mode = False
         self._newline(L)
+        self.fig.canvas.set_window_title("Radargram") 
         self.fig.tight_layout()
         return
 
@@ -387,6 +388,7 @@ class PickWindow(AppWindow):
         ntraces : number of consecutive traces to display at once
         """
         super(PickWindow, self).__init__((10, 8))
+        self.fig.canvas.set_window_title("Picker") 
         self.ax.set_autoscale_on(False)
 
         # Set up scale slider widget
@@ -733,6 +735,7 @@ class MapWindow(AppWindow):
     def __init__(self, L):
         super(MapWindow, self).__init__((4, 4))
         self._newline(L)
+        self.fig.canvas.set_window_title("Map") 
         self.fig.tight_layout()
         return
 
