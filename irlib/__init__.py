@@ -16,6 +16,7 @@ from filehandler import FileHandler, FileHandlerError
 
 # Application-specific libs
 # import app
+import filter_defs
 # from filter_defs import ApplyFilter
 
 # Accessory modules

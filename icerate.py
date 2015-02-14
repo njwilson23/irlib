@@ -44,6 +44,7 @@ class RatingWindow:
         # Set up the plotting window
         plt.ion()
         self.fig1 = plt.figure(1, figsize=(12,5))
+        self.fig1.canvas.set_window_title("Pick rater") 
 
         # Axes 1 is the radargram; axes 2 is the trace being rated
         self.ax1 = self.fig1.add_axes([0.1, 0.05, 0.7, 0.9])
