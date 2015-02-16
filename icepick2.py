@@ -20,8 +20,3 @@ console.register(irlib.app.pickcommands)
 console.register(irlib.app.mapcommands)
 console.start()
 
-#from irlib.app.components import PickWindow
-#pw = PickWindow(console.line)
-#pw.connect_radargram(console.get_appwindows(Radargram)[0])
-#console.appwindows.append(pw)
-

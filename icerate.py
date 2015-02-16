@@ -11,12 +11,12 @@ import sys, os, getopt
 import readline
 import traceback, pdb
 from random import shuffle
-from copy import copy
 
 np.seterr(invalid='ignore')
 
-class RatingWindow:
+class RatingWindow(object):
     def __init__(self, L, picks, ratings=None, rate=1.e-8, bias=.02):
+        self.isopen = True
         self.bias = bias
         self.rate = rate
         self.picks = picks
@@ -32,7 +32,6 @@ class RatingWindow:
             self.ratings = -9 * np.ones((len(picks)))
             sys.stderr.write("ratings passed to RatingWindow have inconsistent length\n")
 
-        nx = self.arr.shape[1]
         ny = self.arr.shape[0]
         self.traces = range(0, self.arr.shape[1], self.interval)
         #shuffle(self.traces)
@@ -62,7 +61,7 @@ class RatingWindow:
                             #'button_press_event', self._onclick)
         self.cid_key = self.fig1.canvas.mpl_connect( \
                             'key_press_event', self._onkeypress)
-        #self.fig1.canvas.mpl_connect('close_event', self._onclose)
+        self.fig1.canvas.mpl_connect('close_event', self._onclose)
 
         self.ShowRadargram()
         self.ShowTraces()
@@ -77,11 +76,9 @@ class RatingWindow:
         """ Event handler for mouse clicks."""
         pass
 
-    # Causes my terminal to act buggy after closing - text doesn't appear
-    #def _onclose(self, event):
-    #    print("exit\n")
-    #    Autosave(L, R)
-    #    sys.exit(0)
+    def _onclose(self, event):
+        print("exit\n")
+        self.isopen = False
 
     def _rate(self, rating):
         """ Assign a rating to a specific event pick. """
@@ -146,9 +143,6 @@ class RatingWindow:
         forces the background to be redrawn (for example, after a
         filter opperation).
         """
-        n = self.arr.shape[0]
-        T = np.arange(0, n*rate, rate)      # time axis
-
         self.ax1.lines = []
 
         # Find the luminescense range so that plot intensity is symmetric
@@ -179,7 +173,6 @@ class RatingWindow:
             self.ax1.plot(range(xa, xb), lower_line, '-y', alpha=0.6, linewidth=2.)
         except:
             traceback.print_exc()
-            print len(self.picks), self.cur_trace
 
         self.ax1.set_xlim([0, self.arr.shape[1]-1])
         self.ax1.set_ylim([self.arr.shape[0]-1, 0])
@@ -200,7 +193,7 @@ def LoadRatings(infile):
 
         for line in ratings:
             try:
-                r = int(line.split('\t')[0])
+                int(line.split('\t')[0])
             except ValueError:
                 valid = False
                 err += 1
@@ -458,7 +451,7 @@ def main():
     # Begin main loop
     print "IceRate"
 
-    while True:
+    while R.isopen:
         s = raw_input('>> ')
         R, L = HandleCommand(s, infile, R, L, S)
 

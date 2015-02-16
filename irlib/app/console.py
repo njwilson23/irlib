@@ -12,8 +12,6 @@ import irlib
 import command_parser
 import commands
 from .components import Radargram, MapWindow, PickWindow
-import traceback
-import pdb
 
 class Console(object):
     """ App-controller with a user input readline loop. """
