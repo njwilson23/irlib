@@ -1106,7 +1106,7 @@ class CommonOffsetGather(Gather):
         kill_list = []
         for i, (x, y) in enumerate(zip(self.metadata.eastings,
                                        self.metadata.northings)):
-            if None in (x,y):
+            if None in (x,y) or np.isnan(x) or np.isnan(y):
                 kill_list.append(i)
             elif bbox is not None and \
                 ((x<bbox[0]) or (x>bbox[1]) or (y<bbox[2]) or (y>bbox[3])):
@@ -1132,22 +1132,11 @@ class CommonOffsetGather(Gather):
         if self.metadata.hasUTM is False:
             raise LineGatherError('RemoveStationary: no UTM coordinates available')
             return
+        self.RemoveBadLocations()
         eastings = np.array(self.metadata.eastings, dtype=float)
         northings = np.array(self.metadata.northings, dtype=float)
 
         dbg_traces_deleted = 0
-
-        # Get rid of traces with no location data
-        kill_list = list(np.union1d(
-                np.nonzero(np.isnan(eastings))[0],
-                np.nonzero(np.isnan(northings))[0]
-                ))
-        if len(kill_list) > 0:
-            self.RemoveTraces(kill_list)
-            dbg_traces_deleted += len(kill_list)
-
-        if debug:
-            print 'null location traces deleted:', dbg_traces_deleted
 
         # Loop through the rest and filter
         kill_list = []

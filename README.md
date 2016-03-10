@@ -72,8 +72,9 @@ programming language suited for scientific computing
 
 2. [*pyproj*](code.google.com/p/pyproj) _libproj_ bindings
 
-One way to get the first four dependencies above in one package is to install
-the [Enthought Python Distribution](http://www.enthought.com/).
+If you do not already have a scientific Python environment and you do not know
+how to set one up, I recommend the [Anaconda Python
+distribution](https://www.continuum.io/downloads).
 
 Additional useful packages and tools:
 -------------------------------------
