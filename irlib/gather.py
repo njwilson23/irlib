@@ -6,22 +6,28 @@ the data. The `Gather` class is a base class for the `CommonOffsetGather` and
 and is now just an alias for the `CommonOffsetGather`, kept for backwards
 compatibility. """
 
+from __future__ import print_function
+
 import os
 import sys
 import datetime
 import math
 import copy
-import cPickle
 import numpy as np
 import scipy.signal as sig
 import scipy.spatial as spatial
 import traceback
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 #import irlib.aaigrid as aai
 #from irlib.filehandler import FileHandler, FileHandlerError
-import aaigrid as aai
-from filehandler import FileHandler, FileHandlerError
-from autovivification import AutoVivification
+from . import aaigrid as aai
+from .filehandler import FileHandler, FileHandlerError
+from .autovivification import AutoVivification
 
 try:
     import agc
@@ -282,7 +288,7 @@ class Gather(object):
                 traceback.print_exc()
             self.history.append(('load_topo', topofnm))
         else:
-            print "{0} is not a file".format(topofnm)
+            print("{0} is not a file".format(topofnm))
 
         if self.history[-1][0] == "load_topo":
             # Fill in NaNs
@@ -309,7 +315,7 @@ class Gather(object):
                 np.ones(11) / 11.0, mode='valid')
             self.history.append(('smooth_topo'))
         except AttributeError:
-            print "topography does not exist"
+            print("topography does not exist")
         return
 
     def RemoveGPSNaNs(self):
@@ -780,7 +786,7 @@ class Gather(object):
             try:
                 self.data = np.vstack([self.data[:,i] for i in keep_list]).T
             except IndexError:
-                print "Inconsistent data lengths in {0}".format(repr(self))
+                print("Inconsistent data lengths in {0}".format(repr(self)))
                 traceback.print_exc()
 
             if hasattr(self, 'topography'):
@@ -824,14 +830,14 @@ class Gather(object):
 
     def Dump(self, fnm=None):
         """ Dumps self into a cache with the given filename using
-        cPickle. Returns boolean on exit indicating success or
+        pickle. Returns boolean on exit indicating success or
         failure.
         """
         if fnm is None:
             fnm = self.GetCacheName()
         if os.path.isdir(os.path.split(fnm)[0]):
             with open(fnm, 'w') as f:
-                pickler = cPickle.Pickler(f, cPickle.HIGHEST_PROTOCOL)
+                pickler = pickle.Pickler(f, pickle.HIGHEST_PROTOCOL)
                 pickler.dump(self)
             return True
         else:
@@ -1157,7 +1163,7 @@ class CommonOffsetGather(Gather):
             # Average them all together
             if iend > 1:
                 if debug:
-                    print i, iend, displacement[iend-1:iend+1]
+                    print(i, iend, displacement[iend-1:iend+1])
                 avg_trace = self.data[:,i:i+iend].sum(axis=1) / float(iend)
                 dbg_traces_deleted += (iend - 1)
                 # Mark spaces held by former traces for deletion
@@ -1181,7 +1187,7 @@ class CommonOffsetGather(Gather):
             self.RemoveMetadata(kill_list)
 
         if debug:
-            print 'stationary location traces deleted:', dbg_traces_deleted
+            print('stationary location traces deleted:', dbg_traces_deleted)
 
         # I won't claim this bit isn't risky
         self.metadata_copy = copy.deepcopy(self.metadata)
@@ -1244,7 +1250,7 @@ class CommonOffsetGather(Gather):
         # Add 1 to the last bound so that the full array is included
         sections[-1] = (sections[-1][0], sections[-1][1]+1)
         if verbose:
-            print "projecting across {0} line segments".format(len(sections))
+            print("projecting across {0} line segments".format(len(sections)))
 
         # Project each of the sections to a least-squares line and grid
         proj_data = np.array([])
@@ -1342,7 +1348,7 @@ class CommonOffsetGather(Gather):
         # Add 1 to the last bound so that the full array is included
         migsections[-1] = (migsections[-1][0], migsections[-1][1]+1)
         if verbose:
-            print "migrating in {0} sections".format(len(migsections))
+            print("migrating in {0} sections".format(len(migsections)))
 
         # Migrate each of the sections separately
         for bounds in migsections:
@@ -1629,7 +1635,7 @@ class PickableGather(Gather):
             super(PickableGather, self).RemoveMetadata(kill_list,
                     update_registers=update_registers)
         except IndexError:
-            print "Inconsistent data lengths in {0}".format(repr(self))
+            print("Inconsistent data lengths in {0}".format(repr(self)))
             traceback.print_exc()
         return
 

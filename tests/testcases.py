@@ -121,7 +121,7 @@ def test_h5_add_utm_milne(milnefnm):
     assert all(z==17 for z in L.metadata.zones)
 
 @pytest.mark.trylast
-def test_h4_generate_caches(milnefnm):
+def test_h5_generate_caches(milnefnm):
     stem, ext = os.path.splitext(milnefnm)
     utmfnm = stem + "_utm" + ext
     cachedir = os.path.join(stem, "cache")

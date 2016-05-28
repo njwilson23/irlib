@@ -4,6 +4,8 @@
 #   Based on the irlib API
 #
 
+from __future__ import print_function
+
 import traceback
 import numpy as np
 from functools import partial
@@ -170,7 +172,7 @@ def ApplyFilter(GatherInstance, cmd):
             GatherInstance.MigrateFK(t0_adjust=t0_offset)
 
         elif cmd == 'kirmig':
-            print "not yet implemented"
+            print("not yet implemented")
 
         elif cmd == 'eng10_old':
             # Englacial scatter enhancer that works well for 10 MHz data
@@ -209,7 +211,7 @@ def ApplyFilter(GatherInstance, cmd):
             GatherInstance.LineProjectMultiSegment(dx=5.0)
 
         else:
-            print "Filter type '{0}' not recognized".format(cmd)
+            print("Filter type '{0}' not recognized".format(cmd))
 
     except:
         traceback.print_exc()

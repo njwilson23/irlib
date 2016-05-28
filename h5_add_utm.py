@@ -102,7 +102,7 @@ zone, hemi = calculate_utm_zone(xlm, ylm)
 north = (hemi == 'N')
 #projector = pyproj.Proj(proj='utm', zone=7, north=True)    # St Elias Range
 #projector = pyproj.Proj(proj='utm', zone=16, north=True)   # Milne Ice Shelf
-projector = pyproj.Proj(proj='utm', zone=zone, north=north) # Auto-determined
+projector = pyproj.Proj(proj='utm', zone=zone, north=north, datum="WGS84") # Auto-determined
 print("Projecting to UTM zone {0}{1}".format(zone, hemi))
 
 for i, (lon, lat) in enumerate(zip(lons, lats)):
@@ -123,7 +123,7 @@ fout = h5py.File(OUTFILE, 'r+')
 # For each dataset in OUTFILE, modify the UTM attribute cluster in place
 for i, dataset in enumerate(datasets):
     try:
-        xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml']
+        xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
         new_xml = (
                 xml.replace('<Name>Datum</Name>\r\n<Val>NaN</Val>',
                             '<Name>Datum</Name>\r\n<Val>WGS84</Val>')
@@ -143,7 +143,7 @@ for i, dataset in enumerate(datasets):
                          '<Name>GPS Message ok (dup)</Name>\r\n<Val>{0}</Val>'
                             .format(gps_message_ok[i]))
                 )       # num_sats appears to already be there
-        fout[dataset].attrs.modify('GPS Cluster_UTM-MetaData_xml', new_xml)
+        fout[dataset].attrs.modify('GPS Cluster_UTM-MetaData_xml', new_xml.encode("utf-8"))
     except KeyError:
         # If the dataset doesn't have a UTM cluster, then add one
         utm_string = """<Cluster>

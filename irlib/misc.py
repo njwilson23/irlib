@@ -4,10 +4,17 @@ module, and which are kept for backwards compatibility.
 """
 
 import numpy as np
-import os.path, sys, cPickle
+import os.path
+import sys
 import traceback
-from recordlist import RecordList
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import h5py
+from .recordlist import RecordList
 
 def path2fid(path, linloc_only = False):
     """ Based on a path, return a unique FID for database

@@ -1,7 +1,8 @@
 
+from __future__ import print_function
 import matplotlib.pyplot
-import commands
-import command_parser as cp
+from . import commands
+from . import command_parser as cp
 from .components import Radargram, PickWindow
 
 class PickCall(commands.Command):
@@ -18,11 +19,11 @@ class PickCall(commands.Command):
     """
     def apply(self, app, args):
         if len(args) == 0:
-            print "Type 'help' or 'help pick' for instructions."
+            print("Type 'help' or 'help pick' for instructions.")
         try:
             cp.apply_command(app.command_registry, args, app, "Pick")
         except KeyError:
-            print "No picking command '{0}' exists".format(args[0])
+            print("No picking command '{0}' exists".format(args[0]))
         return
 
 class PickCommandBase(commands.Command):
@@ -87,7 +88,7 @@ class PickBedAuto(PickCommandBase):
                 try:
                     pickargs = [int(a) for a in args]
                 except ValueError:
-                    print "arguments must be integer"
+                    print("arguments must be integer")
                     return
             else:
                 pickargs = []
@@ -110,7 +111,7 @@ class PickDCAuto(PickCommandBase):
                 try:
                     pickargs = [int(a) for a in args]
                 except ValueError:
-                    print "arguments must be integer"
+                    print("arguments must be integer")
                     return
             else:
                 pickargs = []

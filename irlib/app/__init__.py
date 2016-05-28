@@ -1,4 +1,4 @@
-import filters
-import command_parser
-import console
-import components
+from . import filters
+from . import command_parser
+from . import console
+from . import components

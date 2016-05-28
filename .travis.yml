@@ -1,8 +1,7 @@
 language: python
 python:
   - "2.7"
-  #- "3.3"
-  #- "3.4"
+  - "3.5"
 
 before_install:
   - sudo apt-get update
@@ -15,9 +14,8 @@ before_install:
 
 install:
   #- sudo apt-get install python-numpy   # needed to get numpy C-headers, which aren't being shown for the travis install
-  - conda create --yes -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pip h5py
+  - conda create --yes -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pip h5py pytest pyproj
   - source activate test-environment
-  - pip install pyproj pytest
   - pip install . -v
 
 script:

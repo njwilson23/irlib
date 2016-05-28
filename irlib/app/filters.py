@@ -1,6 +1,6 @@
 """ This file defines the filter commands available from irlib-based apps. """
 
-from commands import Command
+from .commands import Command
 
 def handle_no_args():
     # intended to be used as a decorator - if there are no arguments, then print filter history as exit

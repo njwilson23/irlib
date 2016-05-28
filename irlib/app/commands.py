@@ -1,11 +1,14 @@
 """ Define a Command class for interactive apps. """
 
+from __future__ import print_function
+
 import sys
 import itertools
-import command_parser as cp
-from .components import Radargram, MapWindow, PickWindow
-from irlib import EmptyLineError
 import traceback
+
+from . import command_parser as cp
+from .components import Radargram, MapWindow, PickWindow
+from ..survey import EmptyLineError
 
 class Command(object):
 
@@ -39,21 +42,19 @@ class PrintInfo(Command):
     """
 
     def apply(self, app, args):
-        print app.survey.datafile
-        print 'line: ' + str(app.line.line)
+        print(app.survey.datafile)
+        print('line: ' + str(app.line.line))
         try:
-            print 'channel: ' + str(app.line.datacapture)
+            print('channel: ' + str(app.line.datacapture))
         except AttributeError:
             pass
-        print '# traces: ' + str(app.line.data.shape[1])
-        print '# samples: ' + str(app.line.data.shape[0])
+        print('# traces: ' + str(app.line.data.shape[1]))
+        print('# samples: ' + str(app.line.data.shape[0]))
         rate = 1.0 / app.line.metadata.sample_rate[0]
-        print 'sample interval: ' + str(rate) + ' s'
-        print 'depth resolution: ' + str(rate * 1.68e8 / 2.0) + ' m'
-        print 'vertical range: ' + \
-                str(1.68e8*app.line.data.shape[0]*rate / 2.0) + ' m'
-        print 'available channels: ' + \
-                str(app.survey.GetChannelsInLine(int(app.line.line)))
+        print('sample interval: ' + str(rate) + ' s')
+        print('depth resolution: ' + str(rate * 1.68e8 / 2.0) + ' m')
+        print('vertical range: ' + str(1.68e8*app.line.data.shape[0]*rate / 2.0) + ' m')
+        print('available channels: ' + str(app.survey.GetChannelsInLine(int(app.line.line))))
         return
 
 class ListLines(Command):
@@ -63,20 +64,19 @@ class ListLines(Command):
 
     def apply(self, app, args):
         cursor = 2
-        print "Lines:"
-        print "  ",
+        print("Lines:")
+        print("  ", end="")
         for linestr in app.survey.GetLines():
             lineno = int(linestr.split("_")[1])
             if app.line.line == lineno:
-                print "<{0}>".format(lineno),
+                print("<{0}>".format(lineno), end="")
             else:
-                print " {0} ".format(lineno),
+                print(" {0} ".format(lineno), end="")
             cursor += (2 + len(str(lineno)))
             if cursor > 50:
-                print
-                print "  ",
+                print("\n  ", end="")
                 cursor = 2
-        print
+        print("\n")
 
 class OpenLine(Command):
 
@@ -93,7 +93,7 @@ class OpenLine(Command):
         try:
             lineno = int(args[0])
         except (IndexError, ValueError):
-            print "Must supply an integer line number"
+            print("Must supply an integer line number")
             return
 
         try:
@@ -101,13 +101,13 @@ class OpenLine(Command):
         except IndexError:
             dcno = 0
         except ValueError:
-            print "Bad channel number: {0}".format(args[1])
+            print("Bad channel number: {0}".format(args[1]))
             return
 
         try:
             if 'line_{0}'.format(lineno) in app.survey.GetLines() and \
                 dcno < app.survey.GetChannelsInLine(lineno):
-                print "Opening line {0}, channel {1}".format(lineno, dcno)
+                print("Opening line {0}, channel {1}".format(lineno, dcno))
                 del app.line
                 app.open_line(lineno, dcno=dcno)
 
@@ -115,11 +115,11 @@ class OpenLine(Command):
                     w._newline(app.line)
 
             else:
-                print ("Line {0} channel {1} does "
-                       "not exist".format(lineno, dcno))
+                print("Line {0} channel {1} does "
+                      "not exist".format(lineno, dcno))
         except EmptyLineError:
-            print ("Line {0} channel {1} could not be opened because it "
-                   "contains no data".format(lineno, dcno))
+            print("Line {0} channel {1} could not be opened because it "
+                  "contains no data".format(lineno, dcno))
         except:
             traceback.print_exc()
 
@@ -139,7 +139,7 @@ class ApplyFilter(Command):
 
     def apply(self, app, args):
         if len(args) == 0:
-            print app.line.PprintHistory()
+            print(app.line.PprintHistory())
         else:
             try:
                 # args are the inputs -> 'filter'
@@ -151,7 +151,7 @@ class ApplyFilter(Command):
                     pw.data = app.line.data
                     pw.update()
             except KeyError:
-                print "No filter type '{0}' exists".format(args[0])
+                print("No filter type '{0}' exists".format(args[0]))
 
 class ApplyFilterAlt(ApplyFilter):
     cmd = "f"
@@ -190,7 +190,7 @@ class GainAdjuster(Command):
             for rg in app.get_appwindows(Radargram):
                 rg.repaint(lum_scale=1.0/gain)
         except IndexError:
-            print "\tgain: {0}".format(1.0 / app.get_appwindows(Radargram)[0].lum_scale)
+            print("\tgain: {0}".format(1.0 / app.get_appwindows(Radargram)[0].lum_scale))
 
 class YLimAdjuster(Command):
 
@@ -208,7 +208,7 @@ class YLimAdjuster(Command):
         if len(args) == 0:
             rg = app.get_appwindows(Radargram)[0]
             ylim_ns = [a*rate_ns for a in rg.ax.get_ylim()][::-1]
-            print "Vertical range: {0} - {1} ns".format(*ylim_ns)
+            print("Vertical range: {0} - {1} ns".format(*ylim_ns))
         elif len(args) == 2:
             try:
                 for rg in app.get_appwindows(Radargram):
@@ -218,9 +218,9 @@ class YLimAdjuster(Command):
                     w.ylim = [-float(a)*1e-9 for a in args][::-1]
                     w.update()
             except ValueError:
-                print "Could not understand '{0}'".format(args)
+                print("Could not understand '{0}'".format(args))
         else:
-            print "Incorrect expression, type 'help ylim'"
+            print("Incorrect expression, type 'help ylim'")
         return
 
 class SaveImage(Command):
@@ -260,7 +260,7 @@ class HelpPrinter(Command):
 
     def apply(self, app, args):
         if len(args) == 0:
-            print """\tBasic application commands:
+            print("""\tBasic application commands:
 
             info                print line metadata
             ls                  list lines in survey
@@ -276,20 +276,20 @@ class HelpPrinter(Command):
 
             exit                exit irview
             debug
-            """
+            """)
 
             cmdobjs = [b for b in itertools.chain(*[a.values() for a in app.command_registry.values()])]
             commandtypes = set([a._type for a in cmdobjs])
 
             for ct in filter(lambda a: a is not "General", commandtypes):
-                print"\n\tAvailable {0} commands\n".format(ct)
+                print("\n\tAvailable {0} commands\n".format(ct))
                 for cmdobj in filter(lambda a: a._type == ct, cmdobjs):
                     if cmdobj.cmd is not None and not cmdobj.cmd.startswith("_"):
-                        print "\t{0}".format(cmdobj.cmd)
+                        print("\t{0}".format(cmdobj.cmd))
 
         else:
             if len(app.command_registry.get(args[-1], [])) > 1:
-                print "The following help topics were found:"
+                print("The following help topics were found:")
                 multiple_topics = True
             else:
                 multiple_topics = False
@@ -297,8 +297,8 @@ class HelpPrinter(Command):
             try:
                 for cmdobj in app.command_registry[args[-1]].values():
                     if multiple_topics:
-                        print "{0} {1}:".format(cmdobj._type.lower(), cmdobj.cmd)
-                    print cmdobj.helpstr
+                        print("{0} {1}:".format(cmdobj._type.lower(), cmdobj.cmd))
+                    print(cmdobj.helpstr)
             except KeyError:
                 raise KeyError("No command definition '{0}' found".format(args[-1]))
 

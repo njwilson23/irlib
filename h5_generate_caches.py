@@ -17,7 +17,7 @@ def print_syntax():
         -g                  fix static GPS issues
         --remove-nans       remove traces with NaN coordinates
         --interp-nans       interpolate over NaN coordinates (overrides --remove-nans)
-        -s              
+        -s
         --smoothen-coords   smoothen coordinates (overrides --interp-nans)
         -b                  remove blank traces caused by triggering failure
         -r                  remove stationary traces

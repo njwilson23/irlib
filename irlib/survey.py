@@ -5,12 +5,18 @@ which stores file references and collects metadata in the form of a
 `FileHandler`. Radar lines can be created from a `Survey` using the
 `ExtractLine` method, which returns a `Gather`. """
 
+from __future__ import print_function
 
 import os
 import sys
-import cPickle
 import h5py
 import numpy as np
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 
 from .gather import CommonOffsetGather
 from .recordlist import RecordList, ParseError
@@ -53,7 +59,7 @@ class Survey:
                     for location in list(self.f[line]):
                         self.retain[line][location] = True
         except IOError as e:
-            print "No survey exists at {0}".format(datafile)
+            print("No survey exists at {0}".format(datafile))
             raise e
         finally:
             self._closeh5()
@@ -185,10 +191,10 @@ class Survey:
         if fromcache:
             fnm = self.GetLineCacheName(line, dc=datacapture, cache_dir=cache_dir)
             if print_fnm:
-                print fnm
+                print(fnm)
             if os.path.isfile(fnm):
                 with open(fnm, 'r') as f:
-                    unpickler = cPickle.Unpickler(f)
+                    unpickler = pickle.Unpickler(f)
                     gatherdata = unpickler.load()
                 return gatherdata
             else:
@@ -212,10 +218,11 @@ class Survey:
                                         for dc in datacapture]
             except TypeError:
                 allowed_datacaptures = ["datacapture_{0}".format(datacapture)]
-            datasets = filter(lambda c: c.split('/')[-2] in allowed_datacaptures,
+            datasets = list(
+                        filter(lambda c: c.split('/')[-2] in allowed_datacaptures,
                         filter(lambda b: 'picked' not in self.f[path][b].name,
                         filter(lambda a: isinstance(self.f[path][a], h5py.Dataset),
-                        names)))
+                        names))))
             if len(datasets) == 0:
                 sys.stderr.write("no datasets match the specified channel(s)\n")
 
@@ -298,7 +305,7 @@ class Survey:
         overwrite : (dafault `False`) overwrite existing file [boolean]
         """
         if os.path.exists(fnm) and not overwrite:
-            print 'already exists'
+            print('already exists')
             return
 
         with h5py.File(fnm, 'w') as fout:
@@ -312,7 +319,7 @@ class Survey:
                                         "Survey.WriteHDF5(). This might be a "
                                         "problem, and you should look into "
                                         "it.". format(line))
-                    print "\t{0}".format(line)
+                    print("\t{0}".format(line))
                     for location in list(self.f[line]):
                         if self.retain[line][location]:
                             self.f.copy('{0}/{1}'.format(line, location),

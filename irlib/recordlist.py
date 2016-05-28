@@ -125,13 +125,10 @@ class RecordList:
         else:
             raise ParseError('Timestamp read failure', dataset.name)
 
-
-
         # XML parsing code (unused categories set to None for speed)
-
         # Parse main cluster
         try:
-            xml = dataset.attrs['GPS Cluster- MetaData_xml']
+            xml = dataset.attrs['GPS Cluster- MetaData_xml'].decode("utf-8")
             self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat_N')))
             self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W')))
             self.fix_qual.append(self._xmlGetValI(xml, 'Fix_Quality'))
@@ -148,7 +145,7 @@ class RecordList:
 
         # Parse digitizer cluster
         try:
-            xml = dataset.attrs['Digitizer-MetaData_xml']
+            xml = dataset.attrs['Digitizer-MetaData_xml'].decode("utf-8")
             self.vrange.append(self._xmlGetValF(xml, 'vertical range'))
             self.sample_rate.append(self._xmlGetValF(xml, ' sample rate'))
         except:
@@ -160,7 +157,7 @@ class RecordList:
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
             self.hasUTM = True
             try:
-                xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml']
+                xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
                 self.datums.append(self._xmlGetValS(xml, 'Datum'))
                 self.eastings.append(self._xmlGetValF(xml, 'Easting_m'))
                 self.northings.append(self._xmlGetValF(xml, 'Northing_m'))
@@ -173,7 +170,7 @@ class RecordList:
 
         # Parse comment
         try:
-            self.comments.append(dataset.parent.id.get_comment('.'))
+            self.comments.append(dataset.parent.id.get_comment('.'.encode("utf-8")))
         except:
             with open('error.log', 'w') as f:
                 traceback.print_exc(file=f)

@@ -1,7 +1,8 @@
 
+from __future__ import print_function
 import matplotlib.pyplot
-import commands
-import command_parser as cp
+from . import commands
+from . import command_parser as cp
 from .components import MapWindow
 
 class MapCall(commands.Command):
@@ -19,11 +20,11 @@ class MapCall(commands.Command):
     """
     def apply(self, app, args):
         if len(args) == 0:
-            print "Type 'help' or 'help map' for instructions."
+            print("Type 'help' or 'help map' for instructions.")
         try:
             cp.apply_command(app.command_registry, args, app, "Map")
         except KeyError:
-            print "No mapping command '{0}' exists".format(args[0])
+            print("No mapping command '{0}' exists".format(args[0]))
         return
 
 class MapCommandBase(commands.Command):

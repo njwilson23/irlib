@@ -1,4 +1,5 @@
 
+from __future__ import print_function
 import traceback
 
 def apply_command(registry, inputs, stateobj, cmdtype):
@@ -26,7 +27,7 @@ def apply_command(registry, inputs, stateobj, cmdtype):
             cmdclass.apply(stateobj, args)
         except Exception as e:
             traceback.print_exc()
-            print CommandApplicationError(e)
+            print(CommandApplicationError(e))
 
     else:
          raise KeyError("No command definition '{0}' found".format(cmd))

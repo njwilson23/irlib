@@ -7,6 +7,8 @@ argument to open a grid, or can read data from a numpy array.
 Written by Nat Wilson
 """
 
+from __future__ import print_function
+
 from math import sin, sqrt
 import numpy as np
 import traceback
@@ -260,7 +262,7 @@ class AAIGrid(object):
         try:
             hdr = self._check_header(hdr)
         except AAIError as s:
-            print s
+            print(s)
             return
 
         self.hdr = hdr
