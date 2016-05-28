@@ -1,10 +1,10 @@
 
+import pytest
 import os
 import subprocess
-import urllib
-import irlib
 import numpy
-import pytest
+import six.moves.urllib as urllib
+import irlib
 
 @pytest.mark.tryfirst()
 def test_initialize_test_environment():
@@ -12,11 +12,11 @@ def test_initialize_test_environment():
     if not os.path.isdir("tests/data"):
         os.mkdir("tests/data")
     if not os.path.isfile("tests/data/test_argentiere.h5"):
-        urllib.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
+        urllib.request.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
                            "irlib_test_data/test_argentiere.h5",
                            "tests/data/test_argentiere.h5")
     if not os.path.isfile("tests/data/test_milne.h5"):
-        urllib.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
+        urllib.request.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
                            "irlib_test_data/test_milne.h5",
                            "tests/data/test_milne.h5")
     assert os.path.isfile("tests/data/test_argentiere.h5")

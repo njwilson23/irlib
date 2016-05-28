@@ -59,8 +59,8 @@ Dependencies:
 *Radar Tools* should run anywhere Python and the required dependencies work. In
 the past, I've managed to get it working under Windows, OS X, and Linux.
 
-1. [*Python*](http://www.python.org) 2.6+ (&lt;3.x): dynamic interpretted
-programming language suited for scientific computing
+1. [*Python*](http://www.python.org) 2.6+ (3.x partially supported): dynamic
+   interpretted programming language suited for scientific computing
 
 2. [*Numpy*](http://www.scipy.org) numerical array classes for Python
 
@@ -71,6 +71,9 @@ programming language suited for scientific computing
 2. [*matplotlib*](http://www.matplotlib.org) plotting for Python
 
 2. [*pyproj*](code.google.com/p/pyproj) _libproj_ bindings
+
+2. [*six*](https://pythonhosted.org/six) compatibility library for Python 2 and
+   Python 3
 
 If you do not already have a scientific Python environment and you do not know
 how to set one up, I recommend the [Anaconda Python
