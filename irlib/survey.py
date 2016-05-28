@@ -142,12 +142,10 @@ class Survey:
         if len(self.f[line].keys()) == 0:
             raise EmptyLineError('empty line')
         try:
-            dclist = [self.f[line][loc].keys() for loc in self.f[line].keys()]
-        except Exception as e:
-            raise e
+            n_datacaptures = [len(self.f[line][loc]) for loc in self.f[line].keys()]
         finally:
             self._closeh5()
-        return max([len(a) for a in dclist])
+        return max(n_datacaptures)
 
     def ExtractTrace(self, line, location, datacapture=0, echogram=0):
         """ Extract the values for a trace and return as a vector.

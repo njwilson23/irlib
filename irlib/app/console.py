@@ -139,7 +139,10 @@ class Console(object):
         elif not hasattr(t, "__iter__"):
             return [a for a in self.appwindows if type(a) == t]
         else:
-            return reduce(lambda a,b: a+b, [self.get_appwindows(a) for a in t])
+            windows = []
+            for _t in t:
+                windows.extend(self.get_appwindows(_t))
+            return windows
 
     def add_appwindow(self, ref):
         """ Add a window to be managed by the Console. """

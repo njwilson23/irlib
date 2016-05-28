@@ -273,7 +273,7 @@ class Gather(object):
         def interpolate_nans(V):
             Vreal = np.nonzero(np.isnan(V) == False)[0]
             Vnan = np.nonzero(np.isnan(V))[0]
-            return np.interp(range(len(V)), Vreal, V[Vreal])
+            return np.interp(np.arange(len(V)), Vreal, V[Vreal])
 
         if topofnm is None:
             self.topography = np.array(self.metadata.alt_asl)
@@ -331,7 +331,7 @@ class Gather(object):
         def interpolate_nans(V):
             Vreal = np.nonzero(np.isnan(V) == False)[0]
             Vnan = np.nonzero(np.isnan(V))[0]
-            return np.interp(range(len(V)), Vreal, V[Vreal])
+            return np.interp(np.arange(len(V)), Vreal, V[Vreal])
 
         try:
             eastings0 = np.array(self.metadata.eastings)
@@ -1064,7 +1064,7 @@ class CommonOffsetGather(Gather):
             except IndexError:
                 # Data ended during the last region (no way to fix this)
                 # Best to discard this data
-                self.RemoveTraces(range(i, self.nx+1))
+                self.RemoveTraces(list(range(i, self.nx+1)))
 
         # Interpolate linearly, fixing the metadata as we go
         if len(static_regions) > 0:
