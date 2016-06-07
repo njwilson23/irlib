@@ -1,10 +1,11 @@
 #! /usr/bin/python
 #
-#   Replace onboard GPS coordinates with data from a CSV file  - from NRCan PPP
-#### modified from irlib h5_replace_gps.py
-####  Derek Mueller April-June 2016
+#   Replace onboard GPS coordinates with data from a GPX file
+#
+#   Updated by Derek Mueller April-Jun 2016 to handle CSV files
 #
 
+from __future__ import print_function
 import sys
 import getopt
 import datetime
@@ -13,17 +14,23 @@ import re
 
 def print_syntax():
     print("""
-    SYNTAX: h5_replace_ppp -h HDF_FILE -g CSV_FILE -o OUTFILE [OPTIONS]
+    SYNTAX: h5_replace_gps -h HDF_FILE [-g GPX_FILE] [-c CSV_FILE] -o OUTFILE [OPTIONS]
 
     This tool replaces the existing geographical data in a ice radar HDF
-    database with data taken from a CSV file, e.g. obtained from a PPP output
-    of GPS data
+    database with data taken from a GPX file, e.g. obtained from a handheld or
+    external GPS unit or from a CSV file, e.g. obtained from a PPP output of
+    GPS data
 
     Required:
 
         -h s    (s) is an HDF dataset for which GPS timestamps exist
 
-        -g s    (s) is a CSV file from NRCan PPP output
+        -g s    (s) is a GPS eXchange (GPX) file
+
+        -c s    (s) is a CSV file, e.g. obtained from a PPP output of GPS data
+                The file should have columns:
+
+                    LAT, LON, UNUSED, HOUR, DAYOFYEAR, YEAR, ELEVATION
 
         -o s    (s) is the name of the output; if this file exists, it will be
                 overwritten
@@ -37,7 +44,7 @@ def print_syntax():
         -t n    Set the max time delta permissible for matching locations
                 to (n) seconds; default is 15 seconds
 
-        -n      Replace coordinates in HDF with no appropriate CSV counterpart
+        -n      Replace coordinates in HDF with no appropriate GPS counterpart
                 with 'NaN'. By default, the original coordinates are retained.
     """)
     sys.exit(0)
@@ -95,12 +102,20 @@ def substituteXMLval(name, newval, xml):
                     xml, flags=re.IGNORECASE)
     return newxml
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:o:l:t:n', ['tz='])
+optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:c:o:l:t:n', ['tz='])
 optdict = dict(optlist)
 
 try:
     hdf_file = optdict["-h"]
-    csv_file = optdict["-g"]
+    if "-g" in optdict:
+        gpx_file = optdict["g"]
+        coordinate_source = "GPX"
+    elif "-c" in optdict:
+        csv_file = optdict
+        coordinate_source = "CSV"
+    else:
+        print("missing GPX or CSV file with GPS coordinates")
+        raise KeyError()
     outfile = optdict["-o"]
     tzoffset = int(optdict["--tz"])
 except KeyError:
@@ -108,38 +123,64 @@ except KeyError:
 
 import numpy as np
 import h5py
-#import irlib.gpx
 
 lineno = optdict.get("l", None)
 max_dt = int(optdict.get("-t", 15))     # 15 second default
 insert_nans = ("-n" in optdict)
 
+if coordinate_source == "csv":
+    _gps_fnm = csv_file
+else:
+    _gps_fnm = gpx_file
 print("Performing coordinate replacement")
 print()
 print("\t======== PARAMETERS =========\n"
       "\tSRC dataset:      {infile}\n"
       "\tDST dataset:      {outfile}\n"
-      "\tCSV file:         {csv_file}\n\n"
+      "\tGPS source:       {coordinate_source}\n"
+      "\tGPS file:         {gps_fnm}\n\n"
       "\tMAX timedelta:    {max_dt} sec\n"
       "\tTZ offset:        {tz:+} hr\n"
       "\tINSERT NaNs:      {insert_nans}\n".format(infile=hdf_file, tz=tzoffset,
-       csv_file=csv_file, max_dt=max_dt, outfile=outfile, insert_nans=insert_nans))
+          coordinate_source=coordinate_source, gps_fnm=_gps_fnm, max_dt=max_dt,
+          outfile=outfile, insert_nans=insert_nans))
 
-# Read in the CSV file
+if coordinate_source == "csv":
+    # Read in the CSV file
 
-with open(csv_file) as f:
-    lines = f.readlines()
+    with open(csv_file) as f:
+        lines = f.readlines()
 
-ppplats = [float(a.split(",")[0]) for a in lines[1:]]
-ppplons = [float(a.split(",")[1]) for a in lines[1:]]
-pppeles = [float(a.split(",")[6]) for a in lines[1:]]
-pppyear = [float(a.split(",")[5]) for a in lines[1:]]
-pppdoy =  [float(a.split(",")[4]) for a in lines[1:]]
-ppphr =  [float(a.split(",")[3]) for a in lines[1:]]
+    gpslats = [float(a.split(",")[0]) for a in lines[1:]]
+    gpslons = [float(a.split(",")[1]) for a in lines[1:]]
+    gpseles = [float(a.split(",")[6]) for a in lines[1:]]
 
-ppptimes = []
-for i in range(len(pppyear)):
-   ppptimes.append (datetime.datetime(int(pppyear[i]),1,1) + datetime.timedelta(int(pppdoy[i])-1) + datetime.timedelta(hours=ppphr[i]) )
+    pppyear = [float(a.split(",")[5]) for a in lines[1:]]
+    pppdoy =  [float(a.split(",")[4]) for a in lines[1:]]
+    ppphr =  [float(a.split(",")[3]) for a in lines[1:]]
+
+    gpstimes = []
+    for i in range(len(pppyear)):
+       gpstimes.append(datetime.datetime(int(pppyear[i]),1,1) +
+                       datetime.timedelta(int(pppdoy[i])-1) +
+                       datetime.timedelta(hours=ppphr[i]))
+
+elif coordinate_source == "gpx":
+    import irlib.gpx
+    # Read in the GPX file
+    gpstimes = []
+    gpslons = []
+    gpslats = []
+    gpseles = []
+
+    trackfile = irlib.gpx.GPX(gpx_file)
+    for trk in trackfile.tracks:
+        for trkseg in trk.trksegs:
+            for pt in trkseg.trkpts:
+                gpstimes.append(gpxtime2dt(pt.properties["time"]))
+                gpslons.append(float(pt.lonlat[0]))
+                gpslats.append(float(pt.lonlat[1]))
+                gpseles.append(float(pt.properties["ele"]))
 
 # Copy the HDF to the new file location, and then modify in-place
 shutil.copyfile(hdf_file, outfile)
@@ -176,24 +217,24 @@ for line in lines:
             except (ValueError, AttributeError):
                 hdftimes.append(np.nan)
 
-# Interpolate the CSV positions
+# Interpolate the GPS positions
 hdfseconds = np.array([dateseconds(a) for a in hdftimes])
-pppseconds = np.array([dateseconds(a) for a in ppptimes])
+gpsseconds = np.array([dateseconds(a) for a in gpstimes])
 
 def sortby(a, b):
     return [a_ for (b_, a_) in sorted(zip(b,a))]
 
-ppplons = sortby(ppplons, pppseconds)
-ppplats = sortby(ppplats, pppseconds)
-pppeles = sortby(pppeles, pppseconds)
-pppseconds.sort()
+gpslons = sortby(gpslons, gpsseconds)
+gpslats = sortby(gpslats, gpsseconds)
+gpseles = sortby(gpseles, gpsseconds)
+gpsseconds.sort()
 
-interp_lons = np.interp(hdfseconds, pppseconds, ppplons)
-interp_lats = np.interp(hdfseconds, pppseconds, ppplats)
-interp_eles = np.interp(hdfseconds, pppseconds, pppeles)
+interp_lons = np.interp(hdfseconds, gpsseconds, gpslons)
+interp_lats = np.interp(hdfseconds, gpsseconds, gpslats)
+interp_eles = np.interp(hdfseconds, gpsseconds, gpseles)
 
 # Create a mask indicating where to use the interpolants
-dts = np.array([np.min(np.abs(t-pppseconds)) for t in hdfseconds])
+dts = np.array([np.min(np.abs(t-gpsseconds)) for t in hdfseconds])
 dt_mask = np.isfinite(dts) & (dts < max_dt)
 
 # Replace the GPS data where the mask is true, otherwise put NaN
