@@ -65,6 +65,20 @@ class Survey:
             self._closeh5()
         return
 
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.ExtractLine(key, datacapture=0)
+        elif isinstance(key, tuple):
+            if len(key) == 2:
+                if isinstance(key[0], int) and isinstance(key[1], int):
+                    return self.ExtractLine(key[0], datacapture=key[1])
+                else:
+                    raise TypeError("indices must be integers")
+            else:
+                raise ValueError("one or two indices required")
+        else:
+            raise TypeError("indices must be integers")
+
     def __del__(self):
         if self.status == 'open':
             self._closeh5()
