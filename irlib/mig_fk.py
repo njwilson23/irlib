@@ -45,6 +45,7 @@
 #
 #
 
+from __future__ import print_function
 import math
 import numpy as np
 import pdb, traceback
@@ -330,7 +331,7 @@ def fkmig(D, dt, dx, v, params=None):
     th1 = dipmax * math.pi / 180.0
     th2 = (dipmax+dipwid) * math.pi / 180.0
     if th1 == th2:
-        print "No dip filtering"
+        print("No dip filtering")
 
     for j,kxi in enumerate(kx):
         # Evanescent cut-off

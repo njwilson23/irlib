@@ -1,3 +1,4 @@
+from __future__ import print_function
 from distutils.core import setup
 from distutils.extension import Extension
 
@@ -6,6 +7,7 @@ try:
     ext_modules = [Extension("irlib.agc", ["irlib/agc.pyx"])]
     ext_modules = cythonize(ext_modules)
 except ImportError:
+    print("Cython could not be imported, so extension modules will be skipped")
     ext_modules = []
 
 setup(

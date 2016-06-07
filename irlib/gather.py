@@ -30,12 +30,12 @@ from .filehandler import FileHandler, FileHandlerError
 from .autovivification import AutoVivification
 
 try:
-    import agc
+    from . import agc
 except ImportError:
     sys.stderr.write("Warning: falling back to non-accelerated AGC\n")
 
 try:
-    from mig_fk import fkmig
+    from .mig_fk import fkmig
 except ImportError:
     sys.stderr.write("Warning: F-K migration module not loaded\n")
 
