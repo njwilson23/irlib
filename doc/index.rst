@@ -117,6 +117,8 @@ Environment Variables*.
 
 .. include:: doc_icepick.rst
 
+.. include:: doc_custom_commands.rst
+
 .. include:: doc_tutorial.rst
 
 .. include:: doc_irlib.rst
