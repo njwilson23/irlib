@@ -1338,12 +1338,12 @@ class CommonOffsetGather(Gather):
         migsections = [(breaks[i], breaks[i+1]) for i in range(len(breaks)-1)]
 
         # Integrate short sections into the previous section
-        section_length = map(lambda a: a[1]-a[0], migsections)
+        section_length = list(map(lambda a: a[1]-a[0], migsections))
         while min(section_length) < 10:
             i = section_length.index(min(section_length))
             migsections[i-1] = (migsections[i-1][0], migsections[i][1])
             migsections.pop(i)
-            section_length = map(lambda a: a[1]-a[0], migsections)
+            section_length = list(map(lambda a: a[1]-a[0], migsections))
 
         # Add 1 to the last bound so that the full array is included
         migsections[-1] = (migsections[-1][0], migsections[-1][1]+1)
