@@ -235,11 +235,18 @@ class Radargram(AppWindow):
         data_ybnds = [self.data.shape[0]-1, 0]
 
         self.ax.cla()
-        self.ax.set_ylim([yb if (yb is not None) else db for (yb, db)
-                                                    in zip(ybnds, data_ybnds)])
+        if ybnds[0] is None:
+            y0 = data_ybnds[0]
+        else:
+            y0 = ybnds[0]
+        if ybnds[1] is None:
+            y1 = data_ybnds[1]
+        else:
+            y1 = ybnds[1]
+        self.ax.set_ylim((y0, y1))
 
         self.ax.imshow(self.data, aspect='auto', cmap=self.cmap, vmin=-lum_bound, vmax=lum_bound)
-        locs = np.arange(0, self.ax.get_ylim()[0], 50)
+        locs = np.arange(self.ax.get_ylim()[1], self.ax.get_ylim()[0], 50)
         self.ax.set_yticks(locs)
         self.ax.set_yticklabels(np.round(locs / self.rate * 1e9).astype(int))
         self.fig.canvas.draw()
