@@ -382,7 +382,7 @@ class Gather(object):
         if mode == 'highpass':
             # Spectral inversion to generate high-pass filter
             kernel = -kernel
-            kernel[(width-1)/2] += 1.
+            kernel[(width-1)//2] += 1.
 
         # Perform convolution on data
         for i in range(self.data.shape[1]):
