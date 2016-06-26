@@ -30,7 +30,7 @@ Graphical tools:
 - **icerate**: Rate reflection quality using **icepick** output
 
 - **irview**: General purpose viewer for radar lines that doubles as a tool for
-  marking englacial regions **[DEPRECATED]**
+  marking englacial regions **[DEPRECATED IN FAVOUR OF icepick2]**
 
 Command-line tools:
 -------------------
@@ -48,11 +48,12 @@ Command-line tools:
 Dependencies:
 -------------
 
-*Radar Tools* should run anywhere Python and the required dependencies work. In
-the past, I've managed to get it working under Windows, OS X, and Linux.
+*Radar Tools* should run anywhere Python and the necessary dependencies work. In
+the past, I've managed to get it running under Windows, OS X, and Linux without
+trouble.
 
-1. [*Python*](http://www.python.org) 2.6+ (3.x partially supported): dynamic
-   interpretted programming language suited for scientific computing
+1. [*Python*](http://www.python.org) 2.6+ (3.x works for the irlib package and
+   icepick2)
 
 2. [*Numpy*](http://www.numpy.org) numerical array classes for Python
 
