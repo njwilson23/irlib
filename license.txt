@@ -1,17 +1,30 @@
-LICENSE TERMS
-
 Unless additional restrictions apply (see below), the following
 statement applies to this software.
 
-This software is provided "as is," with no support or maintenance
-implied.
+MIT License
 
-This software can be redistributed and modified, provided that these
-terms, the full source code, and the original reference are included,
-subject to additional restrictions described below.
+Copyright (c) 2017 Nat Wilson
 
 This software should be referenced in conjunction with the Master's degree
-thesis of Nat Wilson, Simon Fraser University (expected 2012).
+thesis of Nat Wilson, Simon Fraser University (2012).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 
 
@@ -44,33 +57,33 @@ distributed here is a clean implementation of the original algorithm.
 Nevertheless, the following terms may still apply.
 
     CREWES license terms
-   
+
     This SOFTWARE is maintained by the CREWES Project at the Department
     of Geology and Geophysics of the University of Calgary, Calgary,
-    Alberta, Canada.  The copyright and ownership is jointly held by 
-    its author (identified above) and the CREWES Project.  The CREWES 
+    Alberta, Canada.  The copyright and ownership is jointly held by
+    its author (identified above) and the CREWES Project.  The CREWES
     project may be contacted via email at:  crewesinfo@crewes.org
-    
+
     The term 'SOFTWARE' refers to the Matlab source code, translations to
     any other computer language, or object code
-   
+
     Terms of use of this SOFTWARE
-   
+
     1) Use of this SOFTWARE by any for-profit commercial organization is
        expressly forbidden unless said organization is a CREWES Project
        Sponsor.
-   
-    2) A CREWES Project sponsor may use this SOFTWARE under the terms of the 
+
+    2) A CREWES Project sponsor may use this SOFTWARE under the terms of the
        CREWES Project Sponsorship agreement.
-   
-    3) A student or employee of a non-profit educational institution may 
+
+    3) A student or employee of a non-profit educational institution may
        use this SOFTWARE subject to the following terms and conditions:
        - this SOFTWARE is for teaching or research purposes only.
-       - this SOFTWARE may be distributed to other students or researchers 
+       - this SOFTWARE may be distributed to other students or researchers
          provided that these license terms are included.
        - reselling the SOFTWARE, or including it or any portion of it, in any
          software that will be resold is expressly forbidden.
-       - transfering the SOFTWARE in any form to a commercial firm or any 
+       - transfering the SOFTWARE in any form to a commercial firm or any
          other for-profit organization is expressly forbidden.
 
     End CREWES license terms
