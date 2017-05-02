@@ -12,13 +12,9 @@ def test_initialize_test_environment():
     if not os.path.isdir("tests/data"):
         os.mkdir("tests/data")
     if not os.path.isfile("tests/data/test_argentiere.h5"):
-        urllib.request.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
-                           "irlib_test_data/test_argentiere.h5",
-                           "tests/data/test_argentiere.h5")
+        urllib.request.urlretrieve("https://www.dropbox.com/s/br5oa1booe582zh/test_argentiere.h5?dl=1")
     if not os.path.isfile("tests/data/test_milne.h5"):
-        urllib.request.urlretrieve("https://dl.dropboxusercontent.com/u/375008/"
-                           "irlib_test_data/test_milne.h5",
-                           "tests/data/test_milne.h5")
+        urllib.request.urlretrieve("https://www.dropbox.com/s/fvap8yjwioe17s5/test_milne.h5?dl=1")
     assert os.path.isfile("tests/data/test_argentiere.h5")
     assert os.path.isfile("tests/data/test_milne.h5")
     return
