@@ -120,7 +120,7 @@ class Survey:
         except IndexError:
             sys.stderr.write("lineno out of range ({0} not in {1}:{2})\n"
                     .format(lineno, 0, len(self.GetLines)))
-        with h5py.Dataset(self.datafile) as f:
+        with h5py.File(self.datafile) as f:
             if len(f[line].keys()) == 0:
                 raise EmptyLineError('empty line')
             n_datacaptures = [len(f[line][loc]) for loc in f[line].keys()]
