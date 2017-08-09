@@ -10,6 +10,14 @@ from irlib.misc import TryCache
 
 plt.ion()
 matplotlib.rcParams["toolbar"] = "none"
+matplotlib.rcParams["keymap.home"] = ""
+matplotlib.rcParams["keymap.back"] = ""
+matplotlib.rcParams["keymap.pan"] = ""
+matplotlib.rcParams["keymap.zoom"] = ""
+matplotlib.rcParams["keymap.forward"] = ""
+matplotlib.rcParams["keymap.xscale"] = ""
+matplotlib.rcParams["keymap.yscale"] = ""
+matplotlib.rcParams["keymap.quit"] = ""
 
 class AppWindow(object):
     """ This is the generic application window class, and contains an axes
@@ -367,7 +375,7 @@ class Radargram(AppWindow):
             depths = [xy[1] for xy in coords[1]]
             fids = [self.radar_fids[loc] for loc in locs]
             RL = irlib.RecordList(self.datafile)
-            h5addrs = ['line_{0}/location_{1}/datacapture_0/echogram_0'.format(self.line, loc) 
+            h5addrs = ['line_{0}/location_{1}/datacapture_0/echogram_0'.format(self.line, loc)
                         for loc in locs]
             map(lambda h5addr: RL.AddDataset(self.fh5[h5addr]), h5addrs)
             lons = [-lon for lon in RL.lons]
@@ -394,7 +402,7 @@ class PickWindow(AppWindow):
         ntraces : number of consecutive traces to display at once
         """
         super(PickWindow, self).__init__((10, 8))
-        self.fig.canvas.set_window_title("Picker") 
+        self.fig.canvas.set_window_title("Picker")
         self.ax.set_autoscale_on(False)
 
         # Set up scale slider widget
@@ -576,8 +584,8 @@ class PickWindow(AppWindow):
             pr = self.dc_pick_reg
             sty = "or"
 
-        pr[activetrace] = self.ax.plot(trace[yi] + self._shiftx(activetrace),
-                                       -self.time[yi], sty, alpha=0.4)
+        pr[activetrace] = self.ax.plot(trace[int(yi)] + self._shiftx(activetrace),
+                                       -self.time[int(yi)], sty, alpha=0.4)
 
         return self.ax.lines
 
