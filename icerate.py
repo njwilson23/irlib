@@ -69,7 +69,7 @@ class RatingWindow(object):
     def _drawpick(self, trace, yi):
         """ Draw a pick mark on the given trace at yi. """
         trace = trace / trace.max() * self.spacing / 3.0
-        self.ax2.plot(trace[yi], -self.T[yi], 'ob', alpha=0.4)
+        self.ax2.plot(trace[int(yi)], -self.T[int(yi)], 'ob', alpha=0.4)
         return self.ax2.lines
 
     def _onclick(self, event):
@@ -435,7 +435,7 @@ def main():
     optdict = dict(optlist)
 
     try:
-        infile = optdict.get("-f", args[0])
+        infile = optdict.get("-f", sys.argv[1])
     except IndexError:
         print "A survey filename must be supplied:"
         print_syntax()
