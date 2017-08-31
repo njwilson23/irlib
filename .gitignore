@@ -5,3 +5,4 @@
 *.so
 *.c
 doc/_build/*
+.idea/*
