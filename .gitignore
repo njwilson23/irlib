@@ -5,4 +5,10 @@
 *.so
 *.c
 doc/_build/*
+
+# PyCharm projectfiles to ignore
 .idea/*
+
+# User data
+data/*
+picking/*
