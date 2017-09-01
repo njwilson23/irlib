@@ -435,7 +435,7 @@ def main():
     optdict = dict(optlist)
 
     try:
-        infile = optdict.get("-f", sys.argv[1])
+        infile = optdict.get("-f", args[0])
     except IndexError:
         print "A survey filename must be supplied:"
         print_syntax()
