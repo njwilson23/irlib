@@ -3,6 +3,7 @@
 #   IceRate - Graphical trace quality rating tool using matplotlib and irlib
 #
 #
+from __future__ import print_function
 
 import irlib
 import numpy as np
@@ -213,7 +214,7 @@ def LoadRatings(infile):
 
 def OpenLine(infile, line, pickfile, fromcache=True):
     """ Start up a RatingWindow object. """
-    print pickfile
+    print(pickfile)
     S = irlib.Survey(infile)
     L = S.ExtractLine(line, fromcache=fromcache)
     if not fromcache:
@@ -228,7 +229,7 @@ def OpenLine(infile, line, pickfile, fromcache=True):
         R = RatingWindow(L, bed_points)
 
     except irlib.FileHandlerError as err_message:
-        print err_message
+        print(err_message)
         dc_points = None
         bed_points = None
         err = 1
@@ -287,16 +288,16 @@ def HandleCommand(s, infile, R, L, S):
         sys.exit(0)
 
     elif args[0] == 'info':                 # INFO
-        print infile
-        print 'line: ' + str(R.line)
-        print 'location: ' + str(R.cur_trace)
-        print 'nx: ' + str(R.arr.shape[1])
-        print 'nz: ' + str(R.arr.shape[0])
-        print 'rated: ' + str(sum([1 for r in R.ratings if r != -9]))
-        print 'unrated: ' + str(sum([1 for r in R.ratings if r == -9]))
+        print(infile)
+        print('line: ' + str(R.line))
+        print('location: ' + str(R.cur_trace))
+        print('nx: ' + str(R.arr.shape[1]))
+        print('nz: ' + str(R.arr.shape[0]))
+        print('rated: ' + str(sum([1 for r in R.ratings if r != -9])))
+        print('unrated: ' + str(sum([1 for r in R.ratings if r == -9])))
 
     elif args[0] == 'ls':                   # LS
-        print S.GetLines()
+        print(S.GetLines())
 
     elif args[0] == 'save':                 # SAVE
         outfile = 'rating/' + \
@@ -304,7 +305,7 @@ def HandleCommand(s, infile, R, L, S):
                 "_line" + str(R.line) + ".txt"
         try:
             SaveRatings(outfile, R, L)
-            print "Saved to {0}".format(outfile)
+            print("Saved to {0}".format(outfile))
         except:
             traceback.print_exc()
 
@@ -319,23 +320,23 @@ def HandleCommand(s, infile, R, L, S):
                 R.ratings = ratings
                 R.ShowTraces()
                 R.ShowRadargram()
-                print "Loaded from {0}".format(loadfile)
+                print("Loaded from {0}".format(loadfile))
         except:
             traceback.print_exc()
 
     elif args[0] == 'open':                 # OPEN
         if len(args) < 2:
-            print "Not enough arguments"
+            print("Not enough arguments")
         line = args[1]
 
         if 'line_{0}'.format(line) in S.GetLines():
-            print "Opening line {0}".format(line)
+            print("Opening line {0}".format(line))
 
             if len(args) >= 3:
                 pickfile = args[2]
             else:
                 pickfile = None
-            
+
             if pickfile and not os.path.exists(pickfile):
                 print("Pick file {0} does not exist".format(pickfile))
                 pickfile = None
@@ -349,7 +350,7 @@ def HandleCommand(s, infile, R, L, S):
             del R
             R,L,S = OpenLine(infile, line, pickfile)
         else:
-            print "Line {0} does not exist".format(line)
+            print("Line {0} does not exist".format(line))
 
     elif args[0] in ('filter', 'f'):        # FILTER
         try:
@@ -357,7 +358,7 @@ def HandleCommand(s, infile, R, L, S):
             R.arr = L.data
             R.ShowRadargram(repaint=True)
         except IndexError:
-            print L.history
+            print(L.history)
 
     elif args[0] in ('nofilter', 'nf'):     # NOFILTER
         L.Reset()
@@ -366,7 +367,7 @@ def HandleCommand(s, infile, R, L, S):
         R.ShowRadargram(repaint=True)
 
     elif args[0] == 'order':                # ORDER
-        print 'location: ' + str(R.cur_trace)
+        print('location: ' + str(R.cur_trace))
         for n in R.traces:
             sys.stdout.write(str(n) + '\t')
         sys.stdout.write('\n')
@@ -391,7 +392,7 @@ def HandleCommand(s, infile, R, L, S):
         pdb.set_trace()
 
     elif args[0] == 'help':                 # [empty input]
-        print """
+        print("""
         info
         save
         load
@@ -407,10 +408,10 @@ def HandleCommand(s, infile, R, L, S):
         ratings
         debug
         exit
-        """
+        """)
 
     else:
-        print "Command not recognized"
+        print("Command not recognized")
 
     return R, L
 
@@ -423,13 +424,13 @@ def get_pickfnm(infile, line):
 def main():
 
     def print_syntax():
-        print "\t icerate -f file_name [-L line_number] [--pick pick_filename]"
+        print("\t icerate -f file_name [-L line_number] [--pick pick_filename]")
         return
 
     try:
         optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:', ['pick='])
     except getopt.GetoptError:
-        print "Error collecting arguments - check syntax."
+        print("Error collecting arguments - check syntax.")
         print_syntax()
         sys.exit(1)
     optdict = dict(optlist)
@@ -437,7 +438,7 @@ def main():
     try:
         infile = optdict.get("-f", args[0])
     except IndexError:
-        print "A survey filename must be supplied:"
+        print("A survey filename must be supplied:")
         print_syntax()
         sys.exit(0)
 
@@ -449,7 +450,7 @@ def main():
         os.mkdir('rating')
 
     # Begin main loop
-    print "IceRate"
+    print("IceRate")
 
     while R.isopen:
         s = raw_input('>> ')
