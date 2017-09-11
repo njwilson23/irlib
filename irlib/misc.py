@@ -247,7 +247,7 @@ def TryCache(fnm):
     if os.path.isfile(fnm):
         try:
             with open(fnm, 'r') as f:
-                unpickler = cPickle.Unpickler(f)
+                unpickler = pickle.Unpickler(f)
                 dataset = unpickler.load()
         except:
             traceback.print_exc()
