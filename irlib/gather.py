@@ -1522,8 +1522,8 @@ class PickableGather(Gather):
 
         # Apply function over all traces
         try:
-            picks = np.array(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T))
-            self.bed_picks[istart:iend] = list(picks) + sbracket[0]
+            picks = np.array(list(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)))
+            self.bed_picks[istart:iend] = picks + sbracket[0]
             self.bed_phase[istart:iend] = 1
         except:
             traceback.print_exc()
