@@ -836,7 +836,7 @@ class Gather(object):
         if fnm is None:
             fnm = self.GetCacheName()
         if os.path.isdir(os.path.split(fnm)[0]):
-            with open(fnm, 'w') as f:
+            with open(fnm, 'wb') as f:
                 pickler = pickle.Pickler(f, pickle.HIGHEST_PROTOCOL)
                 pickler.dump(self)
             return True
@@ -1522,7 +1522,7 @@ class PickableGather(Gather):
 
         # Apply function over all traces
         try:
-            picks = np.array(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T))
+            picks = np.array(list(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)))
             self.bed_picks[istart:iend] = picks + sbracket[0]
             self.bed_phase[istart:iend] = 1
         except:
@@ -1569,7 +1569,7 @@ class PickableGather(Gather):
         # Apply function over all traces
         try:
             picks = map(first_break_dc, self.data[sbracket[0]:sbracket[1],istart:iend].T)
-            self.dc_picks[istart:iend] = picks
+            self.dc_picks[istart:iend] = list(picks)
             self.dc_picks[istart:iend] += sbracket[0]
             self.dc_phase[istart:iend] = 1
         except:

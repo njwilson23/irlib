@@ -246,7 +246,7 @@ def TryCache(fnm):
     """
     if os.path.isfile(fnm):
         try:
-            with open(fnm, 'r') as f:
+            with open(fnm, 'rb') as f:
                 unpickler = pickle.Unpickler(f)
                 dataset = unpickler.load()
         except:
