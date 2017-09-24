@@ -836,7 +836,7 @@ class Gather(object):
         if fnm is None:
             fnm = self.GetCacheName()
         if os.path.isdir(os.path.split(fnm)[0]):
-            with open(fnm, 'w') as f:
+            with open(fnm, 'wb') as f:
                 pickler = pickle.Pickler(f, pickle.HIGHEST_PROTOCOL)
                 pickler.dump(self)
             return True
