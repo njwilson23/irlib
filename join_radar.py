@@ -97,9 +97,10 @@ try:
             if fid in R.keys():
                 alldata[fid] = [P[fid], R[fid]]         # Picking is field 0
                 n = int(fid[4:8])                       # Rating is field 1
-                x = L.metadata.eastings[traces.index(n)]
-                y = L.metadata.northings[traces.index(n)]
-                alldata[fid].append((x,y))              # UTM is field 2
+                lons = L.metadata.lons[traces.index(n)]
+                lats = L.metadata.lats[traces.index(n)]
+                alt = L.metadata.alt_asl[traces.index(n)]
+                alldata[fid].append((lons,lats,alt))              # UTM is field 2
         del L
 
     # Get the antenna offsets and add to alldata dict
@@ -139,17 +140,23 @@ try:
             del alldata[fid]
 
     # Join everything together, filtering by quality
-    fout = 'depth_' + prefix + '.xyz'
+    path_out = "result/"
+    if not os.path.exists(path_out):
+        os.makedirs(path_out)
+
+    fout = path_out + 'depth_' + prefix + '.xyz'
     print 'writing to ' + fout
     fids = alldata.keys()
     fids.sort()
     with open(fout, 'w') as f:
-        f.write('easting\tnorthing\tdepth\terror\n')
+        f.write('fid\tlongitude\tlatitude\taltitude\tdepth\terror\n')
         for fid in fids:
             if alldata[fid][1][0] >= qual_min:
-                f.write('{x}\t{y}\t{depth}\t{err}\n'.format(
-                        x = int(alldata[fid][2][0]),
-                        y = int(alldata[fid][2][1]),
+                f.write('{fidid}\t{lon}\t{lat}\t{alt}\t{depth}\t{err}\n'.format(
+                        fidid = fid,
+                        lon = alldata[fid][2][0],
+                        lat = alldata[fid][2][1],
+                        alt = alldata[fid][2][2],
                         depth = alldata[fid][4],
                         err = alldata[fid][5]))
 
