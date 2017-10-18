@@ -336,12 +336,17 @@ Antenna spacing
 ~~~~~~~~~~~~~~~
 
 A last ingredient before ice thickness can be calculated is an *offsets* file,
+which contains information about how much antenna spacing there was for each line.
 Hopefully this information is contained in field notes. Then run:
 
 ::
 
     antenna_spacing data/gl3_radar_utm_metadata.csv 60
 
+The first parameter is the CSV created previously with ``h5_dumpmeta`` and
+the second is antenna spacing in meters. This creates
+``offsets/gl3_radar_2012_utm_offsets.txt`` containing FID
+(see `FID interpretation <#fid-interpretation>`__) and antenna spacing.
 
 Data join
 ~~~~~~~~~
