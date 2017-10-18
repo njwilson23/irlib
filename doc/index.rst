@@ -55,6 +55,8 @@ Python ecosystem. The following are *required*:
 
 - pyproj_ : Wrapper for *proj.4* geographical projection library
 
+- pandas_ : Powerful Python data analysis toolkit
+
 Finally, these are *nice to have*:
 
 - Cython_ : Python compiler for improving performance

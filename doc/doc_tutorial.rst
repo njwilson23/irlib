@@ -336,20 +336,12 @@ Antenna spacing
 ~~~~~~~~~~~~~~~
 
 A last ingredient before ice thickness can be calculated is an *offsets* file,
-which contains information about how much antenna spacing there was for each
-line. Hopefully this information is contained in field notes. Open the CSV
-created previously with ``h5_dumpmeta``. Save it as XXXX\_offsets.csv, where
-XXXX is the prefix of the HDF file (also prepended onto the picking and rating
-files created above). In this case, it should be saved as
-``gl3_radar_2012_utm_offsets.csv``. Keep the first column ("FID") and delete
-all other columns. Add a new column, and add the appropriate antenna spacing in
-meters for each row (see `FID interpretation <#fid-interpretation>`__). Delete
-the header row, save, and exit. Convert the CSV to a Tab-delimited file, e.g.:
+Hopefully this information is contained in field notes. Then run:
 
 ::
 
-    cat gl3_radar_2012_utm_offsets.csv | sed 's/,/\t/g' > \
-        gl3_radar_2012_utm_offsets.txt
+    antenna_spacing data/gl3_radar_utm_metadata.csv 60
+
 
 Data join
 ~~~~~~~~~
@@ -362,7 +354,7 @@ properly integrating all of the data. The steps are:
 -  Assuming an ice velocity, calculate reflector depth with the Pythagorean
    theorem
 
-I use the script in ``scripts/radar/join_radar.py`` to do all of this.
+I use the script ``join_radar.py`` to do all of this.
 
 ::
 
