@@ -215,6 +215,9 @@ def LoadRatings(infile):
 def OpenLine(infile, line, pickfile, fromcache=True):
     """ Start up a RatingWindow object. """
     print(pickfile)
+    if os.path.isfile(pickfile) == False :
+        sys.stderr.write("\n\tNo pick file found for line " + str(line) + ".\n\tPress 'up' key and change line number.\n\n")
+        exit(1)
     S = irlib.Survey(infile)
     L = S.ExtractLine(line, fromcache=fromcache)
     if not fromcache:
@@ -436,7 +439,7 @@ def main():
     optdict = dict(optlist)
 
     try:
-        infile = optdict.get("-f", args[0])
+        infile = optdict.get("-f", sys.argv[0])
     except IndexError:
         print("A survey filename must be supplied:")
         print_syntax()
