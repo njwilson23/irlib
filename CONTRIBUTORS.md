@@ -6,4 +6,4 @@ When contributing code, please add your name.
 Nat Wilson
 Derek Mueller
 Henrik Engstrom
-
+Fanny Ekblom Johansson
