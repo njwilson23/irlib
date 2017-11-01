@@ -56,13 +56,13 @@ if os.path.isfile(infile) == False:
     sys.exit(3)
 
 # Reads in the file as a pandas dafaframe
-df = pd.read_csv(infile, dtype={'FID': object})
+df = pd.read_csv(infile, dtype={'FID': str})
 
 # Make an array of line one as strings to keep leading zeroes
 FID = np.array(df['FID'])
 
 # Create antenna spacing array
-antenna_spacing = np.array([an_space] * (len(df)))
+antenna_spacing = np.repeat(an_space, len(df))
 
 # Concatinate the arrays to 2D
 file = np.column_stack((FID, antenna_spacing))
