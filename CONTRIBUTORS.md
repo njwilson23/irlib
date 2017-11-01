@@ -3,7 +3,8 @@ The following people have added to *irlib*. This does not imply endorsement of
 
 When contributing code, please add your name.
 
-Nat Wilson
-Derek Mueller
-Henrik Engstrom
-Fanny Ekblom Johansson
+    Nat Wilson
+    Derek Mueller
+    Henrik Engstrom
+	Fanny Ekblom Johansson
+	
