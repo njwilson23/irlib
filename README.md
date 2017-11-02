@@ -44,6 +44,8 @@ Command-line tools:
   a GPS eXchange (GPX) file
 - **h5_generate_cache**: Generate caches to speed loading radar lines
 - **h52a**: Export a line from an HDF5 file to ASCII or binary
+- **antenna_spacing**: Reads CSV from h5_dumpmeta and creates an offsets file with antenna spacing
+- **join_radar**: Takes picked-, rated- and offset files and calculates ice depth
 - **irtrace**: Plot a radar trace acquired at a single location
 - **irline**: Plot a radar section along a line of locations
 
@@ -68,6 +70,8 @@ trouble.
 2. [*pyproj*](https://github.com/jswhit/pyproj) _libproj_ bindings
 
 2. [*six*](https://pythonhosted.org/six) compatibility library for Python 2/3
+
+2. [*pandas*](http://pandas.pydata.org/) powerful Python data analysis toolkit
 
 If you do not already have a scientific Python environment and you do not know
 how to set one up, I recommend the [Anaconda Python
