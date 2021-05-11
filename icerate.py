@@ -9,7 +9,10 @@ import irlib
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os, getopt
-import readline
+try:
+  import readline
+except ImportError:
+  import pyreadline as readline
 import traceback, pdb
 from random import shuffle
 

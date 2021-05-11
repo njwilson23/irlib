@@ -53,7 +53,7 @@ class FileHandler:
         self.bedvals = []
         self.traveltimes = []
         for row in recs:
-            if row is not '':
+            if row != '':
                 row = row.rstrip('\n')
                 self.fids.append(row.split(',')[0])
                 self.dcvals.append(float(row.split(',')[1]))

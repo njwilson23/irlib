@@ -116,6 +116,21 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
 
 A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).
 
+Changes in irlib version 0.5-dev
+--------------------------------
+*irlib* 0.4.4 improvements (Derek Mueller): 
+
+- conda environment defined for easy installation
+- compatible with newer versions of h5py, StringIO
+- timestamps taken as ddmm (newer) or mmdd format (older) and metadata outputs in ISO format
+- h5_dumpmeta.py - added some extra fields, sorts on FID, option to create a shapefile or kml output TODO
+- h5_add_utm.py - works with new lat/lon format (which as of Fall 2016 is a signed float)
+- h5_save2reflex.py - creates an ASCII file that can be read by REFLEX
+- join_radar.py - option to create shapefile or kml of ice thickness/depth TODO
+
+
+
+
 Changes in irlib version 0.4-dev
 --------------------------------
 
@@ -139,6 +154,7 @@ minimum, however the *stable-0.3* branch is available if necessary.
 - composable line gathers and surveys by overloading arithmetic operators?
 - HDF file write?
 - PulseEkko data reader?
+
 
 License:
 --------

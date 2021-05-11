@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #
 #   Add UTM coordinates to HDF5 radar data
-#
+#   Assumes that lat and lon can be positive or negative
 
 import sys
 import os
@@ -35,14 +35,19 @@ if len(args) != 2:
     SYNTAX: h5_add_utm --swap_lon INFILE OUTFILE
 
         Replaces geographical coordinates in INFILE with UTM coordinates
-        in OUTFILE. Does not perform any datum shift. Projection is calculated
-        assuming that the data from neither from western Norway nor Svalbard.
+        in OUTFILE. Does not perform any datum shift. 
 
-        Longitude data in BSI HDF files ('Long_ W') is unsigned. It is assumed
-        to be in the western hemisphere by default. Passing the --swap_lon key
-        forces longitudes to be interpretted from the eastern hemisphere.
+	Works with 2 formats from BSI HDF files: 
+  	  Old format - Latitude and longitude data in BSI HDF files are unsigned. It is assumed
+        	to be in the western hemisphere by default. Passing the --swap_lon key
+        	forces longitudes to be interpretted from the eastern hemisphere.
+		UTM projection is calculated assuming that the data from neither from western Norway nor Svalbard.
+	  New format - Latitude and longigude data in BSI HDF files are signed to indicate 
+		hemisphere. If any lat or lon values are negative, the --swap_lon key is disabled
+
+        
     """)
-    sys.exit(1)
+    #sys.exit(1)
 else:
     import irlib
     from irlib.recordlist import ParseError
@@ -81,13 +86,19 @@ for i in failed[::-1]:
     del datasets[i]
 print("\tdone")
 
-# Pull out the geographical data for convenience
-if "--swap_lon" in optdict:
-    print("swapping sign on longitudes for eastern hemisphere")
-    lons = metadata.lons
+# Based on centroid of survey, determine if this is old format or new format
+xlm, ylm = calculate_centroid(metadata.lons, metadata.lats)
+if xlm>0 and ylm>0:
+    # This is Northern and Eastern Hemisphere... See if you should swap_lon
+    if "--swap_lon" in optdict:
+        print("swapping sign on longitudes for eastern hemisphere")
+        lons = metadata.lons
+    else:
+        lons = [-lon if lon is not None else None for lon in metadata.lons]
 else:
-    lons = [-lon if lon is not None else None for lon in metadata.lons]
+    lons = metadata.lons
 lats = metadata.lats
+
 num_sat = metadata.num_sat
 fix_qual = metadata.fix_qual
 gps_fix_valid = metadata.gps_fix_valid
@@ -99,10 +110,14 @@ northings = []
 
 xlm, ylm = calculate_centroid(lons, lats)
 zone, hemi = calculate_utm_zone(xlm, ylm)
-north = (hemi == 'N')
+
 #projector = pyproj.Proj(proj='utm', zone=7, north=True)    # St Elias Range
 #projector = pyproj.Proj(proj='utm', zone=16, north=True)   # Milne Ice Shelf
-projector = pyproj.Proj(proj='utm', zone=zone, north=north, datum="WGS84") # Auto-determined
+
+if hemi == 'N':
+    projector = pyproj.Proj(proj='utm', zone=zone, north=True, datum="WGS84") # Auto-determined
+if hemi == 'S':
+    projector = pyproj.Proj(proj='utm', zone=zone, south=True, datum="WGS84") # Auto-determined
 print("Projecting to UTM zone {0}{1}".format(zone, hemi))
 
 for i, (lon, lat) in enumerate(zip(lons, lats)):
@@ -123,7 +138,10 @@ fout = h5py.File(OUTFILE, 'r+')
 # For each dataset in OUTFILE, modify the UTM attribute cluster in place
 for i, dataset in enumerate(datasets):
     try:
-        xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
+        try:   # This is the old way h5py library decodes based on data type specified
+            xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
+        except:  # This is the newer way, should work h5py >= 3.0 
+            xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml']
         new_xml = (
                 xml.replace('<Name>Datum</Name>\r\n<Val>NaN</Val>',
                             '<Name>Datum</Name>\r\n<Val>WGS84</Val>')

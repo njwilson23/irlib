@@ -20,6 +20,8 @@ import sys
 import math
 from irlib import Survey
 import traceback
+import pandas as pd
+import geopandas as gpd
 
 ###### DECLARATIONS #######
 
@@ -47,12 +49,12 @@ def zero_time_correction(x):
 ###### MAIN PROGRAM #######
 
 if len(sys.argv) < 3:
-    print """
+    print("""
     SYNTAX: join_radar PREFIX H5FILE
 
     join_radar combines information from picking, rating, offset, and
     HDF5 files, and computes depths at each valid observation location.
-    """
+    """)
     sys.exit(0)
 else:
     prefix = sys.argv[1]
@@ -65,7 +67,7 @@ prefix_test = lambda fnm: True if fnm[:len(prefix)] == prefix else False
 picking_files = filter(prefix_test, os.listdir('picking'))
 rating_files = filter(prefix_test, os.listdir('rating'))
 offsets_file = 'offsets/{0}'.format(prefix + '_offsets.txt')
-print "Using offsets: ", offsets_file
+print ("Using offsets: {}".format(offsets_file))
 
 # Retain the intersection
 pull_number = lambda fnm: fnm.rsplit('_', 1)[1].split('.')[0][4:]
@@ -77,12 +79,12 @@ try:
     # For each pair of corresponding files, grab the data
     S = Survey(h5file)
     alldata = {}
-    print 'reading from'
+    print('reading from')
     for line in common_lines:
 
         pickfile = picking_files[picking_lines.index(line)]
         ratefile = rating_files[rating_lines.index(line)]
-        print '\t' + pickfile
+        print ('\t' + pickfile)
         with open('picking/' + pickfile) as f:
             P = read_columns_as_dict(f, delimiter=',')
         with open('rating/' + ratefile) as f:
@@ -132,8 +134,8 @@ try:
                 alldata[fid].append(err)                # Error is field 5
 
             except IndexError:
-                print "\tWarning: {0} missing a field".format(fid)
-                print "\t\t", alldata[fid]
+                print( "\tWarning: {0} missing a field".format(fid))
+                print( "\t\t", alldata[fid])
                 del alldata[fid]
 
         else:                                           # Remove nodata
@@ -145,7 +147,7 @@ try:
         os.makedirs(path_out)
 
     fout = path_out + 'depth_' + prefix + '.xyz'
-    print 'writing to ' + fout
+    print ('writing to ' + fout)
     fids = alldata.keys()
     fids.sort()
     with open(fout, 'w') as f:

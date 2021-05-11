@@ -31,6 +31,7 @@ optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'd:gsbrfqe',
                     ['remove-nans', 'interp-nans', 'smoothen-cords', 'dc='])
 optdict = dict(optlist)
 
+
 # Parse input switches
 cache_dir = optdict.get('-d', 'cache')
 fix_gps = '-g' in optdict

@@ -99,7 +99,7 @@ def ExtractAttrs(h5file, outfile=None, fout=None, eastern_hemisphere=False):
             # Export as a CSV, creating a file with name outfile
             with open(outfile, 'w') as fout:
                 records.Write(fout, eastern_hemisphere=eastern_hemisphere)
-            sys.stderr.write("\t{f} written\n".format(f=os.path.basename(output)))
+            sys.stderr.write("\t{f} written\n".format(f=os.path.basename(outfile)))
         elif fout:
             # Export as a CSV, using the provided file object
             records.Write(fout, eastern_hemisphere=eastern_hemisphere)

@@ -38,7 +38,8 @@ class AppWindow(object):
         for cbname, cbval in self.fig.canvas.callbacks.callbacks.items():
             try:
                 if cbname == 'key_press_event':
-                    self.fig.canvas.mpl_disconnect(cbval[3])
+                    pass   # DM put this here TODO fix this
+                    #self.fig.canvas.mpl_disconnect(cbval[3])  # DM commented out
             except IndexError:
                 # Already disconnected
                 pass
@@ -95,7 +96,7 @@ class Radargram(AppWindow):
         super(Radargram, self).__init__((10, 4))
         self.digitize_mode = False
         self._newline(L)
-        self.fig.canvas.set_window_title("Radargram") 
+        self.fig.canvas.set_window_title("Radargram") # Depreciated
         self.fig.tight_layout()
         return
 
@@ -624,7 +625,8 @@ class PickWindow(AppWindow):
                 self.mode = oldmode
 
         locs = self.ax.get_yticks()
-        self.ax.set_yticklabels(np.round(locs*-1e9).astype(int))
+        self.ax.set_yticklabels(np.round(locs*-1e9).astype(int)) #TODO --- UserWarning: FixedFormatter should only be used together with FixedLocator
+
 
         self.ax.set_title("Line {0}, mode: {1}".format(self.L.line, self.mode))
 

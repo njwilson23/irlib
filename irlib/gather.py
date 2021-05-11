@@ -1464,9 +1464,9 @@ class PickableGather(Gather):
     def SavePicks(self, outfile, picks, mode='bed'):
         """ Save picks to a text file. """
         FH = FileHandler(outfile, self.line, fids=self.metadata.fids)
-        if mode is 'bed':
+        if mode == 'bed':
             FH.AddBedPicks(picks)
-        elif mode is 'dc':
+        elif mode == 'dc':
             FH.AddDCPicks(picks)
         FH.ComputeTravelTimes()
         FH.Write()

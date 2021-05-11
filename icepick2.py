@@ -2,6 +2,9 @@
 """ Benchmark program for irlib app framework """
 
 import sys
+import pdb
+pdb.set_trace()
+
 import irlib.app.filters
 import irlib.app.pickcommands
 import irlib.app.mapcommands
