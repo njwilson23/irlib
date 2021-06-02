@@ -54,11 +54,12 @@ class RatingWindow(object):
         self.ax2 = self.fig1.add_axes([0.8, 0.05, 0.1, 0.9])
         self.ax2.set_xticklabels('')
         self.ax2.set_yticklabels('')
-
+        
         # Turn off default shortcuts
         for i in self.fig1.canvas.callbacks.callbacks:
             if i == 'key_press_event':
-                self.fig1.canvas.mpl_disconnect(self.fig1.canvas.callbacks.callbacks[i].keys()[0])
+                pass  # DM put this here TODO fix this
+                #self.fig1.canvas.mpl_disconnect(self.fig1.canvas.callbacks.callbacks[i].keys()[0])
 
         # Connect event handlers
         #self.cid_click = self.fig1.canvas.mpl_connect( \
@@ -72,6 +73,7 @@ class RatingWindow(object):
 
     def _drawpick(self, trace, yi):
         """ Draw a pick mark on the given trace at yi. """
+        
         trace = trace / trace.max() * self.spacing / 3.0
         self.ax2.plot(trace[int(yi)], -self.T[int(yi)], 'ob', alpha=0.4)
         return self.ax2.lines
@@ -128,11 +130,12 @@ class RatingWindow(object):
         trace = self.arr[:,self.cur_trace]
         trace = trace / trace.max() * self.spacing / 3.0
         self.ax2.plot(trace, -self.T, '-k')
-
+        
         # Plot the picked time
-        if self.picks[self.cur_trace] != 999:
+        if self.picks[self.cur_trace] != -999:  #DM changed from 999 to -999
             self.mode = 'bed'
-            self._drawpick(trace, self.picks[self.cur_trace])
+            if not np.isnan(self.picks[self.cur_trace]):
+                self._drawpick(trace, self.picks[self.cur_trace])
         else:
             # should skip automatically
             pass
@@ -222,6 +225,7 @@ def OpenLine(infile, line, pickfile, fromcache=True):
         sys.stderr.write("\n\tNo pick file found for line " + str(line) + ".\n\tPress 'up' key and change line number.\n\n")
         exit(1)
     S = irlib.Survey(infile)
+    
     L = S.ExtractLine(line, fromcache=fromcache)
     if not fromcache:
         try:
@@ -459,7 +463,10 @@ def main():
     print("IceRate")
 
     while R.isopen:
-        s = raw_input('>> ')
+        if sys.version_info[0]  == 2:
+            s = raw_input('>> ')
+        else:
+            s = input(">> ")
         R, L = HandleCommand(s, infile, R, L, S)
 
 if __name__ == '__main__':

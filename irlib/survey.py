@@ -165,7 +165,7 @@ class Survey:
             if print_fnm:
                 print(fnm)
             if os.path.isfile(fnm):
-                with open(fnm, 'r') as f:
+                with open(fnm, 'rb') as f:  #changed from r to rb -DM
                     unpickler = pickle.Unpickler(f)
                     gatherdata = unpickler.load()
                 return gatherdata

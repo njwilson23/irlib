@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 #
 #   Replace onboard GPS coordinates with data from a GPX file
 #
@@ -11,7 +11,7 @@ from __future__ import print_function
 import sys
 import os
 import glob
-import getopt
+import argparse
 import datetime
 import shutil
 import re
@@ -20,47 +20,7 @@ import h5py
 import pandas as pd
 import irlib
 import pdb
-pdb.set_trace()
-
-def print_syntax():
-    print("""
-    SYNTAX: h5_replace_gps -h HDF_FILE [-g GPX_FILE] [-c CSV_FILE] -o OUTFILE --tz OFFSET [OPTIONS]
-
-    This tool replaces the existing geographical data in a ice radar HDF
-    database with data taken from a GPX file, e.g. obtained from a handheld or
-    external GPS unit or from a CSV file, e.g. obtained from a PPP output of
-    GPS data
-
-    Required:
-
-        -h s    (s) is an HDF dataset for which GPS timestamps exist
-
-        -g s    (s) is a GPS eXchange (GPX) file
-
-        -c s    (s) is a CSV file, e.g. obtained from a PPP output of GPS data
-                The file should have columns:
-                latitude_decimal_degree,longitude_decimal_degree,ellipsoidal_height_m,decimal_hour,day_of_year,year,rcvr_clk_ns
-                    
-        -o s    (s) is the name of the output; if this file exists, it will be
-                overwritten
-
-        --tz n  (n) is the hour offset of the GPR computer from UTC
-
-    Optional:
-
-        -l n    Work only on line (n); default works on all lines
-
-        -t n    Set the max time delta permissible for matching locations
-                to (n) seconds; default is 15 seconds
-
-        -n      Replace coordinates in HDF with no appropriate supplementary GPS 
-                counterpart with 'NaN'. By default, the original coordinates 
-                are retained.
-                        
-        -p      Keep all coordinates positive (use with old h5 format where Lat_N
-                and Long_W)    
-    """)
-    sys.exit(0)
+#pdb.set_trace()
 
 def get_time(gps_timestamp, timestamp, tzoffset, gpsmissing=False):
     """ 
@@ -126,7 +86,7 @@ def readppp(csv_file):
 
     Parameters
     ----------
-    csv_file : str or list of strings
+    csv_file : str
         file name or a pattern to match.  Example:
         ppp_out.csv  or *.csv
 
@@ -136,20 +96,24 @@ def readppp(csv_file):
 
     '''
     # Make single file into a list
-    if type(csv_file) == str:
-        csv_file = [csv_file]
+    csv_files = glob.glob(csv_file)    
     gps_dfs = []
-    for file in csv_file:
+    for file in csv_files:
         print('Reading {}'.format(file))
         try:
             gps_dfs.append(pd.read_csv(file))
             gps = pd.concat(gps_dfs, ignore_index=True)
         except:
             print("Could not read file {}".format(file))            
-    
+    print('\n')
         # It may be that there are more columns - ortho ht (second last)
-    gps.columns = ['gpslats','gpslons','gpseles','hr','doy','year','rcvr']
-    
+    if gps.shape[1] == 7:
+        gps.columns = ['gpslats','gpslons','gpseles','hr','doy','year','rcvr']
+        print('Elevation is height above ellipsoid\n')
+    if gps.shape[1] == 8:
+        gps.columns = ['gpslats','gpslons','hae','hr','doy','year','gpseles','rcvr']
+        print('Elevation is height above geoid \n')
+              
     gpstimes = []
     for i in range(len(gps.year)):
         gpstimes.append(datetime.datetime(int(gps.year[i]),1,1) +
@@ -207,96 +171,101 @@ def readgpx(gpx_file):
     return gps
 
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'i:h:g:c:o:l:t:n:p', ['tz='])
-optdict = dict(optlist)
+## MAIN PROGRAM
 
-try:
-    hdf_file = optdict["-h"]
-    if "-g" in optdict:
-        gpx_file = optdict["-g"]
-        coordinate_source = "gpx"
-    elif "-c" in optdict:
-        if len(fins) != 0:
-            csv_file = fins
-        else:
-            csv_file = optdict["-c"]
-        coordinate_source = "csv"
-    else:
-        print("missing GPX or CSV file with GPS coordinates")
-        raise KeyError()
-    outfile = optdict["-o"]
-    tzoffset = int(optdict["--tz"])
-except KeyError:
-    print_syntax()
+#replacing getopt and def syntax() with argparse
+prog_description = 'This tool replaces the existing geographical data in a ice radar HDF \
+    database with data taken from a GPX file, e.g. obtained from a handheld or \
+    external GPS unit or from a CSV file, e.g. obtained from a PPP output of GPS data'
+prog_epilog = " Example: h5_replace_gps.py -n survey.h5 survey_ppp.h5 ppp*.csv ppp "
+parser = argparse.ArgumentParser(description = prog_description, epilog=prog_epilog)
+parser.add_argument("infile", help="input HDF (.h5) filename, with or without path, for which GPS or PC timestamps exist")
+parser.add_argument("outfile", help="output HDF (.h5) filename, with or without path, if this file exists, it will be overwritten")
+parser.add_argument("gpsfile", help="GPS filename(s), with enhanced location, with or without path / wildcards")
+parser.add_argument('gpssource', choices=['gpx', 'ppp'], help="Select which format the gps file is in - either gpx or ppp")
+parser.add_argument("-t", "--tzoffset", help="is the hour offset of the GPR computer from UTC (default = 0)", default=0, type=int)
+parser.add_argument("-l", "--line", help="Work only on line (n); default works on all lines", type=int)
+parser.add_argument("-d", "--deltatimemax", help="Set the max time delta permissible for matching locations to (n) seconds; default is 15 seconds", 
+                    default=15, type=int)
+parser.add_argument("-o", "--offsetElev", help="Adds an offset to the elevations to account for the height of GPS off the ice or different geoid, use a neg. number to subtract.", 
+                    default=0, type=float)
+parser.add_argument("-n", "--replaceNaN", help="Replace coordinates in HDF with no appropriate supplementary GPS counterpart with 'NaN'. By default, the original coordinates are retained.", action="store_true")
+parser.add_argument("-p", "--positivecoords", help="Keep all coordinates positive (use with old h5 format where Lat_N and Long_W)", action="store_true")
 
-
-lineno = optdict.get("l", None)
-max_dt = int(optdict.get("-t", 15))     # 15 second default
-insert_nans = ("-n" in optdict)
-positive = ("-p" in optdict)
-
-if coordinate_source == "csv":
-    _gps_fnm = csv_file
-else:
-    _gps_fnm = gpx_file
-    
-print("Performing coordinate replacement")
-print()
+args = parser.parse_args()
+  
+print("Performing coordinate replacement\n\n")
 print("\t======== PARAMETERS =========\n"
       "\tSRC dataset:      {infile}\n"
       "\tDST dataset:      {outfile}\n"
-      "\tGPS source:       {coordinate_source}\n"
-      "\tGPS file:         {gps_fnm}\n\n"
-      "\tMAX timedelta:    {max_dt} sec\n"
-      "\tTZ offset:        {tz:+} hr\n"
-      "\tINSERT NaNs:      {insert_nans}\n".format(infile=hdf_file, tz=tzoffset,
-          coordinate_source=coordinate_source, gps_fnm=_gps_fnm, max_dt=max_dt,
-          outfile=outfile, insert_nans=insert_nans))
+      "\tGPS source:       {gpssource}\n"
+      "\tGPS file:         {gpsfile}\n\n"
+      "\tDelta time max:   {max_dt} sec\n"
+      "\tTZ offset:        {tzoffset:+} hr\n"
+      "\tINSERT NaNs:      {insert_nans}\n"
+      "\tOFFSET Elev:      {offsetElev}\n"
+      "\tLine:             {line}\n"
+      "\tPositive Coords:      {positive}\n".format(
+          infile=args.infile, tzoffset=args.tzoffset,
+          gpssource=args.gpssource, gpsfile=args.gpsfile, max_dt=args.deltatimemax,
+          outfile=args.outfile, insert_nans=args.replaceNaN,line=args.line,
+          offsetElev=args.offsetElev, positive=args.positivecoords))
 
-if coordinate_source == "csv":
-    gps = readppp(csv_file)
+max_dt = int(args.deltatimemax)     # 15 second default
+insert_nans = args.replaceNaN
+positive = args.positivecoords
 
-elif coordinate_source == "gpx":
-    gps = readgpx(gpx_file)
+if args.gpssource == "ppp":
+    gps = readppp(args.gpsfile)
+
+elif args.gpssource == "gpx":
+    gps = readgpx(args.gpsfile)
+
+if args.offsetElev:  # adds offset to GPS data 
+    gps.gpseles = gps.gpseles + args.offsetElev
 
 ### Start the interpolation and substitution.. 
 
 # Copy the HDF to the new file location, and then modify in-place
-shutil.copyfile(hdf_file, outfile)
+shutil.copyfile(args.infile, args.outfile)
 
 # Load HDF file
-hdf = h5py.File(outfile, "r+")
+hdf = h5py.File(args.outfile, "r+")
 
-if lineno is None:
+if args.line is None:
     lines = hdf.keys()
 else:
-    lines = ["line_"+lineno]
+    lines = ["line_"+args.line]
 
 # Read out all acquisition times in the HDF file
 hdfaddrs = []
 hdftimes = []
-for line in lines:
-    for loc in hdf[line]:
-        for dc in hdf[line][loc]:
+for line in lines:   # for every line... 
+    for loc in hdf[line]:    #for every trace... 
+        for dc in hdf[line][loc]: 
 
             dataset = hdf[line][loc][dc]["echogram_0"]
             hdfaddrs.append(dataset)
+            # get the timestamp from the EPU computer
             pcdatetime = dataset.attrs["PCSavetimestamp"]
-            if len(pcdatetime.split(",")) == 4:
+            if len(pcdatetime.split(",")) == 4:    # this is a new (> 2016 file format)
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')
-            else:
+            else:   # this is an older file format  
                 timestamp = irlib.recordlist.pcdateconvert(pcdatetime, datefmt='mmdd') # guessing the format      
             try:
                 gpscluster = dataset.attrs['GPS Cluster- MetaData_xml']
+                # search for a timestamp from the onboard GPS
                 m = re.search(r'<Name>GPS_timestamp_UTC</Name>\r\n<Val>[0-9]{6}</Val>',
                               gpscluster)
-                if m == None:
-                    hdftimes.append(get_time(None,timestamp,tzoffset,gpsmissing=True))
+                if m == None:  
+                    # if there is no GPS timestamp - use the one from the EPU computer
+                    hdftimes.append(get_time(None,timestamp,args.tzoffset,gpsmissing=True))
                 else:
+                    # if there is a GPS timestamp use that instead
                     gpstimestamp = re.search('[0-9]{6}', m.group()).group()
                     hdftimes.append(get_time(gpstimestamp,
-                                         timestamp, tzoffset=0))  # GPS time IS in UTC
+                                         timestamp, 0))  # GPS time IS in UTC so tzoffset must be 0
             except (ValueError, AttributeError):
                 hdftimes.append(np.nan)
 
@@ -314,6 +283,7 @@ dt_mask = np.isfinite(dts) & (dts < max_dt)
 
 # Replace the GPS data where the mask is true, otherwise put NaN
 irep = 0
+#pdb.set_trace()
 for i, dataset in enumerate(hdfaddrs):
 
     if insert_nans or dt_mask[i]:  # replace with better gps or NAN
@@ -323,7 +293,7 @@ for i, dataset in enumerate(hdfaddrs):
             if positive:
                 xml = substituteXMLval("Long_ W", dec2dm(interp_lons[i], signed=False), xml)
                 xml = substituteXMLval("Lat_N", dec2dm(interp_lats[i], signed=False), xml)
-                xml = substituteXMLval("Alt_asl_m", str(interp_eles[i], signed=False), xml)
+                xml = substituteXMLval("Alt_asl_m", str(interp_eles[i]), xml)
             else:
                 xml = substituteXMLval("Long", dec2dm(interp_lons[i]), xml)
                 xml = substituteXMLval("Lat", dec2dm(interp_lats[i]), xml)
@@ -332,14 +302,9 @@ for i, dataset in enumerate(hdfaddrs):
             irep += 1
 
         elif insert_nans:  # exceed max_dt so gps not good, replace with NAN
-            if positive:
                 xml = substituteXMLval("Long_ W", "NaN", xml)
                 xml = substituteXMLval("Lat_N", "NaN", xml)
-            else:
-                xml = substituteXMLval("Long", "NaN", xml)
-                xml = substituteXMLval("Lat", "NaN", xml)
-                
-        xml = substituteXMLval("Alt_asl_m", "NaN", xml)
+                xml = substituteXMLval("Alt_asl_m", "NaN", xml)
 
         dataset.attrs.modify("GPS Cluster- MetaData_xml", xml)
 

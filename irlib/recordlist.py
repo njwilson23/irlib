@@ -175,6 +175,9 @@ class RecordList:
                 self.pps.append(pps)
             else:
                 self.timestamps.append(isodate(pcdateconvert(pcdatetime, datefmt='mmdd'))) # guessing the format                
+                self.startbuf.append("")
+                self.buftime.append("")
+                self.pps.append("")
         else:
             raise ParseError('Timestamp read failure', dataset.name)
 
@@ -267,6 +270,7 @@ class RecordList:
             if not eastern_hemisphere:
                 # Invert longitudes to be in the western hemisphere
                 self.lons = [-i if i is not None else i for i in self.lons]
+        
 
         header = (
             "FID," +
