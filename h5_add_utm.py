@@ -123,7 +123,7 @@ fout = h5py.File(OUTFILE, 'r+')
 # For each dataset in OUTFILE, modify the UTM attribute cluster in place
 for i, dataset in enumerate(datasets):
     try:
-        xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
+        xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml']
         new_xml = (
                 xml.replace('<Name>Datum</Name>\r\n<Val>NaN</Val>',
                             '<Name>Datum</Name>\r\n<Val>WGS84</Val>')

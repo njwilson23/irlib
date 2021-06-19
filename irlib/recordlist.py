@@ -128,7 +128,7 @@ class RecordList:
         # XML parsing code (unused categories set to None for speed)
         # Parse main cluster
         try:
-            xml = dataset.attrs['GPS Cluster- MetaData_xml'].decode("utf-8")
+            xml = dataset.attrs['GPS Cluster- MetaData_xml']
             self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat_N')))
             self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W')))
             self.fix_qual.append(self._xmlGetValI(xml, 'Fix_Quality'))
@@ -145,7 +145,7 @@ class RecordList:
 
         # Parse digitizer cluster
         try:
-            xml = dataset.attrs['Digitizer-MetaData_xml'].decode("utf-8")
+            xml = dataset.attrs['Digitizer-MetaData_xml']
             self.vrange.append(self._xmlGetValF(xml, 'vertical range'))
             self.sample_rate.append(self._xmlGetValF(xml, ' sample rate'))
         except:
@@ -157,7 +157,7 @@ class RecordList:
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
             self.hasUTM = True
             try:
-                xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
+                xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml']
                 self.datums.append(self._xmlGetValS(xml, 'Datum'))
                 self.eastings.append(self._xmlGetValF(xml, 'Easting_m'))
                 self.northings.append(self._xmlGetValF(xml, 'Northing_m'))
