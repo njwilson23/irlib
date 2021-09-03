@@ -8,6 +8,8 @@ import re
 import numpy as np
 import traceback
 import datetime
+import h5py 
+
 
 def pcdateconvert(pcdatetime, datefmt='ddmm'):
     '''
@@ -167,12 +169,22 @@ class RecordList:
         elif 'PCSavetimestamp' in dataset.attrs:
             # 2009 and later
             pcdatetime = dataset.attrs["PCSavetimestamp"]
+            # there are various formats.  Decide which is which by splitting the string
             if len(pcdatetime.split(",")) == 4:
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 self.timestamps.append(isodate(pcdateconvert(timestamp, datefmt='ddmm')))
                 self.startbuf.append(startbuf.split(":")[1])
                 self.buftime.append(buftime.split(":")[1])
                 self.pps.append(pps)
+            elif len(pcdatetime.split(",")) == 3:
+                startbuf,buftime,pps = pcdatetime.split(",")
+                self.startbuf.append(startbuf.split(":")[1])
+                self.buftime.append(buftime.split(":")[1])
+                self.pps.append(pps)
+                #timestamp for this is in a completely different place.  
+                self.timestamps.append(isodate(self.TimeFromComment(splitname)))
+                
+                #self.timestamps.append(isodate(pcdateconvert(timestamp, datefmt='ddmm')))
             else:
                 self.timestamps.append(isodate(pcdateconvert(pcdatetime, datefmt='mmdd'))) # guessing the format                
                 self.startbuf.append("")
@@ -375,6 +387,29 @@ class RecordList:
             data = getattr(self, attr)
             del data[start:end]
         return
+
+    def TimeFromComment(self, splitname):
+        '''
+        This function finds the comment field from the datacapture_0 group using 
+        the low-level hdf 5 api called h5g.  
+        
+        This is the only place where PC timestamp is located in some versions of the 
+        hdf data format
+        
+        Note that when a dataset is opened as an h5l object, the group comment 
+        is not available, hence the reason for reopening the file (maybe could be 
+        done only once for efficiency but it doesn't seem to be an issue so far)
+                
+        splitname is from the AddDataset function
+        returns a datetime object
+         
+        '''
+        
+        h = h5py.File(self.filename)
+        dt = h[splitname[1]][splitname[2]].id.get_comment(b'datacapture_0').decode()
+        return datetime.datetime.strptime(dt, "%m/%d/%Y %I:%M:%S %p")
+    
+
 
 class ParseError(Exception):
     def __init__(self, message='', fnm=''):

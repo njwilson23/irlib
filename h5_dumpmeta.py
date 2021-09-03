@@ -119,6 +119,9 @@ for i, infile in enumerate(infiles):
     if args.csv: 
         if not os.path.isfile(outfiles[i]+'.csv'):
             meta.to_csv(outfiles[i]+'.csv', sep=',',index=False)
+            sys.stderr.write(
+                    "\t{fnm} written\n".format(
+                    fnm=os.path.basename(outfiles[i]+".csv")))
         else:
             if args.clobber:
                 meta.to_csv(outfiles[i]+'.csv', sep=',', index=False)

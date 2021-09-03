@@ -136,6 +136,7 @@ Changes in irlib version 0.4.?-dev
 
 TODO:
 *learn github markdown a bit better... 
+*Make sure you replace all optparse with argparse.. 
 *examine the replace_gps to understand better how this works. 
 *develop a way of merging picking files. Say you pick a few lines and then regenerate the cache with more or less FIDs...  
 *Ask Laurent about file formats and what version of his software they come from (a few files for a test suite would be great to include)

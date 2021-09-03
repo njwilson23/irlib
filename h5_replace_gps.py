@@ -183,6 +183,7 @@ parser.add_argument("infile", help="input HDF (.h5) filename, with or without pa
 parser.add_argument("outfile", help="output HDF (.h5) filename, with or without path, if this file exists, it will be overwritten")
 parser.add_argument("gpsfile", help="GPS filename(s), with enhanced location, with or without path / wildcards")
 parser.add_argument('gpssource', choices=['gpx', 'ppp'], help="Select which format the gps file is in - either gpx or ppp")
+parser.add_argument('timesource', choices=['iprgps', 'iprpc', 'both'], help="Select which timestamp to match gps timestamps to - iprgps (recommended), iprpc (if iprgps not available) or both (use caution)")
 parser.add_argument("-t", "--tzoffset", help="is the hour offset of the GPR computer from UTC (default = 0)", default=0, type=int)
 parser.add_argument("-l", "--line", help="Work only on line (n); default works on all lines", type=int)
 parser.add_argument("-d", "--deltatimemax", help="Set the max time delta permissible for matching locations to (n) seconds; default is 15 seconds", 
@@ -199,6 +200,7 @@ print("\t======== PARAMETERS =========\n"
       "\tSRC dataset:      {infile}\n"
       "\tDST dataset:      {outfile}\n"
       "\tGPS source:       {gpssource}\n"
+      "\tTime source:       {timesource}\n"
       "\tGPS file:         {gpsfile}\n\n"
       "\tDelta time max:   {max_dt} sec\n"
       "\tTZ offset:        {tzoffset:+} hr\n"
@@ -207,7 +209,8 @@ print("\t======== PARAMETERS =========\n"
       "\tLine:             {line}\n"
       "\tPositive Coords:      {positive}\n".format(
           infile=args.infile, tzoffset=args.tzoffset,
-          gpssource=args.gpssource, gpsfile=args.gpsfile, max_dt=args.deltatimemax,
+          gpssource=args.gpssource, timesource=args.timesource,
+          gpsfile=args.gpsfile, max_dt=args.deltatimemax,
           outfile=args.outfile, insert_nans=args.replaceNaN,line=args.line,
           offsetElev=args.offsetElev, positive=args.positivecoords))
 
@@ -239,7 +242,8 @@ else:
 
 # Read out all acquisition times in the HDF file
 hdfaddrs = []
-hdftimes = []
+hdfpctimes = []
+hdfgpstimes = []
 for line in lines:   # for every line... 
     for loc in hdf[line]:    #for every trace... 
         for dc in hdf[line][loc]: 
@@ -253,6 +257,10 @@ for line in lines:   # for every line...
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')
             else:   # this is an older file format  
                 timestamp = irlib.recordlist.pcdateconvert(pcdatetime, datefmt='mmdd') # guessing the format      
+            
+            # add this to list
+            hdfpctimes.append(get_time(None,timestamp,args.tzoffset,gpsmissing=True))
+            
             try:
                 gpscluster = dataset.attrs['GPS Cluster- MetaData_xml']
                 # search for a timestamp from the onboard GPS
@@ -260,30 +268,58 @@ for line in lines:   # for every line...
                               gpscluster)
                 if m == None:  
                     # if there is no GPS timestamp - use the one from the EPU computer
-                    hdftimes.append(get_time(None,timestamp,args.tzoffset,gpsmissing=True))
+                    hdfgpstimes.append(np.nan)
                 else:
                     # if there is a GPS timestamp use that instead
                     gpstimestamp = re.search('[0-9]{6}', m.group()).group()
-                    hdftimes.append(get_time(gpstimestamp,
+                    hdfgpstimes.append(get_time(gpstimestamp,
                                          timestamp, 0))  # GPS time IS in UTC so tzoffset must be 0
             except (ValueError, AttributeError):
-                hdftimes.append(np.nan)
+                hdfgpstimes.append(np.nan)
 
+
+# convert all datetimes to seconds
+hdfgpsseconds = np.array([dateseconds(a) for a in hdfgpstimes])  # represents the timestamps from IPR GPS
+hdfpcseconds = np.array([dateseconds(a) for a in hdfpctimes])  # represents the timestamps from  EPU computer
+gpsseconds = np.array([dateseconds(a) for a in gps.gpstimes])  # represents the timestamps from 'better' GPS file provided
+
+#TODO: compare hdfgpstimes and hdfpctimes
+# What is the offset?  Can you use pc time instead of gps time when it is missing? 
+# I would say no.  Don't use pctimestamps
+np.nanmean(hdfgpsseconds-hdfpcseconds)
+np.nanmax(hdfgpsseconds-hdfpcseconds)
+np.nanmin(hdfgpsseconds-hdfpcseconds)
+np.nanmedian(hdfgpsseconds-hdfpcseconds)
+np.nanstd(hdfgpsseconds-hdfpcseconds)
+# If so, lag the pc times accordingly and replace missing gps time with pctimes. 
+
+if args.timesource == 'iprgps':
+    hdfseconds = hdfgpsseconds
+elif args.timesource == 'pcgps':    
+    hdfseconds = hdfpcseconds
+elif args.timesource == 'both':
+    hdfseconds = hdfgpsseconds
+    # if the hdfgps data is nan, then use the other source
+    hdfseconds[np.isnan(hdfseconds) == True] = hdfpcseconds[np.isnan(hdfgpsseconds) == True]
+else:
+    print('Error in timesource')    
+    sys.exit(1)
+    
+ 
 # Interpolate the supplementary GPS positions
-hdfseconds = np.array([dateseconds(a) for a in hdftimes])
-gpsseconds = np.array([dateseconds(a) for a in gps.gpstimes])
-
+#One-dimensional linear interpolation for monotonically increasing sample points.
+#Returns the one-dimensional piecewise linear interpolant to a function with given discrete data points 
 interp_lons = np.interp(hdfseconds, gpsseconds, gps.gpslons)
 interp_lats = np.interp(hdfseconds, gpsseconds, gps.gpslats)
 interp_eles = np.interp(hdfseconds, gpsseconds, gps.gpseles)
 
-# Create a mask indicating where to use the interpolants
+# Determine the time difference between supplementary gps and hdf timestamps for each trace
 dts = np.array([np.min(np.abs(t-gpsseconds)) for t in hdfseconds])
+# Create a mask indicating where to use the interpolants 
 dt_mask = np.isfinite(dts) & (dts < max_dt)
 
 # Replace the GPS data where the mask is true, otherwise put NaN
 irep = 0
-#pdb.set_trace()
 for i, dataset in enumerate(hdfaddrs):
 
     if insert_nans or dt_mask[i]:  # replace with better gps or NAN
@@ -302,8 +338,13 @@ for i, dataset in enumerate(hdfaddrs):
             irep += 1
 
         elif insert_nans:  # exceed max_dt so gps not good, replace with NAN
+            if positive: 
                 xml = substituteXMLval("Long_ W", "NaN", xml)
                 xml = substituteXMLval("Lat_N", "NaN", xml)
+                xml = substituteXMLval("Alt_asl_m", "NaN", xml)
+            else:     
+                xml = substituteXMLval("Long", "NaN", xml)
+                xml = substituteXMLval("Lat", "NaN", xml)
                 xml = substituteXMLval("Alt_asl_m", "NaN", xml)
 
         dataset.attrs.modify("GPS Cluster- MetaData_xml", xml)
@@ -315,8 +356,15 @@ hdf.close()
 
 print("\t========== RESULTS ==========\n"
       "\tTOTAL traces:     {ntraces}\n"
+      "\t MEAN timedelta:   {mn:.2f} sec\n"
+      "\t MEDIAN timedelta: {md:g} sec\n"
+      "\t MAX timedelta: {ma:g} sec\n"
       "\tMODIFIED traces:  {irep}\n"
-      "\tMEAN timedelta:   {mn:.2f} sec\n"
-      "\tMEDIAN timedelta: {md:g} sec".format(irep=irep, ntraces=i+1,
-      mn=np.mean(dts[np.isnan(dts) == False]), md=np.median(dts)))
+      "\t MEAN timedelta (modified):   {mnm:.2f} sec\n"
+      "\t MEDIAN timedelta  (modified): {mdm:g} sec\n"
+      "\t MAX timedelta  (modified): {mam:g} sec\n"
+      .format(ntraces=i+1,irep=irep, 
+      mn=np.nanmean(dts), md=np.nanmedian(dts), ma=np.nanmax(dts),
+      mnm=np.nanmean(dts[dt_mask]), mdm=np.nanmedian(dts[dt_mask]), 
+      mam=np.nanmax(dts[dt_mask])))
 
