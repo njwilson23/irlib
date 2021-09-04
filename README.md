@@ -116,85 +116,22 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
 
 A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).
 
-Changes in irlib version 0.4.?-dev
+irlib 0.4 changes
 --------------------------------
-*irlib* 0.4.? improvements (Derek Mueller): 
+improvements (Derek Mueller): 
 
 - conda environment defined for easy installation
 - replaced shebang for all scripts with /usr/bin/env so that it would work with conda
 - works in Python 3, Python 2 compatibility hopefully preserved (not tested)
 - compatible with newer versions of h5py, StringIO
 - timestamps taken as ddmm (newer) or mmdd format (older) and metadata outputs in ISO format
-- h5_dumpmeta.py - added some extra fields, sorts on FID, option to create a shapefile output (points or lines or both)
-- h5_add_utm.py - works with new lat/lon format (which as of IEI Version 5.1, Sept 2016 is a signed float)
-- h5_replace_gps.py - improved argument handling, works with new IEI Version 5.1 lat/lon format and enhanced support of ppp files, can offset elevation as well. 
-- h5_save2reflex.py - creates an ASCII file that can be read by REFLEX (not well tested --- and likely very similar to h52a.py Nat, what's your take?
-- antenna_spacing.py - made output file naming a bit more robust
-- join_radar.py - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
+- **h5_dumpmeta.py** - added some extra fields, sorts on FID, option to create a shapefile output (points or lines or both)
+- **h5_add_utm.py** - works with new lat/lon format (which as of IEI Version 5.1, Sept 2016 is a signed float)
+- **h5_replace_gps.py** - improved argument handling, works with new IEI Version 5.1 lat/lon format and enhanced support of ppp files, can offset elevation as well. 
+- **h5_save2reflex.py** - creates an ASCII file that can be read by REFLEX (not well tested --- and likely very similar to h52a.py Nat, what's your take?
+- **antenna_spacing.py** - made output file naming a bit more robust
+- **join_radar.py** - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
 - note that many of the standalone files now use argparse.  To get the syntax message type the file with flag -h and it will show up. 
-
-
-TODO:
-*learn github markdown a bit better... 
-*Make sure you replace all optparse with argparse.. 
-*examine the replace_gps to understand better how this works. 
-*develop a way of merging picking files. Say you pick a few lines and then regenerate the cache with more or less FIDs...  
-*Ask Laurent about file formats and what version of his software they come from (a few files for a test suite would be great to include)
-
-
-INSTALL INSTRUCTIONS: 
-Conda env
-Use one of these lines to create the environment you want: 
-1. Highly recommended (contains vitables, an hdf viewer): 
-    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas vitables
-2. Essential (has libraries to run all irlib functionality):
-    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas
-3. Create a copy of the environment defined in the environment.yml file: 
-     conda create -n environment.yml
-
-Note that each of these lines also installs other dependencies (readline, ipython, pyproj, to name a few)... 
-
-After installing the irlib conda environment, activate it: 
- conda activate irlib
-Then add the path to the irlib folder like so (example)
- conda develop ~/GitHub/irlib
-This will put a file called conda.pth in the site-packages folder and will add this path to the environment when activated
-Add the irlib directory to your path if you want to call the scripts from the command line
-
-
-TODO: MESSAGE for NAT --> 
-Sorry if my coding style takes over or ruins your vision of irlib. Philosophy: 
--I seek to make pragmatic changes only.  I am not rewriting everything just changing what makes sense to me and adding features that might be useful.  
--I have moved to Py3 and I have not spent time to test in Py2 (but also tried not to torpedo Py2 users)
--I embraced 'newer' libraries - argparse, pandas and geopandas to get what needs to be done done. I feel they are more intuitive and easy to program with, so this saved me time as well
--Updating wrt Laurent's h5 changes (in part see below); trying to provide more flex for users; trying to preserve some functionality for users of older file formats (UNTESTED BUT WILL LOOK AT THIS)
-
-I am looking for your blessing for these changes in advance of a PR but also I have some questions to ask so we can have a conversation. 
-
-NAT please grep TODO for 
-console line 69
-components line 41
-icerate line 61
-self.fig.canvas.mpl_disconnect(cbval[3])
-SHOWS UP also IN ICERATE AND ICEPICK
-I am not really up on this code and would appreciate your input.  
-
-Changes in IEI h5 file format (as per Laurent Mingo)
-Version 5.1 IEI (Sept 2016)
-    -Added correction for Lat Lon,
-     E and W with positive and negative signs
-Version 4.4.1 IEI: Format of GPS string is:
-    With no GPS used: GPSCaptureEvent_StartBufferCapture.ms:-99,BufferCaptureTime.ms:264,PPS_NO
-    With standard GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_NO
-    With PPS GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_YES
-
-
-FYI -- Note for future... this project seems to have some momentum: https://impdar.readthedocs.io/en/latest/ 
-
-
-
-Changes in irlib version 0.4-dev
---------------------------------
 
 *irlib* 0.4 represents significant refactoring and cleaning of both the library
 and application design. Breaking changes in the final version will be kept to a
@@ -217,6 +154,74 @@ minimum, however the *stable-0.3* branch is available if necessary.
 - HDF file write?
 - PulseEkko data reader?
 
+### Install instructions 
+
+conda env
+
+Use one of these lines to create the environment you want: 
+1. Highly recommended (contains vitables, an hdf viewer): 
+    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas vitables
+2. Essential (has libraries to run all irlib functionality):
+    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas
+3. Create a copy of the environment defined in the environment.yml file: 
+     conda create -n environment.yml
+
+Note that each of these lines also installs other dependencies (readline, ipython, pyproj, to name a few)... 
+
+After installing the irlib conda environment, activate it: 
+
+    conda activate irlib
+ 
+Then add the path to the irlib folder like so (example):
+
+    conda develop ~/GitHub/irlib
+ 
+This will put a file called conda.pth in the site-packages folder and will add this path to the environment when activated.
+
+Add the irlib directory to your path if you want to call the scripts from the command line.
+
+### Notes
+
+##### TODO:
+- learn github markdown a bit better... 
+- Make sure you replace all optparse with argparse.. 
+- examine the replace_gps to understand better how this works. 
+- develop a way of merging picking files. Say you pick a few lines and then regenerate the cache with more or less FIDs...  
+- Ask Laurent about file formats and what version of his software they come from (a few files for a test suite would be great to include)
+
+##### TODO: MESSAGE for NAT --> 
+
+Sorry if my coding style takes over or ruins your vision of irlib. Philosophy: 
+-I seek to make pragmatic changes only.  I am not rewriting everything just changing what makes sense to me and adding features that might be useful.  
+-I have moved to Py3 and I have not spent time to test in Py2 (but also tried not to torpedo Py2 users)
+-I embraced 'newer' libraries - argparse, pandas and geopandas to get what needs to be done done. I feel they are more intuitive and easy to program with, so this saved me time as well
+-Updating wrt Laurent's h5 changes (in part see below); trying to provide more flex for users; trying to preserve some functionality for users of older file formats (UNTESTED BUT WILL LOOK AT THIS)
+
+I am looking for your blessing for these changes in advance of a PR but also I have some questions to ask so we can have a conversation. 
+
+NAT please grep TODO for: 
+- console line 69
+- components line 41
+- icerate line 61
+- self.fig.canvas.mpl_disconnect(cbval[3])
+SHOWS UP also IN ICERATE AND ICEPICK
+I am not really up on this code and would appreciate your input.  
+
+Changes in IEI h5 file format (as per Laurent Mingo)
+
+Version 5.1 IEI (Sept 2016)
+- Added correction for Lat Lon,
+     E and W with positive and negative signs
+
+Version 4.4.1 IEI: Format of GPS string is:
+
+    With no GPS used: GPSCaptureEvent_StartBufferCapture.ms:-99,BufferCaptureTime.ms:264,PPS_NO
+    
+    With standard GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_NO
+    
+    With PPS GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_YES
+
+FYI -- Note for future... this project seems to have some momentum: https://impdar.readthedocs.io/en/latest/ 
 
 License:
 --------
