@@ -20,11 +20,13 @@ import h5py
 import pandas as pd
 import irlib
 import pdb
-#pdb.set_trace()
+pdb.set_trace()
 
 def get_time(gps_timestamp, timestamp, tzoffset, gpsmissing=False):
     """ 
     Figure out the time and date from the HDF XML.  First read the PC timestamp
+    
+    gps_timestamp is 'HHMMSS' or 'HHMMSS.SS' as a string
        
     If gpsmissing is True, the pcdatetime is the only timestamp to use.  
     If gpsmissing is False, the gps_timestamp refines the pcdatetime (but only
@@ -200,14 +202,14 @@ print("\t======== PARAMETERS =========\n"
       "\tSRC dataset:      {infile}\n"
       "\tDST dataset:      {outfile}\n"
       "\tGPS source:       {gpssource}\n"
-      "\tTime source:       {timesource}\n"
+      "\tTime source:      {timesource}\n"
       "\tGPS file:         {gpsfile}\n\n"
       "\tDelta time max:   {max_dt} sec\n"
       "\tTZ offset:        {tzoffset:+} hr\n"
       "\tINSERT NaNs:      {insert_nans}\n"
       "\tOFFSET Elev:      {offsetElev}\n"
       "\tLine:             {line}\n"
-      "\tPositive Coords:      {positive}\n".format(
+      "\tPositive Coords:  {positive}\n".format(
           infile=args.infile, tzoffset=args.tzoffset,
           gpssource=args.gpssource, timesource=args.timesource,
           gpsfile=args.gpsfile, max_dt=args.deltatimemax,
@@ -245,6 +247,8 @@ hdfaddrs = []
 hdfpctimes = []
 hdfgpstimes = []
 for line in lines:   # for every line... 
+    if line == 'LabVIEW Boolean':
+            continue  # this seems to be present in some files - not a line!
     for loc in hdf[line]:    #for every trace... 
         for dc in hdf[line][loc]: 
 
@@ -255,6 +259,8 @@ for line in lines:   # for every line...
             if len(pcdatetime.split(",")) == 4:    # this is a new (> 2016 file format)
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')
+            elif len(pcdatetime.split(",")) == 3:    # this is a format where the date is in a comment field
+                timestamp = irlib.recordlist.TimeFromComment(args.outfile, line, loc)
             else:   # this is an older file format  
                 timestamp = irlib.recordlist.pcdateconvert(pcdatetime, datefmt='mmdd') # guessing the format      
             
@@ -264,34 +270,36 @@ for line in lines:   # for every line...
             try:
                 gpscluster = dataset.attrs['GPS Cluster- MetaData_xml']
                 # search for a timestamp from the onboard GPS
-                m = re.search(r'<Name>GPS_timestamp_UTC</Name>\r\n<Val>[0-9]{6}</Val>',
+                # These vary according to the IPR hdf version - HHMMSS or HHMMSS.SS
+                m = re.search(r'<Name>GPS_timestamp_UTC</Name>\r\n<Val>[0-9]{6}\.?\d*</Val>',
                               gpscluster)
                 if m == None:  
                     # if there is no GPS timestamp - use the one from the EPU computer
                     hdfgpstimes.append(np.nan)
                 else:
                     # if there is a GPS timestamp use that instead
-                    gpstimestamp = re.search('[0-9]{6}', m.group()).group()
+                    gpstimestamp = re.search('[0-9]{6}\.?\d*', m.group()).group()
                     hdfgpstimes.append(get_time(gpstimestamp,
                                          timestamp, 0))  # GPS time IS in UTC so tzoffset must be 0
             except (ValueError, AttributeError):
                 hdfgpstimes.append(np.nan)
-
 
 # convert all datetimes to seconds
 hdfgpsseconds = np.array([dateseconds(a) for a in hdfgpstimes])  # represents the timestamps from IPR GPS
 hdfpcseconds = np.array([dateseconds(a) for a in hdfpctimes])  # represents the timestamps from  EPU computer
 gpsseconds = np.array([dateseconds(a) for a in gps.gpstimes])  # represents the timestamps from 'better' GPS file provided
 
-#TODO: compare hdfgpstimes and hdfpctimes
+#DM compared hdfgpstimes and hdfpctimes for some files: 
 # What is the offset?  Can you use pc time instead of gps time when it is missing? 
-# I would say no.  Don't use pctimestamps
-np.nanmean(hdfgpsseconds-hdfpcseconds)
-np.nanmax(hdfgpsseconds-hdfpcseconds)
-np.nanmin(hdfgpsseconds-hdfpcseconds)
-np.nanmedian(hdfgpsseconds-hdfpcseconds)
-np.nanstd(hdfgpsseconds-hdfpcseconds)
-# If so, lag the pc times accordingly and replace missing gps time with pctimes. 
+# I would say no.  The difference between these is variable and there will be an offset
+# between gps and pc time unless the pc was just set to UTC... 
+#np.nanmean(hdfgpsseconds-hdfpcseconds)
+#np.nanmax(hdfgpsseconds-hdfpcseconds)
+#np.nanmin(hdfgpsseconds-hdfpcseconds)
+#np.nanmedian(hdfgpsseconds-hdfpcseconds)
+#np.nanstd(hdfgpsseconds-hdfpcseconds)
+# You CAN use pctimes instead of the gps times but this is not recommended (see timesource) 
+# This may be improved if the pc times are lagged accordingly
 
 if args.timesource == 'iprgps':
     hdfseconds = hdfgpsseconds
@@ -304,8 +312,13 @@ elif args.timesource == 'both':
 else:
     print('Error in timesource')    
     sys.exit(1)
-    
- 
+
+# Check here to see if the timestamps worked out: 
+if sum(np.isnan(np.array(hdfseconds))) == len(hdfseconds):
+    print(''''All IPR onboard timestamps are missing. Check that you have the correct timesource setting.  
+          If you expect them to be there, there might be an issue with the code.''')
+    sys.exit(1)
+     
 # Interpolate the supplementary GPS positions
 #One-dimensional linear interpolation for monotonically increasing sample points.
 #Returns the one-dimensional piecewise linear interpolant to a function with given discrete data points 

@@ -39,6 +39,30 @@ def pcdateconvert(pcdatetime, datefmt='ddmm'):
         convdate = convdate - datetime.timedelta(0, 3600*12)
         
     return convdate
+
+def TimeFromComment(infile, line, loc):
+        '''
+        This function finds the comment field from the datacapture_0 group using 
+        the low-level hdf 5 api called h5g.  
+        
+        This is the only place where PC timestamp is located in some versions of the 
+        hdf data format
+        
+        Note that when a dataset is opened as an h5l object, the group comment 
+        is not available, hence the reason for reopening the file (maybe could be 
+        done only once for efficiency but it doesn't seem to be an issue so far)
+            
+        infile - hdf file name
+        line  - the line as str 'line_0'
+        loc  - the loc as str 'loc_0'
+        returns a datetime object
+         
+        '''
+        
+        h = h5py.File(infile)
+        dt = h[line][loc].id.get_comment(b'datacapture_0').decode()
+        return datetime.datetime.strptime(dt, "%m/%d/%Y %I:%M:%S %p")
+    
     
 def isodate(dt):
     ''' Formats datetime object dt to iso date
@@ -182,9 +206,8 @@ class RecordList:
                 self.buftime.append(buftime.split(":")[1])
                 self.pps.append(pps)
                 #timestamp for this is in a completely different place.  
-                self.timestamps.append(isodate(self.TimeFromComment(splitname)))
-                
-                #self.timestamps.append(isodate(pcdateconvert(timestamp, datefmt='ddmm')))
+                self.timestamps.append(isodate(TimeFromComment(self.filename, 
+                                                              splitname[1], splitname[2])))
             else:
                 self.timestamps.append(isodate(pcdateconvert(pcdatetime, datefmt='mmdd'))) # guessing the format                
                 self.startbuf.append("")
@@ -388,26 +411,6 @@ class RecordList:
             del data[start:end]
         return
 
-    def TimeFromComment(self, splitname):
-        '''
-        This function finds the comment field from the datacapture_0 group using 
-        the low-level hdf 5 api called h5g.  
-        
-        This is the only place where PC timestamp is located in some versions of the 
-        hdf data format
-        
-        Note that when a dataset is opened as an h5l object, the group comment 
-        is not available, hence the reason for reopening the file (maybe could be 
-        done only once for efficiency but it doesn't seem to be an issue so far)
-                
-        splitname is from the AddDataset function
-        returns a datetime object
-         
-        '''
-        
-        h = h5py.File(self.filename)
-        dt = h[splitname[1]][splitname[2]].id.get_comment(b'datacapture_0').decode()
-        return datetime.datetime.strptime(dt, "%m/%d/%Y %I:%M:%S %p")
     
 
 
