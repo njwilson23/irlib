@@ -8,12 +8,12 @@ from irlib.misc import ExtractLine, PlotLine
 import traceback
 
 def print_syntax():
-    print """
+    print( """
     STNTAX: plotline infile Nline [options]
 
     Options:
         -G[file]    save segment to a file
-    """
+    """)
 
 optlist, args = getopt.gnu_getopt(sys.argv[1:], 'G:', ['clobber'])
 optdict = dict(optlist)

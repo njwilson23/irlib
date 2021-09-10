@@ -47,9 +47,7 @@ def meta2pd(infile):
     stringbuffer = StringIO.StringIO()
     
     try:
-        records = irlib.misc.ExtractAttrs(infile,
-                                          fout=stringbuffer, 
-                                          eastern_hemisphere=False)
+        irlib.misc.ExtractAttrs(infile, fout=stringbuffer, eastern_hemisphere=False)
     except:
         traceback.print_exc()
         sys.stderr.write("Error reading radar data\n")

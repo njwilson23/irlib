@@ -186,7 +186,7 @@ parser.add_argument("outfile", help="output HDF (.h5) filename, with or without 
 parser.add_argument("gpsfile", help="GPS filename(s), with enhanced location, with or without path / wildcards")
 parser.add_argument('gpssource', choices=['gpx', 'ppp'], help="Select which format the gps file is in - either gpx or ppp")
 parser.add_argument('timesource', choices=['iprgps', 'iprpc', 'both'], help="Select which timestamp to match gps timestamps to - iprgps (recommended), iprpc (if iprgps not available) or both (use caution)")
-parser.add_argument("-t", "--tzoffset", help="is the hour offset of the GPR computer from UTC (default = 0)", default=0, type=int)
+parser.add_argument("-t", "--tzoffset", help="is the hour offset (hh) of the GPR computer from UTC (default = 0)", default=0, type=float)
 parser.add_argument("-l", "--line", help="Work only on line (n); default works on all lines", type=int)
 parser.add_argument("-d", "--deltatimemax", help="Set the max time delta permissible for matching locations to (n) seconds; default is 15 seconds", 
                     default=15, type=int)
@@ -256,6 +256,7 @@ for line in lines:   # for every line...
             hdfaddrs.append(dataset)
             # get the timestamp from the EPU computer
             pcdatetime = dataset.attrs["PCSavetimestamp"]
+            pcdatetime = pcdatetime.astype(str) # make sure it is a string
             if len(pcdatetime.split(",")) == 4:    # this is a new (> 2016 file format)
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')
@@ -367,17 +368,18 @@ for i, dataset in enumerate(hdfaddrs):
 
 hdf.close()
 
+
 print("\t========== RESULTS ==========\n"
       "\tTOTAL traces:     {ntraces}\n"
       "\t MEAN timedelta:   {mn:.2f} sec\n"
       "\t MEDIAN timedelta: {md:g} sec\n"
       "\t MAX timedelta: {ma:g} sec\n"
-      "\tMODIFIED traces:  {irep}\n"
-      "\t MEAN timedelta (modified):   {mnm:.2f} sec\n"
+      "\tMODIFIED traces:  {irep}\n".format(ntraces=i+1,irep=irep, 
+        mn=np.nanmean(dts), md=np.nanmedian(dts), ma=np.nanmax(dts)))
+if not len(dts[dt_mask]) == 0:
+    print("\t MEAN timedelta (modified):   {mnm:.2f} sec\n"
       "\t MEDIAN timedelta  (modified): {mdm:g} sec\n"
-      "\t MAX timedelta  (modified): {mam:g} sec\n"
-      .format(ntraces=i+1,irep=irep, 
-      mn=np.nanmean(dts), md=np.nanmedian(dts), ma=np.nanmax(dts),
-      mnm=np.nanmean(dts[dt_mask]), mdm=np.nanmedian(dts[dt_mask]), 
-      mam=np.nanmax(dts[dt_mask])))
-
+      "\t MAX timedelta  (modified): {mam:g} sec\n".format(
+          mnm=np.nanmean(dts[dt_mask]),
+          mdm=np.nanmedian(dts[dt_mask]),
+          mam=np.nanmax(dts[dt_mask])))    
