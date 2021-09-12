@@ -51,14 +51,9 @@ class ImageWindow:
         self.lum_scale = 0.25
 
         # Turn off default shortcuts
-        for i in self.fig1.canvas.callbacks.callbacks:
-            try:
-                if i == 'key_press_event':
-                    self.fig1.canvas.mpl_disconnect(
-                            self.fig1.canvas.callbacks.callbacks[i].keys()[0])
-            except IndexError:
-                # Already disconnected
-                pass
+        key_press_cids = self.fig1.canvas.callbacks.callbacks.get('key_press_event', {})
+        for cid in key_press_cids.keys():
+            self.fig1.canvas.mpl_disconnect(cid)
 
         # Connect event handlers
         self.cid_click = self.fig1.canvas.mpl_connect( \
