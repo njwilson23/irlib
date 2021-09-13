@@ -35,8 +35,8 @@ class AppWindow(object):
         self.ax = self.fig.add_subplot(1,1,1)
 
         # Turn off default shortcuts
-        key_press_cids = self.fig.canvas.callbacks.callbacks.get('key_press_event', {})
-        for cid in key_press_cids.keys():
+        key_press_cids = list(self.fig.canvas.callbacks.callbacks.get('key_press_event', {}).keys())
+        for cid in key_press_cids:
             self.fig.canvas.mpl_disconnect(cid)
 
         # Connect event handlers
