@@ -1,4 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.439723.svg)](https://doi.org/10.5281/zenodo.439723)
+TODO - refresh DOI for new version
 
 *Radar Tools* is a library and set of tools useful for visualizing and
 processing data collected from ice-penetrating radar. The tools have been
@@ -31,109 +32,54 @@ Graphical tools:
 
 - **icerate**: Rate reflection quality using **icepick** output
 
-- **irview**: General purpose viewer for radar lines that doubles as a tool for
-  marking englacial regions **[DEPRECATED IN FAVOUR OF icepick2]**
 
 Command-line tools:
 -------------------
 
-- **h5_dumpmeta**: Dump metadata from an HDF5 survey into a CSV file
-- **h5_add_utm**: Add UTM coordinates to an HDF5 survey file (requires
-  [**pyproj**](http://code.google.com/p/pyproj/))
+- **h5_dumpmeta**: Dump metadata from an HDF5 survey into a CSV or shapefile
 - **h5_replace_gps**: Replace the coordinates in an HDF5 survey with those from
   a GPS eXchange (GPX) file or an NRCan PPP csv 
+- **h5_add_utm**: Add UTM coordinates to an HDF5 survey file 
 - **h5_generate_cache**: Generate caches to speed loading radar lines (and do some cleaning steps)
-- **h52a**: Export a line from an HDF5 file to ASCII or binary
+- **h52a**: Export a line from an HDF5 file to ASCII or binary for use in other software (like Reflex)
 - **antenna_spacing**: Reads CSV from h5_dumpmeta and creates an offsets file with antenna spacing
-- **join_radar**: Takes picked-, rated- and offset files and calculates ice depth
-- **irtrace**: Plot a radar trace acquired at a single location
-- **irline**: Plot a radar section along a line of locations
+- **join_radar**: Takes picked-, rated- and offset files and calculates ice thickness
+- **merge_picks**: Brings old picks into sync with a new picking project
+- **plottrace**: Plot a radar trace acquired at a single location
+- **plotline**: Plot a radar section along a line of locations
 
 Dependencies:
 -------------
 
-*Radar Tools* should run anywhere Python and the necessary dependencies work. In
-the past, I've managed to get it running under Windows, OS X, and Linux without
-trouble.
+*Radar Tools* is compatible with Python 3 (tested under 3.8). It should work under Windows, OS X, 
+and Linux.  To install it, conda is recommended to manage the environment and dependencies. 
+Specific steps are in the documentation pdf.  
 
-1. [*Python*](http://www.python.org) 2.6+ (3.x works for the irlib package and
-   icepick2)
-
-2. [*Numpy*](http://www.numpy.org) numerical array classes for Python
-
-2. [*Scipy*](http://www.scipy.org) science-oriented libraries for Python
-
-2. [*h5py*](http://www.h5py.org): HDF5 interface for Python
-
-2. [*matplotlib*](http://www.matplotlib.org) plotting for Python
-
-2. [*pyproj*](https://github.com/jswhit/pyproj) _libproj_ bindings
-
-2. [*six*](https://pythonhosted.org/six) compatibility library for Python 2/3
-
-2. [*pandas*](http://pandas.pydata.org/) powerful Python data analysis toolkit
-
-If you do not already have a scientific Python environment and you do not know
-how to set one up, I recommend the [Anaconda Python
-distribution](https://www.continuum.io/downloads).
-
-Additional useful packages and tools:
--------------------------------------
-
-1. [*Cython*](http://www.cython.org) for generating accelerated filters
-
-2. *pywavelet* wrapper for wavelet algorithms (*Torrence and Compo, 1998*)
-(included in `external/pywavelet-0.1`)
-
-Installation
-------------
-
-I recommend installing with `pip`. Download or clone this repository, navigate
-to it in a terminal, and type
-
-    pip install .
 
 Documentation:
---------------
+-------------
+Full documentaion is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documenation.pdf)
 
-In addition to the basic information here, documentation can be found in `doc`.
-In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
-installed, with the ``numpydoc`` extension. The extensions may be installed by
+Change Log: 
+------------------
 
-    pip install numpydoc
-
-or
-
-    conda install numpydoc
-
-Then, from the ``doc/`` directory, type
-
-    make html
-
-If LaTeX is available, the documentation can be compiled into a PDF. Type
-
-    make latexpdf
-
-A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).
-
-irlib 0.4 changes
---------------------------------
-improvements (Derek Mueller): 
-
+*irlib 0.5* changes include the following: 
 - conda environment defined for easy installation
 - replaced shebang for all scripts with /usr/bin/env so that it would work with conda
-- works in Python 3, Python 2 compatibility hopefully preserved (not tested)
+- works in Python 3, Python 2 compatibility hopefully preserved (but not tested)
 - compatible with newer versions of h5py, StringIO
-- timestamps taken as ddmm (newer) or mmdd format (older) and metadata outputs in ISO format
-- **h5_dumpmeta.py** - added some extra fields, sorts on FID, option to create a shapefile output (points or lines or both)
-- **h5_add_utm.py** - works with new lat/lon format (which as of IEI Version 5.1, Sept 2016 is a signed float)
-- **h5_replace_gps.py** - improved argument handling, works with new IEI Version 5.1 lat/lon format and enhanced support of ppp files, can offset elevation as well. 
-- **h5_save2reflex.py** - creates an ASCII file that can be read by REFLEX (not well tested --- and likely very similar to h52a.py Nat, what's your take?
-- **antenna_spacing.py** - made output file naming a bit more robust
-- **join_radar.py** - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
-- note that many of the standalone files now use argparse.  To get the syntax message type the file with flag -h and it will show up. 
+- uses argparse library for commandline options - To get the syntax message type the file with flag -h and it will show up. 
+- compatible with various flavours of the BlueSystems IEI software - see documentation pdf for more details
+- h5_dumpmeta.py - added extra metada fields, sorts on FID, option to create a shapefile output (points or lines or both)
+- h5_add_utm.py - works with new lat/lon format 
+- h5_replace_gps.py - improved argument handling, enhanced support of ppp files, can offset elevation
+- h52a - added format that can be read by REFLEX (not well tested)
+- antenna_spacing.py - made output file naming a bit more robust
+- join_radar.py - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
+- merge _picks.py - added this to reuse old picks with re-cleaned data
+- reorganized the documentation and added suggested workflows
 
-*irlib* 0.4 represents significant refactoring and cleaning of both the library
+*irlib 0.4* represents significant refactoring and cleaning of both the library
 and application design. Breaking changes in the final version will be kept to a
 minimum, however the *stable-0.3* branch is available if necessary.
 
@@ -154,74 +100,10 @@ minimum, however the *stable-0.3* branch is available if necessary.
 - HDF file write?
 - PulseEkko data reader?
 
-### Install instructions 
 
-conda env
+*irlib 0.3* this is a stable branch. 
+TODO - Nat do you have anything to say here? 
 
-Use one of these lines to create the environment you want: 
-1. Highly recommended (contains vitables, an hdf viewer): 
-    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas vitables
-2. Essential (has libraries to run all irlib functionality):
-    conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas
-3. Create a copy of the environment defined in the environment.yml file: 
-     conda create -n environment.yml
-
-Note that each of these lines also installs other dependencies (readline, ipython, pyproj, to name a few)... 
-
-After installing the irlib conda environment, activate it: 
-
-    conda activate irlib
- 
-Then add the path to the irlib folder like so (example):
-
-    conda develop ~/GitHub/irlib
- 
-This will put a file called conda.pth in the site-packages folder and will add this path to the environment when activated.
-
-Add the irlib directory to your path if you want to call the scripts from the command line.
-
-### Notes
-
-##### TODO:
-- learn github markdown a bit better... 
-- Make sure you replace all optparse with argparse.. 
-- examine the replace_gps to understand better how this works. 
-- develop a way of merging picking files. Say you pick a few lines and then regenerate the cache with more or less FIDs...  
-- Ask Laurent about file formats and what version of his software they come from (a few files for a test suite would be great to include)
-
-##### TODO: MESSAGE for NAT --> 
-
-Sorry if my coding style takes over or ruins your vision of irlib. Philosophy: 
--I seek to make pragmatic changes only.  I am not rewriting everything just changing what makes sense to me and adding features that might be useful.  
--I have moved to Py3 and I have not spent time to test in Py2 (but also tried not to torpedo Py2 users)
--I embraced 'newer' libraries - argparse, pandas and geopandas to get what needs to be done done. I feel they are more intuitive and easy to program with, so this saved me time as well
--Updating wrt Laurent's h5 changes (in part see below); trying to provide more flex for users; trying to preserve some functionality for users of older file formats (UNTESTED BUT WILL LOOK AT THIS)
-
-I am looking for your blessing for these changes in advance of a PR but also I have some questions to ask so we can have a conversation. 
-
-NAT please grep TODO for: 
-- console line 69
-- components line 41
-- icerate line 61
-- self.fig.canvas.mpl_disconnect(cbval[3])
-SHOWS UP also IN ICERATE AND ICEPICK
-I am not really up on this code and would appreciate your input.  
-
-Changes in IEI h5 file format (as per Laurent Mingo)
-
-Version 5.1 IEI (Sept 2016)
-- Added correction for Lat Lon,
-     E and W with positive and negative signs
-
-Version 4.4.1 IEI: Format of GPS string is:
-
-    With no GPS used: GPSCaptureEvent_StartBufferCapture.ms:-99,BufferCaptureTime.ms:264,PPS_NO
-    
-    With standard GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_NO
-    
-    With PPS GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_YES
-
-FYI -- Note for future... this project seems to have some momentum: https://impdar.readthedocs.io/en/latest/ 
 
 License:
 --------

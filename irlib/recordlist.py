@@ -9,6 +9,7 @@ import numpy as np
 import traceback
 import datetime
 import h5py 
+import pdb
 
 
 def pcdateconvert(pcdatetime, datefmt='ddmm'):
@@ -195,7 +196,9 @@ class RecordList:
             pcdatetime = dataset.attrs["PCSavetimestamp"]
             # there are various formats.  Decide which is which by splitting the string
             # and manipulating it. 
-            pcdatetime = pcdatetime.astype(str) #convert to string, this converts byte-encoded data
+            
+            if not type(pcdatetime) == str:
+                pcdatetime = pcdatetime.astype(str) #convert to string, this converts byte-encoded data
             if len(pcdatetime.split(",")) == 4:
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 self.timestamps.append(isodate(pcdateconvert(timestamp, datefmt='ddmm')))

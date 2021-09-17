@@ -9,6 +9,9 @@ In general, typing any of the utilities without arguments yield invocation and
 usage instructions that are printed to the screen. This section summarizes
 individual tool's functionality.
 
+
+TODO - modify all these for version 0.5 
+
 Data management
 ----------------
 

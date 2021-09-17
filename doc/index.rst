@@ -37,83 +37,17 @@ construction, individualized plotting, and interfacing *radar_tools*
 capabilities with external Python scripts. The commandline and GUI utilities in
 *radar_tools* are themselves built on ``irlib``.
 
-Dependencies
-------------
-
-*radar_tools* is built upon a number of standard tools from the scientific
-Python ecosystem. The following are *required*:
-
-- Python_ : Already installed for Linux/Mac OS X users
-
-- Numpy_ : Basic array type, analogous to a matrix in MATLAB, except better
-
-- Scipy_ : Wrappers for scientific libraries used for efficient filtering
-
-- h5py_ : interface for HDF datasets
-
-- matplotlib_ : Plotting library required for GUI tools
-
-- pyproj_ : Wrapper for *proj.4* geographical projection library
-
-- pandas_ : Powerful Python data analysis toolkit
-
-Finally, these are *nice to have*:
-
-- Cython_ : Python compiler for improving performance
-
-- IPython_ : Interactive computing environment similar to MATLAB or Mathematica
-
-Consider using a package manager (e.g. APT, rpm, pacman, or Homebrew).
+Irlib was first developed prior to 2012 back in Python2 days.  Since then Python
+2 is no longer supported so everything from version 0.5 on works with Python 3.  
+Some of the functions may be backward compatible but this has not been fully 
+tested.  If you need Python 2 functionality, please use and older version of 
+irlib.  Users may also wish to check out another open source suite of radar 
+tools.  See: https://impdar.readthedocs.io/en/latest/ 
 
 
-Installation
-------------
+TODO - set the order of the chapters here
 
-The latest version is on Github_. After downloading either directly or using the
-command
-
-::
-
-    >> git clone git@github.com:njwilson23/irlib.git
-
-Installation is best done with ``pip``, the Python package manager.
-
-::
-
-    >> cd irlib/    # [or whereever it's downloaded to]
-    >> pip install .
-
-Assuming that dependencies are available (see above), this will take care of
-installing ``radar_tools`` properly. 
-
-To use the *pywavelet* wavelet transform algorithms, navigate to
-``irlib/external`` and follow the directions in the ``README`` file, being sure
-to move the created file ``pywavelet.so`` to some place from which it can be
-imported.
-
-Installing manually
-~~~~~~~~~~~~~~~~~~~
-
-Alternatively, *irlib* can be build in place without ``pip`` by doing
-
-::
-
-    >> python setup.py build_ext --inplace
-
-Path
-~~~~
-
-For convenience, programs that make up *radar\_tools* should be on the execution
-``PATH``. If ``pip`` was used, this should be taken care of. Otherwise, on Linux
-and Mac OS X, one can add the following line to the ``.bashrc``:
-
-::
-
-    export PATH=$PATH:~/python/irlib
-
-On Windows, one should be able to modify the *Path* variable by right clicking
-on **My Computer** and going to *Properties -> Advanced System Settings ->
-Environment Variables*.
+.. include:: doc_installation.rst
 
 .. include:: doc_utilities.rst
 
@@ -124,6 +58,8 @@ Environment Variables*.
 .. include:: doc_tutorial.rst
 
 .. include:: doc_irlib.rst
+
+.. include:: doc_h5formats.rst
 
 .. include:: doc_references.rst
 

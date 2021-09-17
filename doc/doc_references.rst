@@ -10,15 +10,21 @@
 
 .. _Scipy: http://www.scipy.org/SciPy
 
-.. _h5py: http://code.google.com/p/h5py/
+.. _h5py: https://www.h5py.org/
 
 .. _matplotlib: http://matplotlib.org/
 
-.. _pyproj: http://code.google.com/p/pyproj/
+.. _pandas: https://pandas.pydata.org/
+
+.. _geopandas: https://geopandas.org/ 
 
 .. _Cython: http://cython.org/
 
-.. _IPython: http://ipython.org/
+.. _Spyder: https://www.spyder-ide.org/
+
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+
+.. _Vitables: https://vitables.org/
 
 .. _gstat: http://www.gstat.org/
 

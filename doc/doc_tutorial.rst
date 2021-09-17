@@ -17,6 +17,10 @@ of February 13, 2013 (``commit 3dc4638de82867b58c40cd19727d3cfd980112f6``).
 Most likely, it will be best to use the most recent version available.
 Furthermore, I'll be using gstat_ for interpolation.
 
+TODO - Adriana to evaluate the use case for this tutorial... Reorganzation? 
+Bring up to date? 
+
+
 Set-up
 ------
 

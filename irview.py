@@ -54,14 +54,9 @@ class ImageWindow:
         self.lum_scale = 0.25
 
         # Turn off default shortcuts
-        for i in self.fig1.canvas.callbacks.callbacks:
-            try:
-                if i == 'key_press_event':
-                    self.fig1.canvas.mpl_disconnect(
-                            self.fig1.canvas.callbacks.callbacks[i].keys()[0])
-            except IndexError:
-                # Already disconnected
-                pass
+        key_press_cids = self.fig1.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
+        for cid in key_press_cids.keys():
+            self.fig1.canvas.mpl_disconnect(cid)
 
         # Connect event handlers
         self.cid_click = self.fig1.canvas.mpl_connect( \
@@ -337,7 +332,7 @@ def OpenLine(S, line, fh5, fromcache=True, tocache=False, datacapture=0):
         L = None
         IW = None
     except AssertionError:
-        print "no channel {0} found".format(datacapture)
+        print ("no channel {0} found".format(datacapture))
         L = None
         IW = None
     return IW, L
@@ -394,28 +389,28 @@ def HandleCommand(s, S, IW, L):
         sys.exit(0)
 
     elif args[0] == 'info':                 # INFO
-        print S.datafile
-        print 'line: ' + str(IW.line)
+        print (S.datafile)
+        print ('line: ' + str(IW.line))
         try:
-            print 'channel: ' + str(L.datacapture)
+            print ('channel: ' + str(L.datacapture))
         except AttributeError:
             pass
-        print '# traces: ' + str(IW.arr.shape[1])
-        print '# samples: ' + str(IW.arr.shape[0])
-        print 'sample interval: ' + str(IW.rate) + ' s'
-        print 'depth resolution: ' + str(IW.rate * 1.68e8 / 2.0) + ' m'
-        print 'vertical range: ' + str(1.68e8*IW.arr.shape[0]*IW.rate / 2.0) + ' m'
-        print 'available channels: ' + str(S.GetChannelsInLine(int(L.line)))
+        print ('# traces: ' + str(IW.arr.shape[1]))
+        print ('# samples: ' + str(IW.arr.shape[0]))
+        print ('sample interval: ' + str(IW.rate) + ' s')
+        print ('depth resolution: ' + str(IW.rate * 1.68e8 / 2.0) + ' m')
+        print ('vertical range: ' + str(1.68e8*IW.arr.shape[0]*IW.rate / 2.0) + ' m')
+        print ('available channels: ' + str(S.GetChannelsInLine(int(L.line))))
 
     elif args[0] == 'ls':                   # LS
-        print reduce(lambda a,b: a + "{0:>9}".format(b), S.GetLines())
-        print 9*" "*IW.line + 4*" " + "^"
+        print (reduce(lambda a,b: a + "{0:>9}".format(b), S.GetLines()))
+        print (9*" "*IW.line + 4*" " + "^")
 
     elif args[0] == 'open':                 # OPEN
         try:
             line = args[1]
         except IndexError:
-            print "Must supply at least a line number"
+            print ("Must supply at least a line number")
             return IW, L
 
         try:
@@ -423,13 +418,13 @@ def HandleCommand(s, S, IW, L):
         except IndexError:
             datacapture = 0
         except ValueError:
-            print "Bad channel number: {0}".format(args[2])
+            print ("Bad channel number: {0}".format(args[2]))
             return IW, L
 
         try:
             if 'line_{0}'.format(line) in S.GetLines() and \
                 datacapture < S.GetChannelsInLine(int(line)):
-                print "Opening line {0}, channel {1}".format(line, datacapture)
+                print ("Opening line {0}, channel {1}".format(line, datacapture))
                 if IW:
                     IW.Close()
                     del IW
@@ -448,9 +443,9 @@ def HandleCommand(s, S, IW, L):
             IW.arr = L.data
             IW.ShowRadargram(repaint=True)
         except app.command_parser.CommandSearchError as e:
-            print e.message
+            print (e.message)
         except IndexError:
-            print StrFilterHistory(L)
+            print (StrFilterHistory(L))
 
     elif args[0] in ('nofilter', 'nf'):     # NOFILTER
         L.Reset()
@@ -476,19 +471,19 @@ def HandleCommand(s, S, IW, L):
         try:
             IW.RemoveFeature(int(args[1]))
         except IndexError:
-            print "No such feature"
+            print ("No such feature")
 
     elif args[0] == 'dls':                  # DLS
-        print "Feature List"
+        print ("Feature List")
         for key in IW.features.keys():
-            print "{0}: {1} vertices".format(key, len(IW.features[key][1]))
+            print ("{0}: {1} vertices".format(key, len(IW.features[key][1])))
 
     elif args[0] == 'dsave':                # DSAVE
         try:
             dict_list = IW.Export()
             outfnm = IW.GetDigitizerFilename()
             WriteFeatures(IW, outfnm)
-            print "Features saved to " + outfnm
+            print ("Features saved to " + outfnm)
         except:
             traceback.print_exc()
 
@@ -527,7 +522,7 @@ def HandleCommand(s, S, IW, L):
 
     elif args[0] == 'help':                 # HELP
         if len(args) == 1:
-            print """\tApplication commands:
+            print ("""\tApplication commands:
 
             info                print line metadata
             ls                  list lines in survey
@@ -546,17 +541,17 @@ def HandleCommand(s, S, IW, L):
             hist                show a brightness histogram
             exit                exit irview
             debug
-            """
+            """)
 
-            print "\tAvailable filter commands:\n"
+            print ("\tAvailable filter commands:\n")
             for name in app.command_parser.list_filters():
-                print "\t\t{0}".format(name)
+                print ("\t\t{0}".format(name))
 
         else:
-            print app.command_parser.help_filter(args[1])
+            print (app.command_parser.help_filter(args[1]))
 
     else:
-        print "Command not recognized"
+        print ("Command not recognized")
 
     return IW, L
 
@@ -565,13 +560,13 @@ def HandleCommand(s, S, IW, L):
 def main():
 
     def print_syntax():
-        print "\t irview -f file_name [-L line_number]"
+        print ("\t irview -f file_name [-L line_number]")
         return
 
     try:
         optlist, args = getopt.gnu_getopt(sys.argv[1:], 'f:L:')
     except getopt.GetoptError:
-        print "Error collecting arguments - check syntax."
+        print ("Error collecting arguments - check syntax.")
         print_syntax()
         sys.exit(1)
     optdict = dict(optlist)
@@ -579,7 +574,7 @@ def main():
     try:
         infile = optdict['-f']
     except KeyError:
-        print "A survey filename must be supplied:"
+        print ("A survey filename must be supplied:")
         print_syntax()
         sys.exit(0)
 
@@ -590,10 +585,10 @@ def main():
     IW,L = OpenLine(S, line, fh5)
 
     # Begin main loop
-    print "Ice Radar Viewing Tool (IRView)"
-    print "Press [shift+n] to digitize a feature."
-    print "Right-click or press [shift+e] to end the feature."
-    print "Type 'help' for additional commands."
+    print ("Ice Radar Viewing Tool (IRView)")
+    print ("Press [shift+n] to digitize a feature.")
+    print ("Right-click or press [shift+e] to end the feature.")
+    print ("Type 'help' for additional commands.")
     while 1:
         s = raw_input('>> ')
         IW, L = HandleCommand(s, S, IW, L)

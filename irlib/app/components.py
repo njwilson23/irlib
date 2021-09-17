@@ -33,17 +33,12 @@ class AppWindow(object):
         """
         self.fig = plt.figure(figsize=winsize)
         self.ax = self.fig.add_subplot(1,1,1)
-
+        import pdb;  pdb.set_trace()
         # Turn off default shortcuts
-        for cbname, cbval in self.fig.canvas.callbacks.callbacks.items():
-            try:
-                if cbname == 'key_press_event':
-                    pass   # DM put this here TODO fix this
-                    #self.fig.canvas.mpl_disconnect(cbval[3])  # DM commented out
-            except IndexError:
-                # Already disconnected
-                pass
-
+        key_press_cids = self.fig.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
+        for cid in key_press_cids.keys():
+            self.fig.canvas.mpl_disconnect(cid)
+  
         # Connect event handlers
         self.cid_click = self.fig.canvas.mpl_connect('button_press_event', self._onclick)
         self.cid_key = self.fig.canvas.mpl_connect('key_press_event', self._onkeypress)
@@ -96,7 +91,7 @@ class Radargram(AppWindow):
         super(Radargram, self).__init__((10, 4))
         self.digitize_mode = False
         self._newline(L)
-        self.fig.canvas.manager.set_window_title("Radargram") # Depreciated
+        self.fig.canvas.manager.set_window_title("Radargram") 
         self.fig.tight_layout()
         return
 

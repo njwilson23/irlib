@@ -56,10 +56,9 @@ class RatingWindow(object):
         self.ax2.set_yticklabels('')
         
         # Turn off default shortcuts
-        for i in self.fig1.canvas.callbacks.callbacks:
-            if i == 'key_press_event':
-                pass  # DM put this here TODO fix this
-                #self.fig1.canvas.mpl_disconnect(self.fig1.canvas.callbacks.callbacks[i].keys()[0])
+        key_press_cids = self.fig1.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
+        for cid in key_press_cids.keys():
+            self.fig1.canvas.mpl_disconnect(cid)
 
         # Connect event handlers
         #self.cid_click = self.fig1.canvas.mpl_connect( \
