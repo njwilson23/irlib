@@ -8,9 +8,7 @@ code is on github at https://github.com/njwilson23/irlib
 
 There are 5 steps:
 
-.. _setup_a_conda_environment:
-
-Setup a conda environment
+Setup_a_conda_environment:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These steps will set up and manage your Python environment and
@@ -25,7 +23,7 @@ dependencies for irlib.  For more on the dependencies themselves, see below.
 
 -  This will be a bare-bones installation to run irlib
 
-``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas sphinx vitables spyder-kernels ``
+``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas sphinx vitables spyder-kernels``
 
 -  As above but also installs vitables, an hdf viewer, sphinx and spyder-kernels to
    allow you to use spyder to run and debug the code (but only if you set the interpreter 
@@ -33,7 +31,7 @@ dependencies for irlib.  For more on the dependencies themselves, see below.
    supported by your version of spyder. You may want to pin the spyder-kernels version (and/or 
    your python version) like (This will go OUT OF DATE as spyder moves forward, the following works with spyder 4):
 
-``conda create -n irlib -c conda-forge python=3.8 h5py scipy matplotlib cython geopandas vitables spyder-kernels=1.9 ``
+``conda create -n irlib -c conda-forge python=3.8 h5py scipy matplotlib cython geopandas vitables spyder-kernels=1.9``
 
 -  Use the environment file in the repository (spyder-kernels=1.9 here will also go OUT OF
    DATE as the Spyder package evolves):
@@ -42,7 +40,7 @@ dependencies for irlib.  For more on the dependencies themselves, see below.
 
 -  To run irlib you need to work out of a conda-aware console and type:
 
-``conda activate irlib ``
+``conda activate irlib``
 
 .. _make_an_irlib_directory:
 
@@ -64,7 +62,9 @@ Go to https://github.com/njwilson23/irlib and download a
 zip of latest irlib and unzip it in that folder. Alternative: if you
 have git installed you can type the following in the terminal:
 
-``git clone ``\ ```https://github.com/njwilson23/irlib.git```_
+::
+
+    >> git clone git@github.com:njwilson23/irlib.git
 
 This makes a directory in your home folder called py/irlib-master. I renamed this to 'irlib' for simplicity. Note: 
 make a copy of the irlib zip file or directory for safekeeping. If you
@@ -126,8 +126,8 @@ irlib conda environment.
 -  Activate the conda environment and ensure that the irlib files are
    always available. In a terminal type:
 
-| ``conda activate irlib``
-| ``conda develop ``\ 
+ ``conda activate irlib``
+ ``conda develop`` 
 
 Where is where the irlib code is located
 
@@ -150,7 +150,7 @@ h5_dumpmeta.py [-h] [-o OUTFILE] [-c] [-w] [-l] [--clobber] [--swap_lon] [--swap
 Then see if it works with an h5 file (in this example it is called
 'survey.h5':
 
-`` h5_dumpmeta.py survey.h5``
+``h5_dumpmeta.py survey.h5``
 
 It will output some metadata to the screen.
 
@@ -159,7 +159,7 @@ are set and make sure that the python files are executable.
 
 
 Dependencies
-------------
+---------------------
 
 *radar_tools* is built upon a number of standard tools from the scientific
 Python ecosystem. The following are *required*:
@@ -191,7 +191,7 @@ Finally, these are *nice to have*:
 
 
 Alternative installations
-------------
+-----------------------------------
 
 Using a package manager (e.g. APT, rpm, pacman, or Homebrew) download all the dependencies above
 

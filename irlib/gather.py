@@ -491,13 +491,13 @@ class Gather(object):
         return
 
     def DoAutoGainControl(self, timewin=20e-8):
-        """ Apply the RMS-based AGC algorithm from Seismic Unix*.
+        """ Apply the RMS-based AGC algorithm from Seismic Unix.
 
         Try to use a fast Cython-accellerated version. If that fails, fall
         back to the Numpy version.
 
         *Cohen, J.K. and Stockwell, J.W. CWP/SU: Seismic Unix Release
-        42. Colorado School of Mines, Center for Wave Phenomena. (1996)
+        42. Colorado School of Mines, Center for Wave Phenomena. (1996)*
 
         Parameters
         ----------

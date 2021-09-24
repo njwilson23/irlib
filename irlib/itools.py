@@ -190,7 +190,7 @@ def find_projected_nearest_to(x, y, D):
     Pmesh = remove_breaks(Pmesh)
 
     ind = find_nearest2d(x, y, pX, pY)
-    print ind
+    print (ind)
     return find_nearest1d(Pmesh, P[ind])
 
 def read_cresis_mat(matfile):

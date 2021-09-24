@@ -132,7 +132,7 @@ class Survey:
         Parameters
         ----------
         line : line number [integer]
-        location : trace number [integrer]
+        location : trace number [integer]
         datacapture : (default 0) channel number [integer]
         echogram : (default 0) echogram number [integer]
         """
@@ -142,7 +142,8 @@ class Survey:
         with h5py.File(self.datafile) as f:
             vec = f[path][:]
         return vec
-
+   
+       
     def ExtractLine(self, line, bounds=(None,None), datacapture=0,
                     fromcache=False, cache_dir="cache", print_fnm=False,
                     verbose=False, gather_type=CommonOffsetGather):

@@ -1,5 +1,5 @@
-.. radar_tools documentation master file, created by
-   sphinx-quickstart on Wed Feb 13 12:02:03 2013.
+.. icepick and irlib (radar_tools) documentation master file, created by
+   sphinx-quickstart on Sat Sep 18 06:50:40 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -7,8 +7,9 @@ Documentation for IcePick and irlib (radar_tools)
 =================================================
 
 .. toctree::
-    :depth: 3
-
+   :maxdepth: 3
+   :caption: Contents:
+   
 Introduction
 ============
 
@@ -63,10 +64,10 @@ TODO - set the order of the chapters here
 
 .. include:: doc_references.rst
 
-.. Indices and tables
-.. ==================
+Indices and tables
+==================
 
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 
