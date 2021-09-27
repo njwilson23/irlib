@@ -34,62 +34,6 @@ options. Examples include:
 
 - ``exit`` and ``q`` both close *IcePick2*.
 
-Filters
--------
-
-In addition to viewing raw data, *IcePick2* provides access to pre-defined
-filters on the fly using the ``f`` command (mnemonic "filter"). For example,
-typing::
-
-    f gc
-
-applies a linear gain control operator to each trace, increasing the amplitude
-of later-arriving events. This modifies the data in memory, and **it does not
-alter the data in the HDF file**. Help for individual filters is obtained by
-typing ``help [filtername]``. In order to determine what filters have been
-applied to a dataset, typing ``f`` alone lists them, along with any parameters
-required to reproduce the presently displayed data. The data can be reset to
-the version originally loaded by typing ``nf`` (mnemonic "no filter").
-
-The presently defined filters include common operations such as time-domain and
-frequency-domain filtering, dewow, linear and automatic gain control, F-K
-migration, and instrument ringing removal. Defining custom filters can be done
-by constructing a subclass of irlib.app.filters.Command. The operation performed
-by the filter is contained in the ``apply()`` method, and can include *irlib*
-calls, or any other Python manipulation of the ``Gather`` data.
-
-**Non-comprehensive list of filters**
-
-=============== ==============================================================
-Command         Description
-=============== ==============================================================
-*Gain Control*
-``gc``          Applies a linear gain enhancement
-``agc``         Applies an automatic (nonlinear) gain enhancement
-*Convolutions*
-``dewow``       "Dewowing" filter to remove instrument drift
-``lowpass``     Performs a frequency-domain lowpass filter with a cutoff
-                frequency of 25 MHz
-``highpass``    Performs a frequency-domain lowpass filter with a cutoff
-                frequency of 25 MHz
-``lowpass_td``  Performs a time-domain lowpass filter (moving average)
-``highpass_td`` Performs a time-domain highpass filter (inverted moving
-                average)
-*Recursive*
-``iir30low``    Chebyschev lowpass filter with cutoff at 30 MHz
-``iir25high``   Chebyschev highpass filter with cutoff at 25 MHz
-*Migration*
-``migfk``       Stolt (F-K) migration
-*Misc*
-``abs``         Displays the absolute value of the data
-``wiener``      Wiener statistical noise filter
-``ringing``     Horizontal ringing filter based on singular value decomposition
-``project``     Project radar line to straight segments with equal trace
-                spacing
-=============== ==============================================================
-
-A comprehensive list is provided by typing ``help`` with no arguments.
-
 
 Windows
 -------
@@ -157,6 +101,63 @@ The MapWindow shows the current line as a series of dots shown on a Mercator
 projection.
 
 
+Filters
+-------
+
+In addition to viewing raw data, *IcePick2* provides access to pre-defined
+filters on the fly using the ``f`` command (mnemonic "filter"). For example,
+typing::
+
+    f gc
+
+applies a linear gain control operator to each trace, increasing the amplitude
+of later-arriving events. This modifies the data in memory, and **it does not
+alter the data in the HDF file**. Help for individual filters is obtained by
+typing ``help [filtername]``. In order to determine what filters have been
+applied to a dataset, typing ``f`` alone lists them, along with any parameters
+required to reproduce the presently displayed data. The data can be reset to
+the version originally loaded by typing ``nf`` (mnemonic "no filter").
+
+The presently defined filters include common operations such as time-domain and
+frequency-domain filtering, dewow, linear and automatic gain control, F-K
+migration, and instrument ringing removal. Defining custom filters can be done
+by constructing a subclass of irlib.app.filters.Command. The operation performed
+by the filter is contained in the ``apply()`` method, and can include *irlib*
+calls, or any other Python manipulation of the ``Gather`` data.
+
+**Non-comprehensive list of filters**
+
+=============== ==============================================================
+Command         Description
+=============== ==============================================================
+*Gain Control*
+``gc``          Applies a linear gain enhancement
+``agc``         Applies an automatic (nonlinear) gain enhancement
+*Convolutions*
+``dewow``       "Dewowing" filter to remove instrument drift
+``lowpass``     Performs a frequency-domain lowpass filter with a cutoff
+                frequency of 25 MHz
+``highpass``    Performs a frequency-domain lowpass filter with a cutoff
+                frequency of 25 MHz
+``lowpass_td``  Performs a time-domain lowpass filter (moving average)
+``highpass_td`` Performs a time-domain highpass filter (inverted moving
+                average)
+*Recursive*
+``iir30low``    Chebyschev lowpass filter with cutoff at 30 MHz
+``iir25high``   Chebyschev highpass filter with cutoff at 25 MHz
+*Migration*
+``migfk``       Stolt (F-K) migration
+*Misc*
+``abs``         Displays the absolute value of the data
+``wiener``      Wiener statistical noise filter
+``ringing``     Horizontal ringing filter based on singular value decomposition
+``project``     Project radar line to straight segments with equal trace
+                spacing
+=============== ==============================================================
+
+A comprehensive list is provided by typing ``help`` with no arguments.
+
+
 Caching
 -------
 
@@ -167,6 +168,26 @@ Any filter can be applied at the time of cache generation. Caches are Python
 "pickles" (serialized data), and contain a snapshot of the radar data, as well
 as a reference to ``irlib``. Substantial changes to ``irlib`` may require cache
 regeneration.
+
+
+Recommended IcePick2 workflow
+-----------------------------
+
+Below is a recommended workflow for IcePick2 which is to be used with command line
+utility cleaned data (previously introduced). This approch can be altered to fit
+specific needs by adding additional commands, but this is a good place to start.
+
+-  Launch IcePick2: ```icepick2.py ipr_survey.h5```
+-  Open each line one at a time and and follow the below workflow: ```open 1```
+-  Turn on the PickWindow: ```pick on```
+-  Auto pick DC: ```pick dc uppersample# lowersample#```
+	-  check for and correct any errors
+-  Apply filters
+	-  find the best combination for optimal visibility (see filter options above)
+-  Pick bed using the PickWindow
+	-  Can auto pick as was done for DC, however, it is much less accurate
+-  Save picks: ```pick save```
+-  It is suggested that you take notes while picking to ease interpretation later
 
 
 .. Digitizing

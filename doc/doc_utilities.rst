@@ -156,3 +156,27 @@ h52mat
 ``h5_generate_caches`` are available. For those who prefer MATLAB, the rest of
 this document can be ignored.
 
+
+Recommended data cleaning workflow
+----------------------------------
+
+The following steps are very helpful for data cleaning and streamlining
+workflow. Also some of the steps are prerequisites for subsequent
+analyses, so **do this in the correct order**. It is really very
+important that you take notes on what you did so that your workflow
+can be recreated later. It is recommmend you open a document and copy paste
+what you did from the terminal in there for safekeeping. Also, you can
+copy the screen output there too. As you go be aware that some scripts
+will overwrite files. Recommend that you use unique file names that
+represent the step that you just completed.
+
+-  ``h5_dumpmeta.py``
+-  ``h5_consolidate``
+-  ``h5_replace_gps.py``
+-  ``h5_add_utm.py``
+-  ``h5_dumpmeta.py``
+-  ``h5_dumpmeta.py``
+
+Once this has been been completed the data is ready to be used in IcePick2.py, 
+which will be elaborated on in the next chapter.
+
