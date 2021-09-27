@@ -54,15 +54,17 @@ TODO - set the order of the chapters here
 
 .. include:: doc_icepick.rst
 
-.. include:: doc_custom_commands.rst
+.. include:: doc_irview.rst
 
 .. include:: doc_tutorial.rst
 
-.. include:: doc_irlib.rst
-
 .. include:: doc_h5formats.rst
 
-.. include:: doc_references.rst
+.. include:: doc_custom_commands.rst
+
+.. include:: doc_documentation.rst
+
+.. include:: doc_irlib.rst
 
 Indices and tables
 ==================
