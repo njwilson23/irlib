@@ -54,7 +54,7 @@ class Gather(object):
     A new `Gather` (or one of it's subclasses) is typically created by calling
     the `ExtractLine` method of a `Survey` instance. Alternatively, a `Gather`
     (or it's subclasses) can be created by passing a Numpy array as a first
-    argument, e.g.::
+    argument, e.g. ::
 
         G = CommonOffsetGather(mydata)
 
@@ -303,7 +303,7 @@ class Gather(object):
         """ Load topography along line gather, reading from an ASC file.
         Obviously, this requires the Gather to have a valid metadata attribute.
 
-        If `smooth`=True, then apply a boxcar filter to soften the effects of
+        If `smooth` =True, then apply a boxcar filter to soften the effects of
         the DEM discretization.
         """
 
@@ -755,7 +755,7 @@ class Gather(object):
         return
 
     def Reset(self):
-        """ Reset data and metadata using the internal *_copy attribute
+        """ Reset data and metadata using the internal ``*``_copy attribute
         variables. Does not undo the effects of operations that overwrite
         these attribute (such as most preprocessing routines).
         """

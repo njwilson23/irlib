@@ -8,8 +8,8 @@ code is on github at https://github.com/njwilson23/irlib
 
 There are 5 steps:
 
-Setup_a_conda_environment:
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Setup a conda environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These steps will set up and manage your Python environment and
 dependencies for irlib.  For more on the dependencies themselves, see below.
@@ -42,7 +42,6 @@ dependencies for irlib.  For more on the dependencies themselves, see below.
 
 ``conda activate irlib``
 
-.. _make_an_irlib_directory:
 
 Make an irlib directory
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +52,6 @@ wish (including within the conda environment folders). Make a directory
 called 'py' in your home folder. This will hold the irlib directory. Change 
 directory into that folder.
 
-.. _download_irlib:
 
 Download irlib
 ~~~~~~~~~~~~~~
@@ -72,7 +70,6 @@ start messing around, it's good to get the original back without any
 fuss (mostly important in the field if you are not near internet).
 
 
-.. _set_the_operating_system_path:
 
 Set the operating system path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,7 +112,6 @@ your data files are located).
 
 ``echo %PATH%``
 
-.. _set_the_conda_environment_path:
 
 Set the conda environment path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,6 +159,18 @@ Dependencies
 
 *radar_tools* is built upon a number of standard tools from the scientific
 Python ecosystem. The following are *required*:
+
+.. _Python: http://python.org/
+.. _Numpy: http://www.numpy.org/
+.. _Scipy: http://scipy.org/SciPy
+.. _h5py: http://code.google.com/p/h5py/
+.. _matplotlib: http://matplotlib.org/
+.. _pandas: 
+.. _geopandas: 
+.. _Cython: http://cython.org/
+.. _Spyder: 
+.. _Sphinx: 
+.. _Vitables: 
 
 - Python_ : Already installed for Linux/Mac OS X users
 
