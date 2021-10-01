@@ -11,7 +11,7 @@ timestamps taken as ddmm (newer) or mmdd format (older) and metadata outputs in 
 
 Version 5.1 IEI (Sept 2016)
 - Added correction for Lat Lon,
-     E and W with positive and negative signs
+    E and W with positive and negative signs
 
 Version 4.4.1 IEI: Format of GPS string is:
 
