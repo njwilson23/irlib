@@ -1,5 +1,5 @@
 Documentation:
---------------
+==============
 
 TODO - check if we can run sphinx with sphinx dependency or need numpydoc
 

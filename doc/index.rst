@@ -45,26 +45,38 @@ tested.  If you need Python 2 functionality, please use and older version of
 irlib.  Users may also wish to check out another open source suite of radar 
 tools.  See: https://impdar.readthedocs.io/en/latest/ 
 
+The following documentation is as complete as possible.  For the **beginner user** 
+it starts with how to install the software and then progresses through some of the 
+data handling utilities and then reviews how to pick radar returns.  Following 
+this, an **intermediate user** might wish to follow the in-depth tutorial.  
+At the end of the manual there are topics for **advanced users and developpers**. 
+
 
 TODO - set the order of the chapters here
 
+.. introduction is above... next installation
+
 .. include:: doc_installation.rst
 
+.. Commandline utilities section
 .. include:: doc_utilities.rst
 
+.. Icepick 
 .. include:: doc_icepick.rst
 
-.. include:: doc_irview.rst
-
+.. Tutorial is more in-depth and 
 .. include:: doc_tutorial.rst
 
 .. include:: doc_h5formats.rst
 
 .. include:: doc_custom_commands.rst
 
+.. Sphinx documentation 
 .. include:: doc_documentation.rst
 
-.. include:: doc_irlib.rst
+.. irlib API section
+.. include:: doc_irlib.rst  
+
 
 Indices and tables
 ==================

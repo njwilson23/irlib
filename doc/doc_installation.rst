@@ -1,5 +1,8 @@
 Installation
-------------
+============
+
+Installation with Conda
+-----------------------
 
 Installing and setting up irlib is best managed in a conda environment.
 Follow the conda instructions followed by Linux or Windows instructions
@@ -9,7 +12,7 @@ code is on github at https://github.com/njwilson23/irlib
 There are 5 steps:
 
 Setup a conda environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These steps will set up and manage your Python environment and
 dependencies for irlib.  For more on the dependencies themselves, see below.
@@ -155,7 +158,10 @@ are set and make sure that the python files are executable.
 
 
 Dependencies
----------------------
+------------
+In this section the main irlib dependencies are listed and discussed. *If you installed 
+with conda as above you should have these dependencies already and you don't need to 
+read this section.* 
 
 *radar_tools* is built upon a number of standard tools from the scientific
 Python ecosystem. The following are *required*:
@@ -163,14 +169,17 @@ Python ecosystem. The following are *required*:
 .. _Python: http://python.org/
 .. _Numpy: http://www.numpy.org/
 .. _Scipy: http://scipy.org/SciPy
-.. _h5py: http://code.google.com/p/h5py/
+.. _h5py: https://www.h5py.org/
 .. _matplotlib: http://matplotlib.org/
-.. _pandas: 
-.. _geopandas: 
+.. _pandas: https://pandas.pydata.org/
+.. _geopandas: https://geopandas.org/ 
 .. _Cython: http://cython.org/
-.. _Spyder: 
-.. _Sphinx: 
-.. _Vitables: 
+.. _Spyder: https://www.spyder-ide.org/
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _Vitables: https://vitables.org/
+.. _Github: http://njwilson23.github.com/radar_tools
+.. _gstat: http://www.gstat.org/
+
 
 - Python_ : Already installed for Linux/Mac OS X users
 
@@ -199,7 +208,7 @@ Finally, these are *nice to have*:
 
 
 Alternative installations
------------------------------------
+-------------------------
 
 Using a package manager (e.g. APT, rpm, pacman, or Homebrew) download all the dependencies above
 
