@@ -5,12 +5,17 @@
 #
 #
 
-import sys, getopt, os.path, StringIO
-from irlib import ExtractLine
+import sys, getopt, os.path
+try:
+    import StringIO ## for Python 2
+except ImportError:
+    import io as StringIO ## for Python 3
 import pdb
+pdb.set_trace()
+from irlib import Survey
 
 def print_syntax():
-    print """
+    print("""
     SYNTAX: h52a infile Nline|all [options] > file
 
     h52a - export a line from HDF5 to an ASCII (or binary) file
@@ -20,9 +25,10 @@ def print_syntax():
 
     Options:
         -b          write to binary instead (32-bit float)
+        -r          make a reflex version instead
         -f          automatically name the output file
         --clobber   overwrite existing files
-    """
+    """)
 
 def arr2ascii(f, arr):
     """ Write a numpy array arr as an ascii grid to file f. """
@@ -41,7 +47,7 @@ else:
     line = int(args[1])
 
 try:
-    line_data = ExtractLine(infile, line)
+    line_data = Survey.ExtractLine(infile, line)
 except:
     sys.stderr.write("h52a: error extracting line data\n")
     sys.exit(1)
