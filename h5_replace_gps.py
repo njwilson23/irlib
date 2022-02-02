@@ -9,7 +9,6 @@
 
 from __future__ import print_function
 import sys
-import os
 import glob
 import argparse
 import datetime
@@ -19,8 +18,7 @@ import numpy as np
 import h5py
 import pandas as pd
 import irlib
-import pdb
-pdb.set_trace()
+#import pdb; pdb.set_trace()
 
 def get_time(gps_timestamp, timestamp, tzoffset, gpsmissing=False):
     """ 
@@ -256,7 +254,8 @@ for line in lines:   # for every line...
             hdfaddrs.append(dataset)
             # get the timestamp from the EPU computer
             pcdatetime = dataset.attrs["PCSavetimestamp"]
-            pcdatetime = pcdatetime.astype(str) # make sure it is a string
+            if not type(pcdatetime) is str:   #  I lost track of what this may be if not a string! 
+                pcdatetime = pcdatetime.astype(str) # make sure it is a string
             if len(pcdatetime.split(",")) == 4:    # this is a new (> 2016 file format)
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')

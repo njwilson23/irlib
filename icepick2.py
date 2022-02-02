@@ -2,7 +2,7 @@
 """ Benchmark program for irlib app framework """
 
 import sys
-import pdb
+#import pdb; pdb.set_trace()
 
 
 import irlib.app.filters
@@ -11,7 +11,7 @@ import irlib.app.mapcommands
 from irlib.app.console import Console
 from irlib.app.components import Radargram
 
-bannertext = """IcePick v0.4-dev
+bannertext = """IcePick v0.5
 Type 'help' for assistance with available commands."""
 
 try:

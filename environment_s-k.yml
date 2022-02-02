@@ -11,3 +11,5 @@ dependencies:
   - geopandas 
   - vitables 
   - sphinx
+  - spyder-kernels>=2.2.1
+

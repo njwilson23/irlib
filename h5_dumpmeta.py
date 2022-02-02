@@ -15,7 +15,7 @@ import os.path
 import glob
 import traceback
 import argparse
-import pdb
+#import pdb; pdb.set_trace()
 
 try:
     import StringIO ## for Python 2

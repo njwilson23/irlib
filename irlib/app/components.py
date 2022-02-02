@@ -33,7 +33,7 @@ class AppWindow(object):
         """
         self.fig = plt.figure(figsize=winsize)
         self.ax = self.fig.add_subplot(1,1,1)
-        import pdb;  pdb.set_trace()
+        
         # Turn off default shortcuts
         key_press_cids = self.fig.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
         for cid in key_press_cids.keys():
@@ -264,8 +264,11 @@ class Radargram(AppWindow):
         filter opperation).
         """
         n = self.data.shape[0]
-        self.ax.lines = []
-        self.ax.texts = []
+        #import pdb; pdb.set_trace()
+        # These next 2 lines of code cause problems in matplotlib 3.5 - can't set them
+        #https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.5.0.html?highlight=axes.lines#behaviour-changes
+        #self.ax.lines = []   ##TODO need workaround as this throws an error (can't set)
+        #self.ax.texts = []   ##TODO need workaround as this throws an error (can't set)
 
         # Draw nodes
         drawxy = lambda xy: self.ax.plot(xy[0], xy[1], 'or', markersize=5.0,

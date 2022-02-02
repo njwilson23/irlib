@@ -6,8 +6,12 @@
 import sys
 import os
 import shutil
-import getopt
+import argparse
 import traceback
+import h5py
+import irlib
+import pyproj
+#import pdb; pdb.set_trace()
 
 def calculate_centroid(X, Y):
     """ Return the planar centroid of a matched pair of X and Y coordinates.
@@ -27,12 +31,9 @@ def calculate_utm_zone(xll, yll):
     zone = int((180 + xll) // 6) + 1
     return (zone, hemi)
 
-opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["swap_lon"])
-optdict = dict(opts)
-
-if len(args) != 2:
-    print("""
-    SYNTAX: h5_add_utm --swap_lon INFILE OUTFILE
+# Command-line parsing
+prog_description = """
+    SYNTAX: h5_add_utm --swap_lon --swap_lat INFILE OUTFILE
 
         Replaces geographical coordinates in INFILE with UTM coordinates
         in OUTFILE. Does not perform any datum shift. 
@@ -43,18 +44,19 @@ if len(args) != 2:
         	forces longitudes to be interpretted from the eastern hemisphere.
 		UTM projection is calculated assuming that the data from neither from western Norway nor Svalbard.
 	  New format - Latitude and longigude data in BSI HDF files are signed to indicate 
-		hemisphere. If any lat or lon values are negative, the --swap_lon key is disabled
+		hemisphere. If any lat or lon values are negative, the --swap_lon key and --swap_lat key is disabled
+        """
 
-        
-    """)
-    #sys.exit(1)
-else:
-    import irlib
-    from irlib.recordlist import ParseError
-    import h5py
-    import pyproj
-    INFILE = sys.argv[1]
-    OUTFILE = sys.argv[2]
+parser = argparse.ArgumentParser(description = prog_description)
+parser.add_argument("infile", help="input HDF (*.h5) filename, with or without path")
+parser.add_argument("outfile")
+parser.add_argument("--swap_lon",action = 'store_true')
+parser.add_argument("--swap_lat",action = 'store_true')
+args = parser.parse_args()
+
+INFILE = args.infile
+OUTFILE = args.outfile
+
 
 print('operating on {0}'.format(INFILE))
 
@@ -90,14 +92,17 @@ print("\tdone")
 xlm, ylm = calculate_centroid(metadata.lons, metadata.lats)
 if xlm>0 and ylm>0:
     # This is Northern and Eastern Hemisphere... See if you should swap_lon
-    if "--swap_lon" in optdict:
+    if args.swap_lon:
         print("swapping sign on longitudes for eastern hemisphere")
         lons = metadata.lons
     else:
         lons = [-lon if lon is not None else None for lon in metadata.lons]
 else:
     lons = metadata.lons
-lats = metadata.lats
+if args.swap_lat:
+    lats = [-lat if lat is not None else None for lat in metadata.lats]
+else:
+    lats = metadata.lats    
 
 num_sat = metadata.num_sat
 fix_qual = metadata.fix_qual
@@ -118,6 +123,7 @@ if hemi == 'N':
     projector = pyproj.Proj(proj='utm', zone=zone, north=True, datum="WGS84") # Auto-determined
 if hemi == 'S':
     projector = pyproj.Proj(proj='utm', zone=zone, south=True, datum="WGS84") # Auto-determined
+
 print("Projecting to UTM zone {0}{1}".format(zone, hemi))
 
 for i, (lon, lat) in enumerate(zip(lons, lats)):

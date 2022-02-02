@@ -1,9 +1,11 @@
 #! /usr/bin/env python
-#
-#   IceRate - Graphical trace quality rating tool using matplotlib and irlib
-#
-#
-from __future__ import print_function
+'''
+   IceRate - Graphical trace quality rating tool using matplotlib and irlib
+
+
+TODO: replace getopt with argparse
+
+'''
 
 import irlib
 import numpy as np
