@@ -1519,7 +1519,7 @@ class PickableGather(Gather):
                 # Except what?
                 izero = np.nan
             return izero
-
+        
         # Apply function over all traces
         try:
             picks = np.array(list(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)))
