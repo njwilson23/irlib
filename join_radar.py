@@ -41,6 +41,7 @@ HDF5 files, and computes ice thickness at each valid observation location.
     
     You must have a subdirectory 'picking' to run this script
     If there is no rating directory, all picks will be processed with a rating of '-9'
+    If there is a rating directory, ONLY lines with ratings will be processed. 
     If there is no offsets directory, you can specify --offset that will be applied to all traces 
     
     Caution-- This script will overwrite files in the results subdirectory. 
@@ -114,6 +115,8 @@ else:
     if rate:
         rating_lines = list(map(pull_number, rating_files))
         common_lines = list(set(picking_lines).intersection(rating_lines))
+        #TODO: if there are some lines rated and some not, this means only rated lines
+        #will be processed.  Can change this behaviour if you want... 
     else: 
         common_lines = picking_lines
 
@@ -124,6 +127,7 @@ try:
     df = pd.DataFrame()  # Empty dataframe to append to
     print('reading from')
     for line in common_lines:
+        
         #GET PICKING DATAFRAME
         pickfile = picking_files[picking_lines.index(line)]
         print ('\t' + pickfile)
@@ -170,8 +174,8 @@ try:
         PROL = pd.merge(PRO,L, on="FID", how='inner')          
         
         print("\t Line {} has {} traces, {} are in the pick file, {} are rated. {} traces in common but {} have invalid picks. \n".format(
-            line, L.shape[0], P.shape[0], R.shape[0], PROL.shape[0],
-            P.trav_time.isnull().sum()))
+            line, L.shape[0], P.shape[0], R.shape[0]-R['rating'].value_counts()[-9], 
+            PROL.shape[0], P.trav_time.isnull().sum()))
         
         if args.removeNA:
             PROL = PROL.dropna(subset=["trav_time"])
@@ -185,7 +189,7 @@ try:
         PROL.loc[(PROL.rating == -9),'err'] = float('nan')  # for unrated
         PROL['line'] = line
         PROL['bed_elev'] = PROL.elev-PROL.thick
-        df = df.append(PROL)
+        df = pd.concat([df, PROL])
 
     # Now should have a dataframe with all lines
     path_out = "result/"
