@@ -16,6 +16,7 @@ import glob
 import traceback
 import argparse
 import pdb
+pdb.set_trace()
 
 try:
     import StringIO ## for Python 2

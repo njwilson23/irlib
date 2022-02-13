@@ -20,7 +20,7 @@ import h5py
 import pandas as pd
 import irlib
 import pdb
-pdb.set_trace()
+#pdb.set_trace()
 
 def get_time(gps_timestamp, timestamp, tzoffset, gpsmissing=False):
     """ 
@@ -256,7 +256,7 @@ for line in lines:   # for every line...
             hdfaddrs.append(dataset)
             # get the timestamp from the EPU computer
             pcdatetime = dataset.attrs["PCSavetimestamp"]
-            pcdatetime = pcdatetime.astype(str) # make sure it is a string
+            #pcdatetime = pcdatetime.astype(str) # make sure it is a string TODO account for differnent filetypes 
             if len(pcdatetime.split(",")) == 4:    # this is a new (> 2016 file format)
                 timestamp, startbuf,buftime,pps = pcdatetime.split(",")
                 timestamp = irlib.recordlist.pcdateconvert(timestamp, datefmt='ddmm')

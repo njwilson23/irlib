@@ -81,37 +81,33 @@ This step is not strictly necessary but needs to be done if you want to
 type the irlib command line executables from any folder (including where
 your data files are located).
 
--  LINUX: Instructions assume you are using Bash and you installed to
-   the directory from the example above.
+**LINUX**
 
-   -  Find the hidden .bashrc file and open it in an editor. At the
+Instructions assume you are using Bash and you installed to
+the directory from the example above.
+
+Find the hidden .bashrc file and open it in an editor. At the
       bottom of this file type and then save the file:
 
 | ``# Set path for irlib python scripts HERE``
 | ``export PATH=$PATH:~/py/irlib-master``
 
--  
-
-   -  Then, in a terminal, type the following to make the change
+Then, in a terminal, type the following to make the change
       permanent:
 
 ``source .bashrc``
 
--  WINDOWS:
+**WINDOWS**
 
-   -  To add path for the current session:
+To add path for the current session:
 
 ``set PATH=%PATH%;C:\your\path\to\irlib\code``
 
--  
-
-   -  To permanently add path, but not for current session:
+To permanently add path, but not for current session:
 
 ``setx PATH=%PATH%;C:\your\path\to\irlib\code``
 
--  
-
-   -  To view you current operating system path:
+To view you current operating system path:
 
 ``echo %PATH%``
 
@@ -143,8 +139,10 @@ Open a terminal, activate your irlib conda environment and type:
 
 ``h5_dumpmeta.py -h``
 
-You should see the useage message starting like so: usage:
-h5_dumpmeta.py [-h] [-o OUTFILE] [-c] [-w] [-l] [--clobber] [--swap_lon] [--swap_lat] infile
+You should see the useage message starting like so: 
+
+``usage: h5_dumpmeta.py [-h] [-o OUTFILE] [-c] [-w] [-l] [--clobber] 
+[--swap_lon] [--swap_lat] infile``
 
 Then see if it works with an h5 file (in this example it is called
 'survey.h5':
@@ -224,7 +222,7 @@ Installation is best done with ``pip``, the Python package manager.
 
 ::
 
-    >> cd irlib/    # [or whereever it's downloaded to]
+    >> cd irlib/    # or wherever it's downloaded to
     >> pip install .
 
 Assuming that dependencies are available (see above), this will take care of

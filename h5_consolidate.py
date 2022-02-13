@@ -4,25 +4,26 @@
 #
 
 import h5py
-import sys, getopt
+import argparse
 
-def print_syntax():
-    print("""
+prog_description = """
     SYNTAX: h5_consolidate INFILE1 INFILE2 [...] -o OUTFILE
 
     Combines multiple datasets (>1) into a single concatenated dataset.
-    """)
+    """
 
-optlist, fins = getopt.gnu_getopt(sys.argv[1:], 'o:')
-optdict = dict(optlist)
+parser = argparse.ArgumentParser(description = prog_description)
+parser.add_argument('infile', action = 'append', nargs = '*')
+parser.add_argument('-o', '--outfile')
 
-if '-o' in optdict.keys():
-    fout = optdict['-o']
-else:
-    print_syntax()
-    sys.exit()
+args = parser.parse_args()
+
+
+fout = args.outfile
+fins = args.infile[0]
 
 h5out = h5py.File(fout, 'w')
+
 
 # Read each input HDF in the order provided, and copy each line to h5out
 i = 0
@@ -42,4 +43,3 @@ for fin in fins:
     h5in.close()
 
 h5out.close()
-

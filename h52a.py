@@ -8,6 +8,35 @@
 import sys, getopt, os.path, StringIO
 from irlib import ExtractLine
 import pdb
+import argparse
+
+#transition to argparse - in progress
+'''
+prog_description = """
+    SYNTAX: h52a infile Nline|all [options] > file
+
+    h52a - export a line from HDF5 to an ASCII (or binary) file
+
+        Instead of Nline, all may be specified to extract all lines.
+        In this case, [-f] is assumed.
+
+    Options:
+        -b          write to binary instead (32-bit float)
+        -f          automatically name the output file
+        --clobber   overwrite existing files
+    """
+
+parser = argparse.ArgumentParser(description = prog_description)
+parser.add_argument('infile')
+parser.add_argument('-b', help = 'write to binary instead (32-bit float)')
+parser.add_argument('-f', help = 'automatically name the output file')
+parser.add_argument('--clobber', help = 'overwrite existing files')
+
+args = parser.parse_args()
+
+#need to figure out the Nline/all dilemma
+#need to go though inputs in below code and change through
+'''
 
 def print_syntax():
     print """

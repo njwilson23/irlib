@@ -51,8 +51,21 @@ data handling utilities and then reviews how to pick radar returns.  Following
 this, an **intermediate user** might wish to follow the in-depth tutorial.  
 At the end of the manual there are topics for **advanced users and developpers**. 
 
+**Beginner User**
+Introduction
+Installation
+Command-line Utilities
+IcePick2
+icerate
 
-TODO - set the order of the chapters here
+**Intermediate User**
+Tutorial
+
+**Advanced Users and Developpers**
+Changes in IEI h5 file format
+Adding customized filters to the irlib GUI apps
+Documentation
+irlib API
 
 .. introduction is above... next installation
 
