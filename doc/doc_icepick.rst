@@ -7,9 +7,6 @@ these tasks.
 
 *IcePick2* is started from the command line using the syntax
 
-TODO -- Adriana to add wiki content and reorganize the order of sections - 
-Include a "Quick Start Guide" and "Suggested Workflow"
-
 ::
 
     icepick2.py -f HDFNAME [-L LINENO]

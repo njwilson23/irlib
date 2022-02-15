@@ -14,7 +14,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('/home/dmueller/Documents/GitHub/irlib'))
+sys.path.insert(0, os.path.abspath('/home/acaswell/Documents/sphinx/documentation'))
 
 
 # -- Project information -----------------------------------------------------
