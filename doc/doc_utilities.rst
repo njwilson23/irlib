@@ -37,7 +37,8 @@ h5_replace_gps
 	
 		This tool replaces the existing geographical data in a ice radar HDF
 		database with data taken from a GPX file, e.g. obtained from a handheld or
-		external GPS unit or from a CSV file, e.g. obtained from a PPP output of GPS data
+		external GPS unit or from a CSV file, e.g. obtained from a PPP output of 
+		GPS data
 
 	Positional arguments:
 		infile           	input HDF (.h5) filename, with or without path, 
@@ -150,11 +151,13 @@ h5_dumpmeta
     SYNTAX: h5_dumpmeta infile [OPTIONS]
 
     Positional arguments:
-		infile	input HDF (*.h5) filename, with or without path, if you use wildcards 
+		infile	input HDF (*.h5) filename, with or without path, if you use 
+		wildcards 
 				in linux, put this in quotes
 
     Optional arguments:
-		-o 		output file BASENAME [if missing, will be automatically generated]
+		-o 		output file BASENAME [if missing, will be automatically 
+				generated]
 		-c 		create csv metadata file
 		-w 		create a waypoint metadata shapefile
 		-l 		create a line metadata shapefile

@@ -80,7 +80,7 @@ failed = []
 for i, dataset in enumerate(datasets):
     try:
         metadata.AddDataset(fin[dataset])
-    except ParseError:
+    except:
         sys.stderr.write('Failed to read {0}\n'.format(dataset))
         failed.append(i)
 fin.close()
@@ -144,7 +144,7 @@ fout = h5py.File(OUTFILE, 'r+')
 # For each dataset in OUTFILE, modify the UTM attribute cluster in place
 for i, dataset in enumerate(datasets):
     try:
-        try:   # This is the old way h5py library decodes based on data type specified
+        try:   # This is the oldParseError way h5py library decodes based on data type specified
             xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
         except:  # This is the newer way, should work h5py >= 3.0 
             xml = fout[dataset].attrs['GPS Cluster_UTM-MetaData_xml']

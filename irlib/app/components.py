@@ -34,7 +34,7 @@ class AppWindow(object):
         """
         self.fig = plt.figure(figsize=winsize)
         self.ax = self.fig.add_subplot(1,1,1)
-        
+
         # Turn off default shortcuts
         key_press_cids = self.fig.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
         for cid in key_press_cids.keys():

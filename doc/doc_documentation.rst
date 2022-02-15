@@ -1,7 +1,5 @@
-Documentation:
-==============
-
-TODO - check if we can run sphinx with sphinx dependency or need numpydoc
+Documentation
+=============
 
 In addition to the basic information here, documentation can be found in `doc`.
 In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
@@ -22,7 +20,6 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
     make latexpdf
 
 A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).  
-TODO - replace this file link - or put pdf in git repo. 
 
 
 
