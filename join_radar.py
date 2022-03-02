@@ -171,10 +171,10 @@ try:
         #only picks with offsets will go forward         
         PRO = pd.merge(PR,O, on="FID", how='inner')
         #only picks with rating, with offset with data will go forward          
-        PROL = pd.merge(PRO,L, on="FID", how='inner')          
+        PROL = pd.merge(PRO,L, on="FID", how='inner')      
         
-        print("\t Line {} has {} traces, {} are in the pick file, {} are rated. {} traces in common but {} have invalid picks. \n".format(
-            line, L.shape[0], P.shape[0], R.shape[0]-R['rating'].value_counts()[-9], 
+        print("\t Line {} has {} traces, {} are in the pick file, {} are rated. \n\t\t {} traces have both picks and are rated but {} have invalid picks\n".format(
+            line, L.shape[0], P.shape[0], len(R['rating'] != -9), 
             PROL.shape[0], P.trav_time.isnull().sum()))
         
         if args.removeNA:
