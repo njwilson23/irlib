@@ -243,11 +243,34 @@ icerate
 
 *icerate* is a tool for rating the quality of picks before surface
 interpolation. The interface is similar to *IcePick2*, although missing a number
-of features. In the future, *icerate* will be replaced by a RatingWindow in
-*IcePick2*.
+of features. 
 
-Once picks have been made, they can be rated for quality. *icerate* shows the
-picks made in *IcePick2* (either in order or randomly), and allows a numeric
-quality rating to be applied (individually or in small groups) by typing
-**1-5**. When ``save`` is typed, the results will go into ``rating/``.
+When working in a previously picked file, open icerate window:
+	``$ icerate.py -f survey_ppp_utm.h5``
+
+Open the line you wish to work in:
+	``open 1``
+
+Enter a number from 1-5 to assign a rating that corresponds to quality of the pick 
+displayed in the window. These ratings are subjective evaluations that are used to 
+quantify the certainty of each pick. 
+
++-----------+--------------------+
+| Rating    | Approximate Error  |
++===========+====================+
+| 5         | 1.4 m              |
++-----------+--------------------+
+| 4         | 1.7 m              |
++-----------+--------------------+
+| 3         | 2.2 m              |
++-----------+--------------------+
+| 2         | 3.5 m              | 
++-----------+--------------------+
+| 1         | 7.1 m              |
++-----------+--------------------+
+
+Once the rating of the selected line is complete, save the rating:
+	``save``
+Once saved this ratings can be found in “rating/“.
+
 
