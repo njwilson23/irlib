@@ -11,3 +11,4 @@ dependencies:
   - geopandas 
   - vitables 
   - sphinx
+  - numpydoc

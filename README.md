@@ -41,7 +41,7 @@ Command-line tools:
   a GPS eXchange (GPX) file or an NRCan PPP csv 
 - **h5_add_utm**: Add UTM coordinates to an HDF5 survey file 
 - **h5_generate_cache**: Generate caches to speed loading radar lines (and do some cleaning steps)
-- **h52a**: Export a line from an HDF5 file to ASCII or binary for use in other software (like Reflex)
+- **h5_export**: Export a line from an HDF5 file to ASCII or binary for use in other software (like Reflex)
 - **antenna_spacing**: Reads CSV from h5_dumpmeta and creates an offsets file with antenna spacing
 - **join_radar**: Takes picked-, rated- and offset files and calculates ice thickness
 - **merge_picks**: Brings old picks into sync with a new picking project
@@ -53,12 +53,12 @@ Dependencies:
 
 *Radar Tools* is compatible with Python 3 (tested under 3.8). It should work under Windows, OS X, 
 and Linux.  To install it, conda is recommended to manage the environment and dependencies. 
-Specific steps are in the documentation pdf.  
+Specific steps are in the documentation pdf.
 
 
 Documentation:
 -------------
-Full documentaion is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documenation.pdf)
+Full documentaion is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documentation.pdf)
 
 Change Log: 
 ------------------
@@ -66,14 +66,14 @@ Change Log:
 *irlib 0.5* changes include the following: 
 - conda environment defined for easy installation
 - replaced shebang for all scripts with /usr/bin/env so that it would work with conda
-- works in Python 3, Python 2 compatibility hopefully preserved (but not tested)
-- compatible with newer versions of h5py, StringIO
+- works in Python 3, Python 2 compatibility hopefully preserved (but not properly tested)
+- compatible with newer versions of h5py, StringIO, matplotlib
 - uses argparse library for commandline options - To get the syntax message type the file with flag -h and it will show up. 
-- compatible with various flavours of the BlueSystems IEI software - see documentation pdf for more details
+- compatible with various flavours of the BlueSystems IceRadar software/h5 file formats - see documentation pdf for more details
 - h5_dumpmeta.py - added extra metada fields, sorts on FID, option to create a shapefile output (points or lines or both)
 - h5_add_utm.py - works with new lat/lon format 
 - h5_replace_gps.py - improved argument handling, enhanced support of ppp files, can offset elevation
-- h52a - added format that can be read by REFLEX (not well tested)
+- h5_exporty.py - replaces h52a.py and added format that can be read by REFLEX (not well tested)
 - antenna_spacing.py - made output file naming a bit more robust
 - join_radar.py - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
 - merge _picks.py - added this to reuse old picks with re-cleaned data

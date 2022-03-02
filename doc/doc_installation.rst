@@ -22,22 +22,15 @@ dependencies for irlib.  For more on the dependencies themselves, see below.
    permissions** to the conda directory and create an environment
    specifically to use irlib (Run one of these options):
 
-``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas``
-
 -  This will be a bare-bones installation to run irlib
 
-``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas sphinx vitables spyder-kernels``
+``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas``
 
--  As above but also installs vitables, an hdf viewer, sphinx and spyder-kernels to
-   allow you to use spyder to run and debug the code (but only if you set the interpreter 
-   to the correct environment). The trick with spyder is that the spyder-kernels version must be
-   supported by your version of spyder. You may want to pin the spyder-kernels version (and/or 
-   your python version) like (This will go OUT OF DATE as spyder moves forward, the following works with spyder 4):
+-  As above but also installs vitables, an hdf viewer and sphinx:
 
-``conda create -n irlib -c conda-forge python=3.8 h5py scipy matplotlib cython geopandas vitables spyder-kernels=1.9``
+``conda create -n irlib -c conda-forge python h5py scipy matplotlib cython geopandas sphinx vitables numpydoc``
 
--  Use the environment file in the repository (spyder-kernels=1.9 here will also go OUT OF
-   DATE as the Spyder package evolves):
+-  Or use the environment file in the repository:
 
 ``conda create -n environment.yml``
 
@@ -172,11 +165,11 @@ Python ecosystem. The following are *required*:
 .. _pandas: https://pandas.pydata.org/
 .. _geopandas: https://geopandas.org/ 
 .. _Cython: http://cython.org/
-.. _Spyder: https://www.spyder-ide.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _Vitables: https://vitables.org/
 .. _Github: http://njwilson23.github.com/radar_tools
 .. _gstat: http://www.gstat.org/
+.. _numpydoc: https://numpydoc.readthedocs.io/en/latest/index.html
 
 
 - Python_ : Already installed for Linux/Mac OS X users
@@ -197,11 +190,11 @@ Python ecosystem. The following are *required*:
 
 Finally, these are *nice to have*:
 
-- Spyder_ : Interactive developlment environment if you plan on debugging and edition code. 
-
 - Sphinx_ : Documentation generator library. 
 
-- Vitables_ : An hdf viewer to look at the structure of h5 files more visually.
+- numpydoc_ : A sphinx extension containing styling.
+
+- Vitables_ : An hdf viewer to look at the structure of h5 files more visually. (you can also use hdfview or another alternative)
 
 
 

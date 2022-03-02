@@ -5,6 +5,7 @@ When contributing code, please add your name.
 
     Nat Wilson
     Derek Mueller
+    Adriana Caswell
     Henrik Engstrom
     Fanny Ekblom Johansson
 	

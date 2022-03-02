@@ -19,7 +19,7 @@ If LaTeX is available, the documentation can be compiled into a PDF. Type
 
     make latexpdf
 
-A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).  
+A pdf copy of the current documentation can be found on the project github site
 
 
 

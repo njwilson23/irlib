@@ -12,5 +12,7 @@ doc/_build/*
 # User data
 data/*
 picking/*
+results/*
+rating/*
 rating/autosave.txt
 .history
