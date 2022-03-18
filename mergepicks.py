@@ -26,7 +26,6 @@ import pandas as pd
 import os
 import numpy as np
 import pdb
-pdb.set_trace()
 
 def get_pick_fnm(h5,lineno,dirpicking):
     """ Autogenerate a filename for pickfiles. (modified from components.py)"""
