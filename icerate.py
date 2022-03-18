@@ -51,9 +51,9 @@ class RatingWindow(object):
         # Set up the plotting window
         plt.ion()
         self.fig1 = plt.figure(1, figsize=(12,5))
-        
+     
         self.fig1.canvas.manager.set_window_title("Pick rater")
-        
+
         # Axes 1 is the radargram; axes 2 is the trace being rated
         self.ax1 = self.fig1.add_axes([0.1, 0.05, 0.7, 0.9])
         self.ax2 = self.fig1.add_axes([0.8, 0.05, 0.1, 0.9])
@@ -61,8 +61,10 @@ class RatingWindow(object):
         self.ax2.set_yticklabels('')
         
         # Turn off default shortcuts
+
         key_press_cids = self.fig1.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
         for cid in key_press_cids.keys():
+
             self.fig1.canvas.mpl_disconnect(cid)
 
         # Connect event handlers

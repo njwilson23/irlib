@@ -224,6 +224,7 @@ class RecordList:
         # XML parsing code (unused categories set to None for speed)
         # Parse main cluster
         try:
+
             try:   # This is the old way h5py library decodes based on data type specified
                 xml = dataset.attrs['GPS Cluster- MetaData_xml'].decode("utf-8")
             except:  # This is the newer way, should work h5py >= 3.0 
@@ -237,6 +238,7 @@ class RecordList:
                 self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long')))  #Changed from Long_W
             
             self.gps_time.append(self._xmlGetValS(xml, 'GPS_timestamp_UTC'))            
+
             self.fix_qual.append(self._xmlGetValI(xml, 'Fix_Quality'))
             self.num_sat.append(self._xmlGetValI(xml, 'Num _Sat'))
             self.dilution.append(self._xmlGetValF(xml, 'Dilution'))
@@ -251,6 +253,7 @@ class RecordList:
 
         # Parse digitizer cluster
         try:
+
             try:   # This is the old way h5py library decodes based on data type specified
                 xml = dataset.attrs['Digitizer-MetaData_xml'].decode("utf-8")
             except:  # This is the newer way, should work h5py >= 3.0 
@@ -270,6 +273,7 @@ class RecordList:
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
             self.hasUTM = True
             try:
+
                 try:   # This is the old way h5py library decodes based on data type specified
                     xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
                 except:  # This is the newer way, should work h5py >= 3.0 
