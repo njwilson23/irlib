@@ -29,7 +29,7 @@ Version 4.4.1 IceRadar: Format of PCSavetimestamp string is:
 	With standard GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_NO
 	With PPS GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_YES
     
-	Importantly, in some cases the actual timestamp is saved as a comment field. The format is dd/mm/yyy 
+	Importantly, in some cases the actual timestamp is saved as a comment field. The format is dd/mm/yyyy
 
 Version ? IceRadar: (ca. 2009)
 
