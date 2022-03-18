@@ -58,7 +58,7 @@ Specific steps are in the documentation pdf.
 
 Documentation:
 -------------
-Full documentaion is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documentation.pdf)
+Full documentation is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documentation.pdf)
 
 Change Log: 
 ------------------
