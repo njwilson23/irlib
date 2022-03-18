@@ -12,8 +12,6 @@
 import sys, getopt, os.path
 from irlib.misc import ExtractTrace, PlotTrace
 import traceback
-import pdb
-pdb.set_trace()
 
 def print_syntax():
     print ("""
