@@ -14,7 +14,7 @@ from irlib.misc import ExtractTrace, PlotTrace
 import traceback
 
 def print_syntax():
-    print """
+    print ("""
     SYNTAX: plottrace infile Nline Nlocation [options]
 
     Options:
@@ -24,7 +24,7 @@ def print_syntax():
         -d          specify vertical spacing (default = 0.1)
         -G[file]    save trace to a file
         --clobber   overwrite existing files
-    """
+    """)
 
 
 optlist, args = getopt.gnu_getopt(sys.argv[1:], 'fsr:d:G:', ['clobber'])

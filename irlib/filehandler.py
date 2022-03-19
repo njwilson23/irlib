@@ -53,7 +53,7 @@ class FileHandler:
         self.bedvals = []
         self.traveltimes = []
         for row in recs:
-            if row is not '':
+            if row != '':
                 row = row.rstrip('\n')
                 self.fids.append(row.split(',')[0])
                 self.dcvals.append(float(row.split(',')[1]))
@@ -137,11 +137,11 @@ class FileHandler:
 
             if self.nrecs == 0:
                 return
-
-            self.traveltimes = [999 for i in range(self.nrecs)]
+		# changed nodata=999 to -999, since 999 is a legitimate value (DM)
+            self.traveltimes = [-999 for i in range(self.nrecs)]  
 
             for i in range(self.nrecs):
-                if self.bedvals[i] != 999 and self.dcvals[i] != 999:
+                if self.bedvals[i] != -999 and self.dcvals[i] != -999:
                     self.traveltimes[i] = self.bedvals[i] - self.dcvals[i]
         except:
             traceback.print_exc()

@@ -1,16 +1,22 @@
 #! /usr/bin/env python
-#
-#   IceRate - Graphical trace quality rating tool using matplotlib and irlib
-#
-#
-from __future__ import print_function
+'''
+   IceRate - Graphical trace quality rating tool using matplotlib and irlib
+
+
+TODO: replace getopt with argparse
+
+'''
 
 import irlib
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import sys, os, getopt
-import readline
 import traceback, pdb
+try:
+  import readline
+except ImportError:
+  import pyreadline as readline
 from random import shuffle
 
 np.seterr(invalid='ignore')
@@ -34,7 +40,8 @@ class RatingWindow(object):
             sys.stderr.write("ratings passed to RatingWindow have inconsistent length\n")
 
         ny = self.arr.shape[0]
-        self.traces = range(0, self.arr.shape[1], self.interval)
+        # made list of this range since it could not be sorted otherwise
+        self.traces = list(range(0, self.arr.shape[1], self.interval))  
         #shuffle(self.traces)
         self.n = 0
         self.cur_trace = self.traces[self.n]
@@ -44,17 +51,20 @@ class RatingWindow(object):
         # Set up the plotting window
         plt.ion()
         self.fig1 = plt.figure(1, figsize=(12,5))
-        self.fig1.canvas.set_window_title("Pick rater")
+     
+        self.fig1.canvas.manager.set_window_title("Pick rater")
 
         # Axes 1 is the radargram; axes 2 is the trace being rated
         self.ax1 = self.fig1.add_axes([0.1, 0.05, 0.7, 0.9])
         self.ax2 = self.fig1.add_axes([0.8, 0.05, 0.1, 0.9])
         self.ax2.set_xticklabels('')
         self.ax2.set_yticklabels('')
-
+        
         # Turn off default shortcuts
-        key_press_cids = list(self.fig1.canvas.callbacks.callbacks.get('key_press_event', {}).keys())
-        for cid in key_press_cids:
+
+        key_press_cids = self.fig1.canvas.callbacks.callbacks.get('key_press_event', {}).copy()
+        for cid in key_press_cids.keys():
+
             self.fig1.canvas.mpl_disconnect(cid)
 
         # Connect event handlers
@@ -69,6 +79,7 @@ class RatingWindow(object):
 
     def _drawpick(self, trace, yi):
         """ Draw a pick mark on the given trace at yi. """
+        
         trace = trace / trace.max() * self.spacing / 3.0
         self.ax2.plot(trace[int(yi)], -self.T[int(yi)], 'ob', alpha=0.4)
         return self.ax2.lines
@@ -119,17 +130,18 @@ class RatingWindow(object):
     def ShowTraces(self, view=(None, None)):
         """ Show traces as echograms in PickerWindow axes 1. """
 
-        self.ax2.lines = []
+        self.ax2.clear()
 
         # Plot the trace
         trace = self.arr[:,self.cur_trace]
         trace = trace / trace.max() * self.spacing / 3.0
         self.ax2.plot(trace, -self.T, '-k')
-
+        
         # Plot the picked time
-        if self.picks[self.cur_trace] != 999:
+        if self.picks[self.cur_trace] != -999:  #DM changed from 999 to -999
             self.mode = 'bed'
-            self._drawpick(trace, self.picks[self.cur_trace])
+            if not np.isnan(self.picks[self.cur_trace]):
+                self._drawpick(trace, self.picks[self.cur_trace])
         else:
             # should skip automatically
             pass
@@ -144,7 +156,7 @@ class RatingWindow(object):
         forces the background to be redrawn (for example, after a
         filter opperation).
         """
-        self.ax1.lines = []
+        #self.ax1.lines = []
 
         # Find the luminescense range so that plot intensity is symmetric
         lum_bound = max((abs(self.arr.max()), abs(self.arr.min())))
@@ -152,8 +164,9 @@ class RatingWindow(object):
         # Paint on the background
         if len(self.ax1.images) == 0 or repaint is True:
             self.ax1.imshow(self.arr, aspect='auto', cmap=cmap, vmin=-lum_bound, vmax=lum_bound)
-            locs = self.ax1.get_yticks()
-            self.ax1.set_yticklabels(locs*10)
+            locs = self.ax1.get_yticks().tolist()
+            self.ax1.yaxis.set_major_locator(mticker.FixedLocator(locs))
+            self.ax1.set_yticklabels(["{:0.0f}".format((x*10)) for x in locs])
 
         # Draw location indicator
         self.ax1.plot((self.cur_trace, self.cur_trace),
@@ -169,9 +182,8 @@ class RatingWindow(object):
                             [i+5 for i in self.picks[xa:xb]])
             lower_line = map(lambda n: (n==994 and np.nan or n),
                             [i-5 for i in self.picks[xa:xb]])
-
-            self.ax1.plot(range(xa, xb), upper_line, '-y', alpha=0.6, linewidth=2.)
-            self.ax1.plot(range(xa, xb), lower_line, '-y', alpha=0.6, linewidth=2.)
+            self.ax1.plot(list(range(xa, xb)), list(upper_line), '-y', alpha=0.6, linewidth=2.)
+            self.ax1.plot(list(range(xa, xb)), list(lower_line), '-y', alpha=0.6, linewidth=2.)
         except:
             traceback.print_exc()
 
@@ -219,6 +231,7 @@ def OpenLine(infile, line, pickfile, fromcache=True):
         sys.stderr.write("\n\tNo pick file found for line " + str(line) + ".\n\tPress 'up' key and change line number.\n\n")
         exit(1)
     S = irlib.Survey(infile)
+    
     L = S.ExtractLine(line, fromcache=fromcache)
     if not fromcache:
         try:
@@ -456,7 +469,10 @@ def main():
     print("IceRate")
 
     while R.isopen:
-        s = raw_input('>> ')
+        if sys.version_info[0]  == 2:
+            s = raw_input('>> ')
+        else:
+            s = input(">> ")
         R, L = HandleCommand(s, infile, R, L, S)
 
 if __name__ == '__main__':

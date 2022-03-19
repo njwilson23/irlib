@@ -1,4 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.439723.svg)](https://doi.org/10.5281/zenodo.439723)
+TODO - refresh DOI for new version
 
 *Radar Tools* is a library and set of tools useful for visualizing and
 processing data collected from ice-penetrating radar. The tools have been
@@ -31,95 +32,54 @@ Graphical tools:
 
 - **icerate**: Rate reflection quality using **icepick** output
 
-- **irview**: General purpose viewer for radar lines that doubles as a tool for
-  marking englacial regions **[DEPRECATED IN FAVOUR OF icepick2]**
 
 Command-line tools:
 -------------------
 
-- **h5_dumpmeta**: Dump metadata from an HDF5 survey into a CSV file
-- **h5_add_utm**: Add UTM coordinates to an HDF5 survey file (requires
-  [**pyproj**](http://code.google.com/p/pyproj/))
+- **h5_dumpmeta**: Dump metadata from an HDF5 survey into a CSV or shapefile
 - **h5_replace_gps**: Replace the coordinates in an HDF5 survey with those from
-  a GPS eXchange (GPX) file
-- **h5_generate_cache**: Generate caches to speed loading radar lines
-- **h52a**: Export a line from an HDF5 file to ASCII or binary
+  a GPS eXchange (GPX) file or an NRCan PPP csv 
+- **h5_add_utm**: Add UTM coordinates to an HDF5 survey file 
+- **h5_generate_cache**: Generate caches to speed loading radar lines (and do some cleaning steps)
+- **h5_export**: Export a line from an HDF5 file to ASCII or binary for use in other software (like Reflex)
 - **antenna_spacing**: Reads CSV from h5_dumpmeta and creates an offsets file with antenna spacing
-- **join_radar**: Takes picked-, rated- and offset files and calculates ice depth
-- **irtrace**: Plot a radar trace acquired at a single location
-- **irline**: Plot a radar section along a line of locations
+- **join_radar**: Takes picked-, rated- and offset files and calculates ice thickness
+- **merge_picks**: Brings old picks into sync with a new picking project
+- **plottrace**: Plot a radar trace acquired at a single location
+- **plotline**: Plot a radar section along a line of locations
 
 Dependencies:
 -------------
 
-*Radar Tools* should run anywhere Python and the necessary dependencies work. In
-the past, I've managed to get it running under Windows, OS X, and Linux without
-trouble.
+*Radar Tools* is compatible with Python 3 (tested under 3.8). It should work under Windows, OS X, 
+and Linux.  To install it, conda is recommended to manage the environment and dependencies. 
+Specific steps are in the documentation pdf.
 
-1. [*Python*](http://www.python.org) 2.6+ (3.x works for the irlib package and
-   icepick2)
-
-2. [*Numpy*](http://www.numpy.org) numerical array classes for Python
-
-2. [*Scipy*](http://www.scipy.org) science-oriented libraries for Python
-
-2. [*h5py*](http://www.h5py.org): HDF5 interface for Python
-
-2. [*matplotlib*](http://www.matplotlib.org) plotting for Python
-
-2. [*pyproj*](https://github.com/jswhit/pyproj) _libproj_ bindings
-
-2. [*six*](https://pythonhosted.org/six) compatibility library for Python 2/3
-
-2. [*pandas*](http://pandas.pydata.org/) powerful Python data analysis toolkit
-
-If you do not already have a scientific Python environment and you do not know
-how to set one up, I recommend the [Anaconda Python
-distribution](https://www.continuum.io/downloads).
-
-Additional useful packages and tools:
--------------------------------------
-
-1. [*Cython*](http://www.cython.org) for generating accelerated filters
-
-2. *pywavelet* wrapper for wavelet algorithms (*Torrence and Compo, 1998*)
-(included in `external/pywavelet-0.1`)
-
-Installation
-------------
-
-I recommend installing with `pip`. Download or clone this repository, navigate
-to it in a terminal, and type
-
-    pip install .
 
 Documentation:
---------------
+-------------
+Full documentation is generated with sphinx and a rendered version is available on github (https://github.com/njwilson23/irlib/blob/main/irlib_documentation.pdf)
 
-In addition to the basic information here, documentation can be found in `doc`.
-In order to build the documentation, [Sphinx](http://sphinx-doc.org/) must be
-installed, with the ``numpydoc`` extension. The extensions may be installed by
+Change Log: 
+------------------
 
-    pip install numpydoc
+*irlib 0.5* changes include the following: 
+- conda environment defined for easy installation
+- replaced shebang for all scripts with /usr/bin/env so that it would work with conda
+- works in Python 3, Python 2 compatibility hopefully preserved (but not properly tested)
+- compatible with newer versions of h5py, StringIO, matplotlib
+- mostly uses argparse library for commandline options - To get the syntax message type the file with flag -h and it will show up. 
+- compatible with various flavours of the BlueSystem IceRadar software/h5 file formats - see documentation pdf for more details
+- h5_dumpmeta.py - added extra metada fields, sorts on FID, option to create a shapefile output (points or lines or both)
+- h5_add_utm.py - works with new lat/lon format 
+- h5_replace_gps.py - improved argument handling, enhanced support of ppp files, can offset elevation
+- h5_exporty.py - replaces h52a.py and added format that can be read by REFLEX (not well tested)
+- antenna_spacing.py - made output file naming a bit more robust
+- join_radar.py - rewritten to optionally circumvent need for offset and rating files, added option to create shapefile
+- merge _picks.py - added this to reuse old picks with re-cleaned data
+- reorganized the documentation and added suggested workflows
 
-or
-
-    conda install numpydoc
-
-Then, from the ``doc/`` directory, type
-
-    make html
-
-If LaTeX is available, the documentation can be compiled into a PDF. Type
-
-    make latexpdf
-
-A copy can be found [here](https://dl.dropboxusercontent.com/u/375008/irlib_manual.pdf).
-
-Changes in irlib version 0.4-dev
---------------------------------
-
-*irlib* 0.4 represents significant refactoring and cleaning of both the library
+*irlib 0.4* represents significant refactoring and cleaning of both the library
 and application design. Breaking changes in the final version will be kept to a
 minimum, however the *stable-0.3* branch is available if necessary.
 
@@ -140,10 +100,15 @@ minimum, however the *stable-0.3* branch is available if necessary.
 - HDF file write?
 - PulseEkko data reader?
 
+
+*irlib 0.3* 
+Works with BlueSystem equipment circa 2012
+
+
 License:
 --------
 
 *Radar Tools* is provided "as is," without any warranty. Some parts of
-*Radar Tools* are affected by different licensing terms. See `license.txt` for
-detailed information.
+*Radar Tools* are affected by different licensing terms. 
+See `license.txt` for detailed information.
 

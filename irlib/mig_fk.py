@@ -67,9 +67,9 @@ def fktran(D, t, x, ntpad=None, nxpad=None, percent=0., ishift=1):
         raise Exception('Space domain length is inconsistent in input')
 
     if ntpad is None:
-        ntpad = 2**nextpow2(t)
+        ntpad = 2.0**nextpow2(t)
     if nxpad is None:
-        nxpad = 2**nextpow2(x)
+        nxpad = 2.0**nextpow2(x)
 
     # Get real values of transform with fftrl
     specfx, f = fftrl(D, t, percent, ntpad)
@@ -162,9 +162,9 @@ def ifktran(spec, f, kx, nfpad=None, nkpad=None, percent=0.0):
         raise Exception('wavenumber coordinate vector is wrong size')
 
     if nfpad is None:
-        nfpad = 2**nextpow2(len(f))
+        nfpad = 2.0**nextpow2(len(f))
     if nkpad is None:
-        nkpad = 2**nextpow2(len(kx))
+        nkpad = 2.0**nextpow2(len(kx))
 
     # Determine if kx needs to be wrapped
     if kx[0] < 0.0:
@@ -305,10 +305,10 @@ def fkmig(D, dt, dx, v, params=None):
     D = np.vstack([D,np.zeros([ntpad,ntr])])
 
     # xpad
-    ntrnew = 2**nextpow2( round((xmax+xpad) / dx + 1) )
+    ntrnew = 2.0**nextpow2( round((xmax+xpad) / dx + 1) )
     xmaxnew = (ntrnew-1)*dx + x[0]
     xnew = np.arange(x[0], xmaxnew+dx, dx)
-    nxpad = ntrnew - ntr
+    nxpad = ntrnew-ntr
     D = np.hstack([D, np.zeros([nsampnew,nxpad])])
 
     # Forward f-k transform

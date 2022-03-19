@@ -1,0 +1,14 @@
+name: irlib
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - h5py 
+  - scipy 
+  - matplotlib 
+  - cython 
+  - geopandas 
+  - vitables 
+  - sphinx
+  - numpydoc

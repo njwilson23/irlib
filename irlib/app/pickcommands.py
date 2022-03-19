@@ -81,7 +81,6 @@ class PickBedAuto(PickCommandBase):
     Optionally, constrain pick to between *s0* and *s1* samples from the "top"
     of the traces.
     """
-
     def apply(self, app, args):
         for w in app.get_appwindows(PickWindow):
             if len(args) > 0:

@@ -7,6 +7,71 @@ import os
 import re
 import numpy as np
 import traceback
+import datetime
+import h5py 
+import pdb
+
+
+def pcdateconvert(pcdatetime, datefmt='ddmm'):
+    '''
+    This will take a pcdatetime in BSI format - either 
+    dd/mm/yy_hh:mm:ss.sss AM/PM (default) or  mm/dd/yy_.... (if requested)
+    and make it into a datetime object
+    
+    datefmt can only be 'ddmm' (since fall 2016) or 'mmdd' <2016-Sept
+    '''
+    
+    assert (datefmt == 'ddmm' or datefmt == 'mmdd' ), "Bad date format specified"
+     
+    pcdate, pctime = pcdatetime.split("_")
+    if datefmt == 'ddmm':
+        dd,mm,yy = pcdate.split("/")
+    else:        
+        mm,dd,yy = pcdate.split("/")  # It USED to be this way 
+    hms, ampm = pctime.split()
+    h,m,s = hms.split(":")
+    if len(yy) == 2:
+        yy = "20"+yy
+    convdate = datetime.datetime(int(yy), int(mm), int(dd), int(h), int(m),\
+                                int(float(s)), int(float(s)%1*1e6) )
+    if ampm.lower() == "pm" and int(h) < 12:
+        convdate += datetime.timedelta(0, 3600*12)
+    if ampm.lower() == "am" and int(h) == 12:
+        convdate = convdate - datetime.timedelta(0, 3600*12)
+        
+    return convdate
+
+def TimeFromComment(infile, line, loc):
+        '''
+        This function finds the comment field from the datacapture_0 group using 
+        the low-level hdf 5 api called h5g.  
+        
+        This is the only place where PC timestamp is located in some versions of the 
+        hdf data format
+        
+        Note that when a dataset is opened as an h5l object, the group comment 
+        is not available, hence the reason for reopening the file (maybe could be 
+        done only once for efficiency but it doesn't seem to be an issue so far)
+            
+        infile - hdf file name
+        line  - the line as str 'line_0'
+        loc  - the loc as str 'loc_0'
+        returns a datetime object
+         
+        '''
+        
+        h = h5py.File(infile)
+        dt = h[line][loc].id.get_comment(b'datacapture_0').decode()
+        return datetime.datetime.strptime(dt, "%m/%d/%Y %I:%M:%S %p")
+    
+    
+def isodate(dt):
+    ''' Formats datetime object dt to iso date
+    '''
+    return dt.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+
+
 
 class RecordList:
     """ Class to simplify the extraction of metadata from HDF5 radar
@@ -22,12 +87,14 @@ class RecordList:
     def __init__(self, filename=None):
         self.filename = filename
 
+        #now with more metadata fields
         self.attrs = ['fids', 'filenames', 'lines', 'locations',
                       'datacaptures', 'echograms', 'timestamps', 'lats',
-                      'lons', 'fix_qual', 'num_sat', 'dilution', 'alt_asl',
+                      'lons','gps_time', 'fix_qual', 'num_sat', 'dilution', 'alt_asl',
                       'geoid_height', 'gps_fix_valid', 'gps_message_ok',
                       'datums', 'eastings', 'northings', 'elevations', 'zones',
-                      'vrange', 'sample_rate', 'comments']
+                      'vrange', 'sample_rate','stacking','trig_level','rec_len', 
+                      'startbuf', 'buftime', 'pps','comments']
 
         for attr in self.attrs:
             setattr(self, attr, [])
@@ -36,10 +103,11 @@ class RecordList:
 
     @staticmethod
     def _xmlGetValF(xml, name):
-        """ Look up a value in an XML fragment. Return NaN if not found.
+        """ Look up a float value in an XML fragment. Return NaN if not found.
         """
-        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.]+?)</Val>'.format(
-                        name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
+        # Modified search to be less restrictive
+        m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.E-]+?)</Val>'.format(
+                        name.replace(' ', '\s')), xml, flags=re.IGNORECASE)        
         if m is not None:
             return float(m.group().split('<Val>')[1].split('</Val>')[0])
         else:
@@ -47,7 +115,7 @@ class RecordList:
 
     @staticmethod
     def _xmlGetValI(xml, name):
-        """ Look up a value in an XML fragment. Return None if not found.
+        """ Look up an integer value in an XML fragment. Return None if not found.
         """
         m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>([0-9.]+?)</Val>'.format(
                         name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
@@ -58,7 +126,7 @@ class RecordList:
 
     @staticmethod
     def _xmlGetValS(xml, name):
-        """ Look up a value in an XML fragment. Return an empty string if not found.
+        """ Look up a string value in an XML fragment. Return an empty string if not found.
         """
         m = re.search(r'<Name>{0}</Name>[\r]?\n<Val>(-?[0-9.]+?)</Val>'.format(
                         name.replace(' ', '\s')), xml, flags=re.IGNORECASE)
@@ -74,8 +142,12 @@ class RecordList:
         """
         if dmstr == '': return
         try:
+            hem = 1
             a,b = dmstr.split(".")
-            return round(float(a[:-2]) +
+            if float(a[:-2]) <0:
+                hem = -1
+                a = a[1:]
+            return hem*round(float(a[:-2]) +
                          float(a[-2:])/60. + float("." + b)/60.,6)
         except (AttributeError, ValueError):
             return None
@@ -88,7 +160,7 @@ class RecordList:
 
         Parameters
         ----------
-        dataset : a h5py dataset at the `echogram` level
+        dataset : an h5py dataset at the `echogram` level
                   (fh5[line][location][datacapture][echogram])
         fid : pre-defined FID for the dataset
 
@@ -121,16 +193,53 @@ class RecordList:
             self.timestamps.append(dataset.attrs['Save timestamp'])
         elif 'PCSavetimestamp' in dataset.attrs:
             # 2009 and later
-            self.timestamps.append(dataset.attrs['PCSavetimestamp'])
+            pcdatetime = dataset.attrs["PCSavetimestamp"]
+            # there are various formats.  Decide which is which by splitting the string
+            # and manipulating it. 
+            
+            if not type(pcdatetime) == str:
+                pcdatetime = pcdatetime.astype(str) #convert to string, this converts byte-encoded data
+            if len(pcdatetime.split(",")) == 4:
+                timestamp, startbuf,buftime,pps = pcdatetime.split(",")
+                self.timestamps.append(isodate(pcdateconvert(timestamp, datefmt='ddmm')))
+                self.startbuf.append(startbuf.split(":")[1])
+                self.buftime.append(buftime.split(":")[1])
+                self.pps.append(pps)
+            elif len(pcdatetime.split(",")) == 3:
+                startbuf,buftime,pps = pcdatetime.split(",")
+                self.startbuf.append(startbuf.split(":")[1])
+                self.buftime.append(buftime.split(":")[1])
+                self.pps.append(pps)
+                #timestamp for this is in a completely different place.  
+                self.timestamps.append(isodate(TimeFromComment(self.filename, 
+                                                              splitname[1], splitname[2])))
+            else:
+                self.timestamps.append(isodate(pcdateconvert(pcdatetime, datefmt='mmdd'))) # guessing the format                
+                self.startbuf.append("")
+                self.buftime.append("")
+                self.pps.append("")
         else:
             raise ParseError('Timestamp read failure', dataset.name)
 
         # XML parsing code (unused categories set to None for speed)
         # Parse main cluster
         try:
-            xml = dataset.attrs['GPS Cluster- MetaData_xml']
-            self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat_N')))
-            self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W')))
+
+            try:   # This is the old way h5py library decodes based on data type specified
+                xml = dataset.attrs['GPS Cluster- MetaData_xml'].decode("utf-8")
+            except:  # This is the newer way, should work h5py >= 3.0 
+                xml = dataset.attrs['GPS Cluster- MetaData_xml'] 
+            
+            if self._xmlGetValS(xml, 'Lat') == '' :   # old format            
+                self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat_N'))) 
+                # the Long_ W space here is important since this IS the variable name (will change in ver 6.2 IceRadar)
+                self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W'))) 
+            else:
+                self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat')))  #Changed from Lat_N
+                self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long')))  #Changed from Long_W
+            
+            self.gps_time.append(self._xmlGetValS(xml, 'GPS_timestamp_UTC'))            
+
             self.fix_qual.append(self._xmlGetValI(xml, 'Fix_Quality'))
             self.num_sat.append(self._xmlGetValI(xml, 'Num _Sat'))
             self.dilution.append(self._xmlGetValF(xml, 'Dilution'))
@@ -145,9 +254,17 @@ class RecordList:
 
         # Parse digitizer cluster
         try:
-            xml = dataset.attrs['Digitizer-MetaData_xml']
+
+            try:   # This is the old way h5py library decodes based on data type specified
+                xml = dataset.attrs['Digitizer-MetaData_xml'].decode("utf-8")
+            except:  # This is the newer way, should work h5py >= 3.0 
+                xml = dataset.attrs['Digitizer-MetaData_xml'] 
             self.vrange.append(self._xmlGetValF(xml, 'vertical range'))
             self.sample_rate.append(self._xmlGetValF(xml, ' sample rate'))
+            self.stacking.append(self._xmlGetValI(xml, 'Stacking'))
+            self.trig_level.append(self._xmlGetValF(xml, 'trigger level'))
+            self.rec_len.append(self._xmlGetValI(xml, 'Record Length'))
+            
         except:
             with open('error.log', 'w') as f:
                 traceback.print_exc(file=f)
@@ -157,7 +274,11 @@ class RecordList:
         if 'GPS Cluster_UTM-MetaData_xml' in dataset.attrs:
             self.hasUTM = True
             try:
-                xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml']
+
+                try:   # This is the old way h5py library decodes based on data type specified
+                    xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml'].decode("utf-8")
+                except:  # This is the newer way, should work h5py >= 3.0 
+                    xml = dataset.attrs['GPS Cluster_UTM-MetaData_xml']
                 self.datums.append(self._xmlGetValS(xml, 'Datum'))
                 self.eastings.append(self._xmlGetValF(xml, 'Easting_m'))
                 self.northings.append(self._xmlGetValF(xml, 'Northing_m'))
@@ -180,12 +301,21 @@ class RecordList:
 
     def Write(self, f, eastern_hemisphere=False):
         """ Write out the data stored internally in CSV format to a file
-        object f. """
+        object f. 
+        
+        IF lat and lon are both al
+        
+        """
         error = 0
-
-        if not eastern_hemisphere:
-            # Invert longitudes to be in the western hemisphere
-            self.lons = [-i if i is not None else i for i in self.lons]
+        
+        # If this is true, then either we are in the Eastern & Northern Hemisphere
+        # Or this is the old format where the lat/lon were unsigned
+        if len([lon for lon in self.lons if (lon is not None and lon < 0)]) + \
+                len([lat for lat in self.lats if (lat is not None and lat < 0)]) == 0:
+            if not eastern_hemisphere:
+                # Invert longitudes to be in the western hemisphere
+                self.lons = [-i if i is not None else i for i in self.lons]
+        
 
         header = (
             "FID," +
@@ -197,6 +327,7 @@ class RecordList:
             "timestamp," +
             "lat," +
             "lon," +
+            "gps_time," +
             "fix_qual," +
             "num_sat," +
             "dilution," +
@@ -205,14 +336,20 @@ class RecordList:
             "gps_fix," +
             "gps_ok," +
             "vertical_range," +
-            "sample_rate")
+            "sample_rate," +
+            "stacking," +
+            "trig_level," +
+            "rec_len," +
+            "startbuf," +
+            "buftime," +
+            "pps")
         if self.hasUTM:
             header += (
-                ",datums," +
-                "eastings," +
-                "northings," +
-                "elevations," +
-                "zones")
+                ",datum," +
+                "easting," +
+                "northing," +
+                "elevation," +
+                "zone")
         header += "\n"
         f.write(header)
 
@@ -228,6 +365,7 @@ class RecordList:
                     "\"" + self.timestamps[i] + "\"" + "," +
                     str(self.lats[i]) + "," +
                     str(self.lons[i]) + "," +
+                    str(self.gps_time[i]) + "," +
                     str(self.fix_qual[i]) + "," +
                     str(self.num_sat[i]) + "," +
                     str(self.dilution[i]) + "," +
@@ -236,7 +374,14 @@ class RecordList:
                     str(self.gps_fix_valid[i]) + "," +
                     str(self.gps_message_ok[i]) + "," +
                     str(self.vrange[i]) + "," +
-                    str(self.sample_rate[i]))
+                    str(self.sample_rate[i]) + "," +
+                    str(self.stacking[i]) + "," +
+                    str(self.trig_level[i]) + "," +
+                    str(self.rec_len[i]) + "," +
+                    str(self.startbuf[i]) + "," +
+                    str(self.buftime[i]) + "," +
+                    str(self.pps[i])                    
+                    )
                 if self.hasUTM:
                     sout += (
                         "," + str(self.datums[i]) + "," +
@@ -275,6 +420,9 @@ class RecordList:
             data = getattr(self, attr)
             del data[start:end]
         return
+
+    
+
 
 class ParseError(Exception):
     def __init__(self, message='', fnm=''):

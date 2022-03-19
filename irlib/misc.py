@@ -99,7 +99,7 @@ def ExtractAttrs(h5file, outfile=None, fout=None, eastern_hemisphere=False):
             # Export as a CSV, creating a file with name outfile
             with open(outfile, 'w') as fout:
                 records.Write(fout, eastern_hemisphere=eastern_hemisphere)
-            sys.stderr.write("\t{f} written\n".format(f=os.path.basename(output)))
+            sys.stderr.write("\t{f} written\n".format(f=os.path.basename(outfile)))
         elif fout:
             # Export as a CSV, using the provided file object
             records.Write(fout, eastern_hemisphere=eastern_hemisphere)
@@ -115,7 +115,7 @@ def ExtractTrace(h5file, line, location, datacapture=0, echogram=0):
     with h5py.File(h5file, 'r') as f:
         path = 'line_{lin}/location_{loc}/datacapture_{dc}/echogram_{eg}'.format(
             lin=line, loc=location, dc=datacapture, eg=echogram)
-        vec = f[path].value
+        vec = f[path][()] # .value needed for older h5 library
     return vec
 
 def ExtractLine(h5file, line, bounds=(None,None)):
@@ -155,15 +155,15 @@ def ExtractLine(h5file, line, bounds=(None,None)):
 
         # Pull them all out, concatenate into a single array
         try:
-            arr = np.array((f[path][datasets[0]].value,)).T
+            arr = np.array((f[path][datasets[0]].value,)).T  
         except IndexError:
             sys.stderr.write("error indexing {0} - it might be empty\n".format(path))
             return
 
         for dataset in datasets[1:]:
-            newrow = np.array((f[path][dataset].value,)).T
+            newrow = np.array((f[path][dataset],)).T  # Old version needs .value
             # Test to see if the sample length is the same.
-            # Resize to match the largest sample langth.
+            # Resize to match the largest sample length.
             # This will cause some funny steps in the radargram -
             # hopefully these will disappear when setting zero-time
             if newrow.shape[0] < arr.shape[0]:
@@ -182,10 +182,14 @@ def PlotTrace(D, Dp=None, Dpp=None, Dn=None, Dnn=None, outfile=None, rate=1e-8, 
     n = D.size
     T = np.arange(0, n*rate, rate)      # time axis
 
+    # Workaround here. 
+    # D and T are not the same size so add nan on to the beginning of D
+    D = np.insert(D, 0, np.nan)
+
     plt.figure(figsize=(8,4))
-    plt.axes(axisbg='black')
+    plt.axes(facecolor='black')
     plt.grid(b=True, color='white')
-    plt.xlabel('Time (ns)')
+    plt.xlabel('Time (ns)')   # TODO make pretty
     plt.ylabel('Voltage (V)')
 
     plt.plot(T, D, '-w')

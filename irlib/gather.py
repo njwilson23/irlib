@@ -54,7 +54,7 @@ class Gather(object):
     A new `Gather` (or one of it's subclasses) is typically created by calling
     the `ExtractLine` method of a `Survey` instance. Alternatively, a `Gather`
     (or it's subclasses) can be created by passing a Numpy array as a first
-    argument, e.g.::
+    argument, e.g. ::
 
         G = CommonOffsetGather(mydata)
 
@@ -303,7 +303,7 @@ class Gather(object):
         """ Load topography along line gather, reading from an ASC file.
         Obviously, this requires the Gather to have a valid metadata attribute.
 
-        If `smooth`=True, then apply a boxcar filter to soften the effects of
+        If `smooth` =True, then apply a boxcar filter to soften the effects of
         the DEM discretization.
         """
 
@@ -491,13 +491,13 @@ class Gather(object):
         return
 
     def DoAutoGainControl(self, timewin=20e-8):
-        """ Apply the RMS-based AGC algorithm from Seismic Unix*.
+        """ Apply the RMS-based AGC algorithm from Seismic Unix.
 
         Try to use a fast Cython-accellerated version. If that fails, fall
         back to the Numpy version.
 
         *Cohen, J.K. and Stockwell, J.W. CWP/SU: Seismic Unix Release
-        42. Colorado School of Mines, Center for Wave Phenomena. (1996)
+        42. Colorado School of Mines, Center for Wave Phenomena. (1996)*
 
         Parameters
         ----------
@@ -755,7 +755,7 @@ class Gather(object):
         return
 
     def Reset(self):
-        """ Reset data and metadata using the internal *_copy attribute
+        """ Reset data and metadata using the internal ``*``_copy attribute
         variables. Does not undo the effects of operations that overwrite
         these attribute (such as most preprocessing routines).
         """
@@ -1464,9 +1464,9 @@ class PickableGather(Gather):
     def SavePicks(self, outfile, picks, mode='bed'):
         """ Save picks to a text file. """
         FH = FileHandler(outfile, self.line, fids=self.metadata.fids)
-        if mode is 'bed':
+        if mode == 'bed':
             FH.AddBedPicks(picks)
-        elif mode is 'dc':
+        elif mode == 'dc':
             FH.AddDCPicks(picks)
         FH.ComputeTravelTimes()
         FH.Write()
@@ -1519,7 +1519,7 @@ class PickableGather(Gather):
                 # Except what?
                 izero = np.nan
             return izero
-
+        
         # Apply function over all traces
         try:
             picks = np.array(list(map(first_break_bed, self.data[sbracket[0]:sbracket[1],istart:iend].T)))

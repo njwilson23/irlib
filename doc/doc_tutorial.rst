@@ -1,6 +1,11 @@
 Tutorial
 ========
 
+Note: This tutorial, while helpful, is not necessary for operating irlib. For 
+a basic introdution to irlib and its workflow refer to Command-line Utilities 
+and IcePick2. This extra information is helpful for intermediate and advanced
+irlib users. 
+
 **This tutorial is for an older version of irlib. The same workflow still
 applies, with the difference being that picking is performed in IcePick2. I have
 adjusted the text where needed, but some inconsistencies may have been
@@ -16,6 +21,7 @@ The radar codes are subject to change. I'll be using a current git revision as
 of February 13, 2013 (``commit 3dc4638de82867b58c40cd19727d3cfd980112f6``).
 Most likely, it will be best to use the most recent version available.
 Furthermore, I'll be using gstat_ for interpolation.
+
 
 Set-up
 ------

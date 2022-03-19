@@ -1,8 +1,9 @@
+#! /usr/bin/env python
+
 """
 Functions relevant to the analysis of bed reflection power (BRP) in radar
 traces.
 """
-
 import os
 import numpy as np
 

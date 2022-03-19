@@ -7,7 +7,10 @@ from __future__ import print_function
 import sys
 import os
 import getopt
-import readline
+try:
+  import readline
+except ImportError:
+  import pyreadline as readline
 import atexit
 import matplotlib.pyplot as plt
 import six

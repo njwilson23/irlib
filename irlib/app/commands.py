@@ -281,10 +281,10 @@ class HelpPrinter(Command):
             cmdobjs = [b for b in itertools.chain(*[a.values() for a in app.command_registry.values()])]
             commandtypes = set([a._type for a in cmdobjs])
 
-            for ct in filter(lambda a: a is not "General", commandtypes):
+            for ct in filter(lambda a: a != "General", commandtypes):
                 print("\n\tAvailable {0} commands\n".format(ct))
                 for cmdobj in filter(lambda a: a._type == ct, cmdobjs):
-                    if cmdobj.cmd is not None and not cmdobj.cmd.startswith("_"):
+                    if cmdobj.cmd != None and not cmdobj.cmd.startswith("_"):
                         print("\t{0}".format(cmdobj.cmd))
 
         else:
