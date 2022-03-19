@@ -3,7 +3,7 @@ Tutorial
 
 Note: This tutorial, while helpful, is not necessary for operating irlib. For 
 a basic introdution to irlib and its workflow refer to Command-line Utilities 
-and IcePick2. This extra information is helpful for intermidiate and advanced
+and IcePick2. This extra information is helpful for intermediate and advanced
 irlib users. 
 
 **This tutorial is for an older version of irlib. The same workflow still

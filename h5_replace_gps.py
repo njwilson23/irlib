@@ -18,7 +18,6 @@ import numpy as np
 import h5py
 import pandas as pd
 import irlib
-#import pdb; pdb.set_trace()
 
 def get_time(gps_timestamp, timestamp, tzoffset, gpsmissing=False):
     """ 
@@ -103,8 +102,8 @@ def readppp(csv_file):
         try:
             gps_dfs.append(pd.read_csv(file))
             gps = pd.concat(gps_dfs, ignore_index=True)
-        except:
-            print("Could not read file {}".format(file))            
+        except Exception as e:
+            print("Could not read file {} due to {}".format(file, e))            
     print('\n')
         # It may be that there are more columns - ortho ht (second last)
     if gps.shape[1] == 7:
@@ -173,7 +172,6 @@ def readgpx(gpx_file):
 
 ## MAIN PROGRAM
 
-#replacing getopt and def syntax() with argparse
 prog_description = 'This tool replaces the existing geographical data in a ice radar HDF \
     database with data taken from a GPX file, e.g. obtained from a handheld or \
     external GPS unit or from a CSV file, e.g. obtained from a PPP output of GPS data'
@@ -305,13 +303,11 @@ if args.timesource == 'iprgps':
     hdfseconds = hdfgpsseconds
 elif args.timesource == 'pcgps':    
     hdfseconds = hdfpcseconds
-elif args.timesource == 'both':
+else:
     hdfseconds = hdfgpsseconds
     # if the hdfgps data is nan, then use the other source
-    hdfseconds[np.isnan(hdfseconds) == True] = hdfpcseconds[np.isnan(hdfgpsseconds) == True]
-else:
-    print('Error in timesource')    
-    sys.exit(1)
+    hdfseconds[np.isnan(hdfseconds)] = hdfpcseconds[np.isnan(hdfgpsseconds)]
+
 
 # Check here to see if the timestamps worked out: 
 if sum(np.isnan(np.array(hdfseconds))) == len(hdfseconds):

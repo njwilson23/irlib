@@ -232,7 +232,8 @@ class RecordList:
             
             if self._xmlGetValS(xml, 'Lat') == '' :   # old format            
                 self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat_N'))) 
-                self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W'))) ## why the space?!!@%%@
+                # the Long_ W space here is important since this IS the variable name (will change in ver 6.2 IceRadar)
+                self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long_ W'))) 
             else:
                 self.lats.append(self._dm2dec(self._xmlGetValS(xml, 'Lat')))  #Changed from Lat_N
                 self.lons.append(self._dm2dec(self._xmlGetValS(xml, 'Long')))  #Changed from Long_W

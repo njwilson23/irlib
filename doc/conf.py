@@ -6,21 +6,20 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-# -- Path setup --------------------------------------------------------------
+import os
+import sys
 
+# -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('/home/dmueller/Documents/GitHub/irlib/doc'))
-
+#sys.path.insert(0, os.path.abspath('<absolute_path_to_irlib_doc>'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'IcePick and irlib (radar_tools)'
-copyright = '2021, Nat Wilson'
+copyright = '2022, Nat Wilson'
 author = 'Nat Wilson'
 
 # The short X.Y version

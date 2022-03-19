@@ -21,7 +21,7 @@ Version 5.1 IceRadar (Sept 2016)
 	Lat and Long are the field names and the values are floating point numbers
 
 	PCSavetimestamp attributes contains the same string as before but the timestamp is before the 
-	GPSCaptureEvent_StartBufferCapture.ms field 	The format is dd/mm/yyy_hh:mm:ss
+	GPSCaptureEvent_StartBufferCapture.ms field. The format is dd/mm/yy_HH:MM:SS am/pm
 
 Version 4.4.1 IceRadar: Format of PCSavetimestamp string is:
 
@@ -29,7 +29,7 @@ Version 4.4.1 IceRadar: Format of PCSavetimestamp string is:
 	With standard GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_NO
 	With PPS GPS reading: GPSCaptureEvent_StartBufferCapture.ms:72,BufferCaptureTime.ms:336,PPS_YES
     
-	Importantly, in some cases the actual timestamp is saved as a comment field. The format is dd/mm/yyyy
+	Importantly, in some cases the actual timestamp is saved as a comment field. The format is dd/mm/yyyy_HH:MM:SS am/pm 
 
 Version ? IceRadar: (ca. 2009)
 
@@ -38,7 +38,7 @@ Version ? IceRadar: (ca. 2009)
 	The user can use --swap_lon and --swap_lat to change the sign of either lat and lon in h5_add_utm.py 
 	and --positivecoords in h5_replace_gps.py
 	
-	Computer time stored as PCSavetimestamp: mm/dd/yyyy_hh:mm:ss like "3/12/2014_11:49:20 AM" There are no
+	Computer time stored as PCSavetimestamp: mm/dd/yyyy_HH:MM:SS am/pm like "3/12/2014_11:49:20 AM" There are no
 	GPSCapture stats.
 	
 Version ? IceRadar: (ca. 2008)	

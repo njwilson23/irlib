@@ -4,7 +4,6 @@
 Functions relevant to the analysis of bed reflection power (BRP) in radar
 traces.
 """
-import irlib
 import os
 import numpy as np
 

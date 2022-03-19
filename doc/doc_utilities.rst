@@ -97,7 +97,7 @@ Works with 2 formats from BSI HDF files:
 		key forces longitudes to be interpretted from the eastern hemisphere.
 		UTM projection is calculated assuming that the data from neither from western 
 		Norway nor Svalbard.
-	New format - Latitude and longigude data in BSI HDF files are signed to indicate 
+	New format - Latitude and longitude data in BSI HDF files are signed to indicate 
 		hemisphere. If any lat or lon values are negative, the --swap_lon key is disabled
 
 h5_generate_caches
@@ -197,7 +197,7 @@ The following steps are very helpful for data cleaning and streamlining
 workflow. Also some of the steps are prerequisites for subsequent
 analyses, so **do this in the correct order**. It is really very
 important that you take notes on what you did so that your workflow
-can be recreated later. It is recommmend you open a document and copy paste
+can be recreated later. It is recommmended you open a document and copy paste
 what you did from the terminal in there for safekeeping. Also, you can
 copy the screen output there too. As you go be aware that some scripts
 will overwrite files. Recommend that you use unique file names that

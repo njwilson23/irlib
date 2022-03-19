@@ -155,15 +155,13 @@ def ExtractLine(h5file, line, bounds=(None,None)):
 
         # Pull them all out, concatenate into a single array
         try:
-            #arr = np.array((f[path][datasets[0]].value,)).T  # Old version needs .value
-            arr = np.array((f[path][datasets[0]],)).T  
+            arr = np.array((f[path][datasets[0]].value,)).T  
         except IndexError:
             sys.stderr.write("error indexing {0} - it might be empty\n".format(path))
             return
 
         for dataset in datasets[1:]:
-            #newrow = np.array((f[path][dataset].value,)).T # Old version needs .value
-            newrow = np.array((f[path][dataset],)).T 
+            newrow = np.array((f[path][dataset],)).T  # Old version needs .value
             # Test to see if the sample length is the same.
             # Resize to match the largest sample length.
             # This will cause some funny steps in the radargram -

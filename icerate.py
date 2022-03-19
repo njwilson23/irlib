@@ -12,11 +12,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import sys, os, getopt
+import traceback, pdb
 try:
   import readline
 except ImportError:
   import pyreadline as readline
-import traceback, pdb
 from random import shuffle
 
 np.seterr(invalid='ignore')
@@ -130,7 +130,7 @@ class RatingWindow(object):
     def ShowTraces(self, view=(None, None)):
         """ Show traces as echograms in PickerWindow axes 1. """
 
-        #self.ax2.lines = []
+        self.ax2.clear()
 
         # Plot the trace
         trace = self.arr[:,self.cur_trace]
@@ -182,7 +182,6 @@ class RatingWindow(object):
                             [i+5 for i in self.picks[xa:xb]])
             lower_line = map(lambda n: (n==994 and np.nan or n),
                             [i-5 for i in self.picks[xa:xb]])
-            #pdb.set_trace()
             self.ax1.plot(list(range(xa, xb)), list(upper_line), '-y', alpha=0.6, linewidth=2.)
             self.ax1.plot(list(range(xa, xb)), list(lower_line), '-y', alpha=0.6, linewidth=2.)
         except:

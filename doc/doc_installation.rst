@@ -58,9 +58,9 @@ have git installed you can type the following in the terminal:
 
 ::
 
-    >> git clone git@github.com:njwilson23/irlib.git
+    git clone git@github.com:njwilson23/irlib.git
 
-This makes a directory in your home folder called py/irlib-master. I renamed this to 'irlib' for simplicity. Note: 
+This makes a directory in your home folder called py/irlib Note: 
 make a copy of the irlib zip file or directory for safekeeping. If you
 start messing around, it's good to get the original back without any
 fuss (mostly important in the field if you are not near internet).
@@ -83,7 +83,7 @@ Find the hidden .bashrc file and open it in an editor. At the
       bottom of this file type and then save the file:
 
 | ``# Set path for irlib python scripts HERE``
-| ``export PATH=$PATH:~/py/irlib-master``
+| ``export PATH=$PATH:~/py/irlib``
 
 Then, in a terminal, type the following to make the change
       permanent:
@@ -138,7 +138,7 @@ You should see the useage message starting like so:
 [--swap_lon] [--swap_lat] infile``
 
 Then see if it works with an h5 file (in this example it is called
-'survey.h5':
+'survey.h5'):
 
 ``h5_dumpmeta.py survey.h5``
 
@@ -209,7 +209,7 @@ command
 
 ::
 
-    >> git clone git@github.com:njwilson23/irlib.git
+    git clone git@github.com:njwilson23/irlib.git
 
 Installation is best done with ``pip``, the Python package manager.
 

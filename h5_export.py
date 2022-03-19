@@ -17,7 +17,6 @@ import sys
 import os.path
 import argparse
 import numpy as np
-#import pdb; pdb.set_trace()
 
 import irlib
 

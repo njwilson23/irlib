@@ -9,26 +9,21 @@
    The shapefile output (by necessity) will be only traces with lat/lon/elevation
 
 """
-# standtard libraries
+# standard libraries
 import sys
 import os.path
 import glob
 import traceback
 import argparse
-#import pdb; pdb.set_trace()
 
 try:
     import StringIO ## for Python 2
 except ImportError:
     import io as StringIO ## for Python 3
 
-try:
-    import pandas as pd
-    import geopandas as gpd
-    from shapely.geometry import LineString
-except ImportError:
-    print("Some important libraries are missing, check your dependencies/environment")    
-    sys.exit(1)
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import LineString
 
 def meta2pd(infile):
     '''
@@ -49,9 +44,8 @@ def meta2pd(infile):
     try:
         irlib.misc.ExtractAttrs(infile, fout=stringbuffer, eastern_hemisphere=False)
     except:
-        traceback.print_exc()
         sys.stderr.write("Error reading radar data\n")
-        sys.exit(1)
+        raise
 
     stringbuffer.seek(0)
     meta = pd.read_csv(stringbuffer,header=0)
@@ -73,7 +67,6 @@ def meta2pd(infile):
 
 ## MAIN HERE  ###
 
-#replacing getopt and def syntax() with argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("infile", help="input HDF (*.h5) filename, with or without path, if you use wildcards in linux, put this in quotes")
 parser.add_argument("-o", "--outfile", help="output file BASENAME [if missing, will be automatically generated]")

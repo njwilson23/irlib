@@ -58,7 +58,7 @@ Specific steps are in the documentation pdf.
 
 Documentation:
 -------------
-Full documentation is generated with sphinx and is available ![here](http://njwilson23.github.com/radar_tools/irlib_documentation.pdf)
+Full documentation is generated with sphinx and a rendered version is available on github (https://github.com/njwilson23/irlib/blob/main/irlib_documentation.pdf)
 
 Change Log: 
 ------------------
@@ -68,8 +68,8 @@ Change Log:
 - replaced shebang for all scripts with /usr/bin/env so that it would work with conda
 - works in Python 3, Python 2 compatibility hopefully preserved (but not properly tested)
 - compatible with newer versions of h5py, StringIO, matplotlib
-- uses argparse library for commandline options - To get the syntax message type the file with flag -h and it will show up. 
-- compatible with various flavours of the BlueSystems IceRadar software/h5 file formats - see documentation pdf for more details
+- mostly uses argparse library for commandline options - To get the syntax message type the file with flag -h and it will show up. 
+- compatible with various flavours of the BlueSystem IceRadar software/h5 file formats - see documentation pdf for more details
 - h5_dumpmeta.py - added extra metada fields, sorts on FID, option to create a shapefile output (points or lines or both)
 - h5_add_utm.py - works with new lat/lon format 
 - h5_replace_gps.py - improved argument handling, enhanced support of ppp files, can offset elevation
@@ -101,14 +101,14 @@ minimum, however the *stable-0.3* branch is available if necessary.
 - PulseEkko data reader?
 
 
-*irlib 0.3* this is a stable branch. 
-TODO - Nat do you have anything to say here? 
+*irlib 0.3* 
+Works with BlueSystem equipment circa 2012
 
 
 License:
 --------
 
 *Radar Tools* is provided "as is," without any warranty. Some parts of
-*Radar Tools* are affected by different licensing terms. See `license.txt` for
-detailed information.
+*Radar Tools* are affected by different licensing terms. 
+See `license.txt` for detailed information.
 
