@@ -1,5 +1,6 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.439723.svg)](https://doi.org/10.5281/zenodo.439723)
-TODO - refresh DOI for new version
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10223796.svg)](https://doi.org/10.5281/zenodo.10223796) (v0.5.0)
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.439723.svg)](https://doi.org/10.5281/zenodo.439723) (v0.4.1)
 
 *Radar Tools* is a library and set of tools useful for visualizing and
 processing data collected from ice-penetrating radar. The tools have been

@@ -13,7 +13,7 @@ except ImportError:
 setup(
     name = "irlib",
     author = "Nat Wilson",
-    version = "0.5",
+    version = "0.5.1",
     packages = ["irlib"],
     ext_modules = ext_modules,
     scripts = ["icepick2.py", "icerate.py", "h5_add_utm.py", "h5_dumpmeta.py", \
