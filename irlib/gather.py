@@ -586,7 +586,7 @@ class Gather(object):
         kernel /= np.sum(kernel)
         if mode == 'highpass':
             kernel = -kernel
-            kernel[M/2] += 1.0
+            kernel[M // 2] += 1.0
 
         for i in range(self.data.shape[1]):
             self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
