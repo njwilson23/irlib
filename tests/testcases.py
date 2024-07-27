@@ -126,7 +126,7 @@ def test_h5_generate_caches(milnefnm):
     utmfnm = stem + "_utm" + ext
     cachedir = os.path.join(stem, "cache")
     ret = subprocess.call(["h5_generate_caches.py", utmfnm,
-                           "--remove-nans", "-g", "-s", "-b", "-r",
+                           "--remove_nans", "-g", "-s", "-b",
                            "-d", cachedir])
     assert ret == 0
     assert os.path.isdir(cachedir)
