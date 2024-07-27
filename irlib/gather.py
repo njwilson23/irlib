@@ -582,7 +582,7 @@ class Gather(object):
             M += 1
 
         X = np.arange(M+1) - M / 2
-        kernel = sig.blackman(M+1) * np.sinc(2*fc*X)
+        kernel = sig.windows.blackman(M+1) * np.sinc(2*fc*X)
         kernel /= np.sum(kernel)
         if mode == 'highpass':
             kernel = -kernel
