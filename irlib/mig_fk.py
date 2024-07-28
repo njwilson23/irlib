@@ -305,10 +305,10 @@ def fkmig(D, dt, dx, v, params=None):
     D = np.vstack([D,np.zeros([ntpad,ntr])])
 
     # xpad
-    ntrnew = 2.0**nextpow2( round((xmax+xpad) / dx + 1) )
+    ntrnew = 2 ** nextpow2(round((xmax+xpad) / dx + 1))
     xmaxnew = (ntrnew-1)*dx + x[0]
     xnew = np.arange(x[0], xmaxnew+dx, dx)
-    nxpad = int(ntrnew-ntr)
+    nxpad = ntrnew-ntr
     D = np.hstack([D, np.zeros([nsampnew,nxpad])])
 
     # Forward f-k transform
