@@ -582,11 +582,11 @@ class Gather(object):
             M += 1
 
         X = np.arange(M+1) - M / 2
-        kernel = sig.blackman(M+1) * np.sinc(2*fc*X)
+        kernel = sig.windows.blackman(M+1) * np.sinc(2*fc*X)
         kernel /= np.sum(kernel)
         if mode == 'highpass':
             kernel = -kernel
-            kernel[M/2] += 1.0
+            kernel[M // 2] += 1.0
 
         for i in range(self.data.shape[1]):
             self.data[:,i] = np.convolve(kernel, self.data[:,i], mode='same')
